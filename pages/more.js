@@ -2,7 +2,7 @@ import { fetchPublishedPostsWithTag } from '../utils/content-api'
 import TopBar from '../components/top-bar'
 import PostList from '../components/post-list'
 
-export default function Home({posts}) {
+export default function More({posts}) {
   return (
     <div>
       <TopBar />
@@ -12,7 +12,7 @@ export default function Home({posts}) {
 }
 
 export async function getServerSideProps() {
-  const posts = await fetchPublishedPostsWithTag('page:tours')
+  const posts = await fetchPublishedPostsWithTag('page:more')
   return {
     props: {
       posts
