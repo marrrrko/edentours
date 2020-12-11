@@ -3,7 +3,7 @@ export default function PostList({ posts }) {
     <div className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 font-serif">
       {posts.map((post) => {
         return (
-          <div key={post.id} className="w-full mx-auto mb-8">
+          <div key={post.id} className="w-full mx-auto mb-8 px-4">
             <h2 className="text-lg font-bold font-serif">{post.title}</h2>
             <div
               className="space-y-4 font-sans"

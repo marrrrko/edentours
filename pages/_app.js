@@ -1,6 +1,7 @@
 import 'tailwindcss/tailwind.css'
 import '../extra-styles.css'
-import Head from "next/head"
+import Head from 'next/head'
+import TopBar from '../components/top-bar'
 
 function MyApp({ Component, pageProps }) {
   return (
@@ -8,7 +9,14 @@ function MyApp({ Component, pageProps }) {
       <Head>
         <title>Eden Tours</title>
       </Head>
-      <Component {...pageProps} />
+      <div className="flex flex-col h-screen">
+        <div className="">
+          <TopBar />
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          <Component {...pageProps} />
+        </div>
+      </div>
     </>
   )
 }

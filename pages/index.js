@@ -8,7 +8,6 @@ import PostList from '../components/post-list'
 export default function Home({ posts, front }) {
   return (
     <div>
-      <TopBar />
       {front && (
         <div>
           <div className="relative text-center text-white">
@@ -18,15 +17,15 @@ export default function Home({ posts, front }) {
             <img src={front.feature_image} />
           </div>
           <div
-            className="space-y-4 w-full md:w-3/5 lg:2/5 mx-auto pt-8 font-sans"
+            className="space-y-4 w-full md:w-3/5 lg:2/5 mx-auto pt-8 font-sans px-4"
             dangerouslySetInnerHTML={createMarkup(front)}
           ></div>
         </div>
       )}
-      <div className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 font-sans my-5">
+      <div className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 font-sans my-5  px-4">
         <h3 className="mb-4 text-lg font-serif font-bold">Upcomming Tours:</h3>
       </div>
-      <div className="w-full md:w-3/5 lg:2/5 mx-auto font-sans my-5 px-4">
+      <div className="w-full md:w-3/5 lg:2/5 mx-auto font-sans my-5 px-8">
         <div className="pl-3 py-6 w-full bg-yellow-300 font-lg font-bold">
           <span className="">
             January 5th @ 21:00 GMT - In the footsteps of the apostle Paul
