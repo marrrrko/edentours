@@ -3,7 +3,7 @@ import Document, { Html, Head, Main, NextScript } from 'next/document'
 export default class MyDocument extends Document {
   render() {
     return (
-      <Html className="leading-tight">
+      <Html className="leading-loose font-serif">
         <Head>
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link

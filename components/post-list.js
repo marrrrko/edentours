@@ -6,7 +6,7 @@ export default function PostList({ posts }) {
           <div key={post.id} className="w-full mx-auto mb-8 px-4">
             <h2 className="text-lg font-bold font-serif">{post.title}</h2>
             <div
-              className="space-y-4 font-sans"
+              className="space-y-4 font-serif"
               dangerouslySetInnerHTML={createMarkup(post)}
             ></div>
           </div>
