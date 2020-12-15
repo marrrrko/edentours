@@ -1,23 +1,13 @@
 import { fetchPostBySlug } from '../utils/content-api'
 import DefaultErrorPage from 'next/error'
+import Post from '../components/post'
 
 const Index = ({ slug, html }) => {
-  if (!slug) {
+  if (!props.slug) {
     return <DefaultErrorPage statusCode={404} />
   }
 
-  return (
-    <div
-      className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 my-5 px-4"
-      dangerouslySetInnerHTML={createMarkup(html)}
-    ></div>
-  )
-}
-
-function createMarkup(html) {
-  return {
-    __html: html
-  }
+  return <Post {...props} />
 }
 
 export async function getServerSideProps() {

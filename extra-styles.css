@@ -1,31 +1,43 @@
 h1 {
-  @apply text-2xl font-bold mt-2
+  @apply text-2xl font-bold mt-2;
 }
 
 h2 {
-  @apply text-xl font-bold mt-2
+  @apply text-xl font-bold mt-2;
 }
 
 h3 {
-  @apply text-xl mt-2
+  @apply text-xl mt-2;
 }
 
 h4 {
-  @apply font-extrabold mt-2
+  @apply font-extrabold mt-2;
 }
 
 p {
-  @apply my-8 text-base leading-loose
+  @apply my-8 text-base leading-loose;
 }
 
 blockquote {
-  @apply pl-5 ml-3 border-l-2 font-bold border-blue-400
+  @apply pl-5 ml-3 border-l-2 font-bold border-blue-400;
 }
 
 ul {
-  @apply list-disc ml-6
+  @apply list-disc ml-6;
 }
 
 a {
-  @apply underline
+  @apply underline;
+}
+
+.image-text-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0px;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  display: flex;
 }

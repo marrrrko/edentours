@@ -1,30 +1,13 @@
 import { fetchPostBySlug } from '../utils/content-api'
 import DefaultErrorPage from 'next/error'
+import Post from '../components/post'
 
-const Page = ({ slug, html, feature_image }) => {
-  if (!slug) {
+const Page = (props) => {
+  if (!props.slug) {
     return <DefaultErrorPage statusCode={404} />
   }
 
-  return (
-    <>
-      {feature_image && (
-        <div className="relative text-center text-white">
-          <img src={feature_image} />
-        </div>
-      )}
-      <div
-        className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 my-5 px-4"
-        dangerouslySetInnerHTML={createMarkup(html)}
-      ></div>
-    </>
-  )
-}
-
-function createMarkup(html) {
-  return {
-    __html: html
-  }
+  return <Post {...props} />
 }
 
 export async function getServerSideProps(context) {
@@ -51,5 +34,5 @@ Plan is simple:
   * Galleries are nice
   * If gallery item caption is markdown link: render text in image and image is link
   * Fix all links to use new url (and cached)
-  * Main page is special post  
+  * Scheduling module embedded as iframe our using some special tag
 */
