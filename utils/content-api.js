@@ -42,8 +42,6 @@ export async function fetchPostBySlug(slug) {
     if (apiResponse.status !== 200) {
       console.log(`Could not retrieve post with slug ${slug}`)
       console.log(`${apiResponse.status}: ${apiResponse.statusText}`)
-    } else {
-      console.log('ok!')
     }
 
     const postData = apiResponse.data

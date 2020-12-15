@@ -25,3 +25,7 @@ blockquote {
 ul {
   @apply list-disc ml-6
 }
+
+a {
+  @apply underline
+}

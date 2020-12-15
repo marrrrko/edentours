@@ -1,16 +1,23 @@
 import { fetchPostBySlug } from '../utils/content-api'
 import DefaultErrorPage from 'next/error'
 
-const Page = ({ slug, html }) => {
+const Page = ({ slug, html, feature_image }) => {
   if (!slug) {
     return <DefaultErrorPage statusCode={404} />
   }
 
   return (
-    <div
-      className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 my-5 px-4"
-      dangerouslySetInnerHTML={createMarkup(html)}
-    ></div>
+    <>
+      {feature_image && (
+        <div className="relative text-center text-white">
+          <img src={feature_image} />
+        </div>
+      )}
+      <div
+        className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 my-5 px-4"
+        dangerouslySetInnerHTML={createMarkup(html)}
+      ></div>
+    </>
   )
 }
 
@@ -25,12 +32,13 @@ export async function getServerSideProps(context) {
 
   if (page === 'robots.txt' || page === 'favicon.ico') return { props: {} }
 
-  console.log(`Ctx: ${JSON.stringify(context.query)}`)
   const pagePostData = await fetchPostBySlug(page)
 
-  if (!pagePostData || !pagePostData.slug) return { props: {} }
+  if (!pagePostData || !pagePostData.slug) {
+    console.log(`Could not retrieve post "${page}"`)
+    return { props: {} }
+  }
 
-  //console.log(`Fetched place: ${JSON.stringify(pagePostData)}`)
   return { props: { ...pagePostData } }
 }
 
