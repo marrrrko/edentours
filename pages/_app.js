@@ -1,5 +1,5 @@
 import 'tailwindcss/tailwind.css'
-import '../extra-styles.css'
+import '../page-styles.css'
 import Head from 'next/head'
 import TopBar from '../components/top-bar'
 

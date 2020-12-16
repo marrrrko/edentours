@@ -11,7 +11,9 @@ export default function Post({ title, slug, html, feature_image }) {
         <div className="relative text-center text-white font-bold">
           <img src={feature_image} />
           {title && !title.startsWith('_') && (
-            <div className={titleImageTextClasses}>{title}</div>
+            <div className={titleImageTextClasses}>
+              <div>{title}</div>
+            </div>
           )}
         </div>
       )}
