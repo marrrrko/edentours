@@ -2,9 +2,9 @@ import Link from 'next/link'
 
 export default function TopBar(props) {
   return (
-    <div className="w-full border-b flex flex-row flex-wrap items-center p-1 font-serif">
+    <div className="topbar w-full border-b flex flex-row flex-wrap items-center p-1 font-serif">
       <div className="flex-grow p-3 md:pl-20 pl-2 text-lg md:text-2xl font-extrabold ">
-        <a href="/" className="hover:bg-gray-200 p-2 px-4 rounded">
+        <a href="/" className="hover:bg-gray-200 p-2 px-4 rounded no-underline">
           <span>eden•tours</span>
         </a>
       </div>

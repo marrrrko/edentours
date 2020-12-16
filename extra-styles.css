@@ -41,3 +41,7 @@ a {
   align-items: center;
   display: flex;
 }
+
+.topbar a {
+  text-decoration: none;
+}
