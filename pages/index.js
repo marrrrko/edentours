@@ -2,7 +2,7 @@ import { fetchPostBySlug } from '../utils/content-api'
 import DefaultErrorPage from 'next/error'
 import Post from '../components/post'
 
-const Index = ({ slug, html }) => {
+const Index = (props) => {
   if (!props.slug) {
     return <DefaultErrorPage statusCode={404} />
   }
