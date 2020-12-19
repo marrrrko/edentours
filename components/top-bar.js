@@ -10,14 +10,24 @@ export default function TopBar(props) {
       </div>
       <div className="font-serif">
         <ul className="flex flex-row flex-wrap list-none">
-          <li className="mr-1 md:mr-3 hover:bg-gray-200 p-1 md:px-3 rounded">
-            <Link href="/tours">Tours</Link>
+          <li className="mr-1 md:mr-3">
+            <Link href="/tours" passHref>
+              <a className="hover:bg-gray-200 p-2 pb-3 md:px-3 rounded">
+                Tours
+              </a>
+            </Link>
           </li>
-          <li className="mr-1 md:mr-3 hover:bg-gray-200 p-1 md:px-3 rounded">
-            <Link href="/research">Research</Link>
+          <li className="mr-1 md:mr-3">
+            <Link href="/research">
+              <a className="hover:bg-gray-200 p-2 pb-3 md:px-3 rounded">
+                Research
+              </a>
+            </Link>
           </li>
-          <li className="mr-4 md:mr-7 hover:bg-gray-200 p-1 md:px-3 rounded">
-            <Link href="/faq">FAQ</Link>
+          <li className="mr-4 md:mr-7">
+            <Link href="/faq">
+              <a className="hover:bg-gray-200 p-2 pb-3 md:px-3 rounded">FAQ</a>
+            </Link>
           </li>
         </ul>
       </div>

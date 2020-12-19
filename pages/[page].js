@@ -1,6 +1,7 @@
 import { fetchPostBySlug } from '../utils/content-api'
 import DefaultErrorPage from 'next/error'
 import Post from '../components/post'
+import Router from 'next/router'
 
 const Page = (props) => {
   if (!props.slug) {
@@ -26,6 +27,10 @@ export async function getServerSideProps(context) {
 }
 
 export default Page
+
+Router.onRouteChangeComplete = () => {
+  document.querySelector('.page-content').scrollTo(0, 0)
+}
 
 /*
 Plan is simple:
