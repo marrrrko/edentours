@@ -9,7 +9,7 @@ export default function Post({ title, slug, html, feature_image }) {
     <>
       {feature_image && (
         <div className="relative text-center text-white font-bold">
-          <img src={feature_image} />
+          <img className="mx-auto" src={feature_image} />
           {title && !title.startsWith('_') && (
             <div className={titleImageTextClasses}>
               <div>{title}</div>
@@ -18,7 +18,7 @@ export default function Post({ title, slug, html, feature_image }) {
         </div>
       )}
       <div
-        className="w-full md:w-3/5 lg:2/5 mx-auto pt-8 my-5 px-4"
+        className="w-full md:w-3/5 2xl:w-2/5 mx-auto pt-8 my-5 px-4 pb-24"
         dangerouslySetInnerHTML={createMarkup(html)}
       ></div>
     </>

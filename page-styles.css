@@ -52,3 +52,7 @@ a {
 .topbar a {
   text-decoration: none;
 }
+
+figure.kg-card > img {
+  width: 100%;
+}
