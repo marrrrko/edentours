@@ -48,6 +48,14 @@ export default function Post({
                 />
               </div>
             )
+          } else if (pageSection.type === 'maphub') {
+            return (
+              <div
+                key={index}
+                className="w-full 2xl:w-3/5 mx-auto my-5 px-4"
+                dangerouslySetInnerHTML={createMarkup(pageSection)}
+              ></div>
+            )
           }
         })}
       </div>
@@ -56,13 +64,7 @@ export default function Post({
 }
 
 function createMarkup(section) {
-  if (section.type === 'html') {
-    return {
-      __html: section.html
-    }
-  }
-
   return {
-    __html: section.type
+    __html: section.html
   }
 }
