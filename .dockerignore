@@ -6,3 +6,4 @@ Dockerfile
 **/out
 **/dist
 **/.next
+.env.local

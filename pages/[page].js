@@ -1,4 +1,5 @@
-import { fetchPostBySlug } from '../utils/content-api'
+import { fetchPostBySlug } from '../utils/ghost'
+import { buildPageContent } from '../utils/page-content'
 import DefaultErrorPage from 'next/error'
 import Post from '../components/post'
 import Router from 'next/router'
@@ -16,7 +17,8 @@ export async function getServerSideProps(context) {
 
   if (page === 'robots.txt' || page === 'favicon.ico') return { props: {} }
 
-  const pagePostData = await fetchPostBySlug(page)
+  const post = await fetchPostBySlug(page)
+  const pagePostData = await buildPageContent(post)
 
   if (!pagePostData || !pagePostData.slug) {
     console.log(`Could not retrieve post "${page}"`)

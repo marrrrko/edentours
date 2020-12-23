@@ -1,4 +1,13 @@
-export default function Post({ title, slug, html, feature_image }) {
+import React from 'react'
+import Gallery from 'react-grid-gallery'
+
+export default function Post({
+  title,
+  slug,
+  html,
+  pageContent,
+  feature_image
+}) {
   let titleImageTextClasses = 'image-text-overlay text-3xl'
   if (title && title.startsWith('*')) {
     titleImageTextClasses = titleImageTextClasses + ' text-black'
@@ -17,16 +26,43 @@ export default function Post({ title, slug, html, feature_image }) {
           )}
         </div>
       )}
-      <div
-        className="w-full md:w-3/5 2xl:w-2/5 mx-auto pt-8 my-5 px-4 pb-24"
-        dangerouslySetInnerHTML={createMarkup(html)}
-      ></div>
+      <div className="pt-8 pb-24">
+        {pageContent.map((pageSection, index) => {
+          if (pageSection.type === 'html') {
+            return (
+              <div
+                key={index}
+                className="w-full md:w-3/5 2xl:w-2/5 mx-auto my-5 px-4"
+                dangerouslySetInnerHTML={createMarkup(pageSection)}
+              ></div>
+            )
+          } else if (pageSection.type === 'flickr') {
+            return (
+              <div
+                key={index}
+                className="w-full overflow-hidden relative my-5 px-10"
+              >
+                <Gallery
+                  images={pageSection.gridConfig}
+                  enableImageSelection={false}
+                />
+              </div>
+            )
+          }
+        })}
+      </div>
     </>
   )
 }
 
-function createMarkup(html) {
+function createMarkup(section) {
+  if (section.type === 'html') {
+    return {
+      __html: section.html
+    }
+  }
+
   return {
-    __html: html
+    __html: section.type
   }
 }

@@ -28,3 +28,6 @@ yarn-error.log*
 
 # tailwind css output
 styles.css
+
+# config
+.env.local
