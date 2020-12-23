@@ -1,6 +1,6 @@
 import Flickr from 'flickr-sdk'
 
-const flickrKey = process.env.FLICKR_KEY
+const flickrKey = process.env.FLICKR_KEY || 'abc'
 const flickr = new Flickr(flickrKey)
 
 export async function fetchFlickrSet(setId, user) {

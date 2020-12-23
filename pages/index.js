@@ -1,4 +1,4 @@
-import { fetchPostBySlug } from '../utils/content-api'
+import { fetchPostBySlug } from '../utils/ghost'
 import DefaultErrorPage from 'next/error'
 import Post from '../components/post'
 
