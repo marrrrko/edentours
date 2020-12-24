@@ -98,6 +98,21 @@ async function parsePostHtml(postHtml) {
         appendHtml(` ${key}="${attributes[key]}"`)
       }
 
+      const isTourDatesList = (name, key, attributes) => {
+        return (
+          name === 'a' &&
+          key === 'href' &&
+          attributes[key].startsWith('https://dates.eden.tours')
+        )
+      }
+
+      const handleTourDatesList = () => {
+        currentSection.type = 'tourdates'
+        appendHtml = (html) => {
+          return
+        }
+      }
+
       const parser = new htmlparser2.Parser({
         onopentag(name, attributes) {
           currentDepth++
@@ -109,6 +124,8 @@ async function parsePostHtml(postHtml) {
               handleFlickrAlbumLink(attributes[key])
             } else if (isMapHubIframe(name, key, attributes)) {
               handleMapHubIframe(key, attributes)
+            } else if (isTourDatesList(name, key, attributes)) {
+              handleTourDatesList(key, attributes)
             } else {
               appendHtml(` ${key}="${attributes[key]}"`)
             }

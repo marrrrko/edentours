@@ -14,6 +14,7 @@ export default class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Nunito&display=swap"
             rel="stylesheet"
           />
+          <script src="https://apis.google.com/js/api.js"></script>
         </Head>
         <body className="min-h-screen">
           <Main />

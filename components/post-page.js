@@ -3,6 +3,7 @@ import FeatureImage from './feature-image'
 import FlickrSection from './flickr-section'
 import HtmlSection from './html-section'
 import MapHubSection from './maphub-section'
+import TourDatesSection from './tour-dates-section'
 
 export default function Post({ title, pageContent, feature_image }) {
   const pageSections = pageContent.map((pageSection, index) => {
@@ -13,6 +14,8 @@ export default function Post({ title, pageContent, feature_image }) {
         return <FlickrSection key={index} pageSection={pageSection} />
       case 'maphub':
         return <MapHubSection key={index} pageSection={pageSection} />
+      case 'tourdates':
+        return <TourDatesSection key={index} />
       default:
         return <span></span>
     }
