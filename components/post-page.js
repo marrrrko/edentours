@@ -52,7 +52,7 @@ export default function Post({
             return (
               <div
                 key={index}
-                className="w-full 2xl:w-3/5 mx-auto my-5 px-4"
+                className="w-full mx-auto my-5 px-10 md:px-20"
                 dangerouslySetInnerHTML={createMarkup(pageSection)}
               ></div>
             )

@@ -1,7 +1,7 @@
 import { fetchPostBySlug } from '../utils/ghost'
 import { buildPageContent } from '../utils/page-content'
 import DefaultErrorPage from 'next/error'
-import Post from '../components/post'
+import Post from '../components/post-page'
 import Router from 'next/router'
 
 const Index = (props) => {
