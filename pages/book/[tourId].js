@@ -2,21 +2,19 @@ import DefaultErrorPage from 'next/error'
 import Router from 'next/router'
 import NewTourBooking from '../../components/new-tour-booking'
 
-const Page = (props) => {
-  if (!props.tourInfo) {
+const Page = ({ tourId }) => {
+  if (!tourId) {
     return <DefaultErrorPage statusCode={404} />
   }
 
-  return <NewTourBooking tourInfo={props.tourInfo} />
+  return <NewTourBooking tourId={tourId} />
 }
 
 export async function getServerSideProps(context) {
   const { tourId } = context.query
   console.log(`Context: ${JSON.stringify(context.query)}`)
 
-  const tourInfo = { id: tourId }
-
-  return { props: { tourInfo } }
+  return { props: { tourId } }
 }
 
 export default Page
