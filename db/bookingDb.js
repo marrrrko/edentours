@@ -56,6 +56,34 @@ export async function createNewEvents(events) {
   return ids
 }
 
+export async function createNewBooking(tourId, booking) {
+  let db = await getDb()
+  const bookingId = uuid()
+  let doc = {
+    ...booking,
+    id: bookingId,
+    tourId: tourId
+  }
+
+  await new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO Booking VALUES (?,json(?))',
+      [doc.id, JSON.stringify(doc)],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          console.log('Created booking #' + bookingId)
+          resolve()
+        }
+      }
+    )
+  })
+  await closeDb(db)
+
+  return bookingId
+}
+
 async function insertEvent(db, eventData) {
   const eventId = uuid()
   let doc = {

@@ -6,7 +6,68 @@ export default function NewTourBooking({ tourId }) {
     tourId: tourId,
     eventInfo: null,
     error: null,
-    loading: true
+    loading: true,
+    sending: false,
+    done: false,
+    formData: {
+      bookerName: '',
+      email: '',
+      groupName: '',
+      groupDetails: '',
+      participantCount: 1,
+      areYouHuman: ''
+    }
+  })
+
+  const handleBookingSubmission = (formData) => {
+    setEventData({
+      ...eventData,
+      formData: formData,
+      sending: true
+    })
+  }
+
+  const retry = () => {
+    setEventData({ ...eventData, error: null, sending: false })
+  }
+
+  useEffect(() => {
+    async function postFormData() {
+      try {
+        let response = await fetch('/api/booking/' + tourId, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(eventData.formData)
+        })
+        let responseMsg = await response.json()
+        if (response.ok) {
+          console.log('Success! ' + JSON.stringify(eventData))
+          setEventData({
+            ...eventData,
+            sending: false,
+            done: true
+          })
+        } else {
+          console.log('Not Success! ' + JSON.stringify(responseMsg))
+          setEventData({
+            ...eventData,
+            error: responseMsg.msg,
+            sending: false
+          })
+        }
+      } catch (err) {
+        console.log('Badnesss!')
+        setEventData({
+          ...eventData,
+          error: err.toString(),
+          loading: false,
+          sending: false
+        })
+      }
+    }
+    if (eventData.sending) postFormData()
   })
 
   useEffect(() => {
@@ -14,16 +75,16 @@ export default function NewTourBooking({ tourId }) {
       try {
         let response = await fetch('/api/booking/' + tourId)
         let eventInfo = await response.json()
-        if (!eventInfo.id || !eventInfo.label || !eventInfo.date) {
+        if (!eventInfo.id || !eventInfo.summary || !eventInfo.start) {
           setEventData({
-            tourId: tourId,
+            ...eventData,
             eventInfo: eventInfo,
             error: 'Invalid Event',
             loading: false
           })
         } else {
           setEventData({
-            tourId: tourId,
+            ...eventData,
             eventInfo: eventInfo,
             error: null,
             loading: false
@@ -31,9 +92,8 @@ export default function NewTourBooking({ tourId }) {
         }
       } catch (err) {
         setEventData({
-          tourId: tourId,
-          eventInfo: null,
-          error: err,
+          ...eventData,
+          error: err.toString(),
           loading: false
         })
       }
@@ -41,30 +101,83 @@ export default function NewTourBooking({ tourId }) {
     if (eventData.loading) fetchEventData()
   })
 
-  if (eventData.loading) {
+  if (eventData.loading || eventData.sending) {
     return (
       <svg
-        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
         xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
+        style={{
+          margin: 'auto',
+          background: 'transparent',
+          display: 'block'
+        }}
+        width="287px"
+        height="287px"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="xMidYMid"
       >
         <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        ></path>
+          cx="50"
+          cy="50"
+          r="32"
+          strokeWidth="8"
+          stroke="#182731"
+          strokeDasharray="50.26548245743669 50.26548245743669"
+          fill="none"
+          strokeLinecap="round"
+        >
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            dur="2.380952380952381s"
+            repeatCount="indefinite"
+            keyTimes="0;1"
+            values="0 50 50;360 50 50"
+          ></animateTransform>
+        </circle>
+        <circle
+          cx="50"
+          cy="50"
+          r="23"
+          strokeWidth="8"
+          stroke="#a7d4ec"
+          strokeDasharray="36.12831551628262 36.12831551628262"
+          strokeDashoffset="36.12831551628262"
+          fill="none"
+          strokeLinecap="round"
+        >
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            dur="2.380952380952381s"
+            repeatCount="indefinite"
+            keyTimes="0;1"
+            values="0 50 50;-360 50 50"
+          ></animateTransform>
+        </circle>
       </svg>
     )
+  } else if (eventData.done) {
+    return (
+      <p>
+        Your booking was recorded. You should receive an email in a few days.
+      </p>
+    )
+  } else if (eventData.error != undefined) {
+    return (
+      <p>
+        An error occurred: {eventData.error} <br />{' '}
+        <button className="p-3 bg-gray-500" onClick={retry}>
+          Retry
+        </button>
+      </p>
+    )
   } else {
-    return <NewTourBookingForm tourInfo={eventData.eventInfo} />
+    return (
+      <NewTourBookingForm
+        tourInfo={eventData.eventInfo}
+        formData={eventData.formData}
+        submitHandler={handleBookingSubmission}
+      />
+    )
   }
 }
