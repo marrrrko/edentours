@@ -14,7 +14,6 @@ export default function NewTourBooking({ tourId }) {
       try {
         let response = await fetch('/api/booking/' + tourId)
         let eventInfo = await response.json()
-        console.log('Got data ' + JSON.stringify(eventInfo))
         if (!eventInfo.id || !eventInfo.label || !eventInfo.date) {
           setEventData({
             tourId: tourId,
@@ -33,8 +32,8 @@ export default function NewTourBooking({ tourId }) {
       } catch (err) {
         setEventData({
           tourId: tourId,
-          eventInfo: eventInfo,
-          error: null,
+          eventInfo: null,
+          error: err,
           loading: false
         })
       }

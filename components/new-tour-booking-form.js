@@ -2,17 +2,16 @@ import React from 'react'
 import { parseISO, format } from 'date-fns'
 
 export default function NewTourBookingForm({ tourInfo }) {
-  console.log(`TI: ${JSON.stringify(tourInfo)}`)
   return (
     <div className="w-full md:w-3/5 2xl:w-2/5 mx-auto pb-36 pt-20 px-4 grid min-h-screen">
       <div className="bg-white">
         <div className="text-xl font-semibold text-center mb-3">
           New Tour Booking
         </div>
-        <div className="text-lg text-center mt-6">{tourInfo.label}</div>
+        <div className="text-lg text-center mt-6">{tourInfo.summary}</div>
         <div className="text-xl text-center">
-          {format(parseISO(tourInfo.date), 'EEEE MMMM do yyyy')} <br />
-          {format(parseISO(tourInfo.date), 'h:mm a OOOO')}
+          {format(parseISO(tourInfo.start), 'EEEE MMMM do yyyy')} <br />
+          {format(parseISO(tourInfo.start), 'h:mm a OOOO')}
         </div>
         <form className="mt-6">
           <label

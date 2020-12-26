@@ -1,15 +1,22 @@
-export default function handler(req, res) {
+import { getEvent } from '../../../db/bookingDb'
+
+export default async function handler(req, res) {
   const bookingId = req.query.bookingId
-  res.statusCode = 200
-  res.setHeader('Content-Type', 'application/json')
-  res.end(
-    JSON.stringify({
-      body: `${JSON.parse(JSON.stringify(req.body))}`,
-      id: bookingId,
-      label: 'Super duper Tour',
-      date: new Date()
-    })
-  )
+
+  if (bookingId && req.method === 'GET') {
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    const event = await getEvent(bookingId)
+    res.end(
+      JSON.stringify({
+        ...event
+      })
+    )
+  } else {
+    res.statusCode = 400
+    res.setHeader('Content-Type', 'application/json')
+    res.end({ msg: 'Invalid request' })
+  }
 }
 
 function processBooking(booking) {

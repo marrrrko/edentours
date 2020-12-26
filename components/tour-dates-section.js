@@ -2,69 +2,62 @@ import React, { useEffect, useState } from 'react'
 import TourDates from './tour-dates'
 
 export default function TourDatesSection({}) {
-  const [calendarData, setCalendarData] = useState({
+  const [bookingData, setBookingData] = useState({
     entries: null,
     error: null,
     loading: true
   })
 
   useEffect(() => {
-    gapi.load('client', loadCalendarEvents)
-
-    function loadCalendarEvents() {
-      gapi.client
-        .init({
-          apiKey: 'AIzaSyCugr28FW9yey69bQ9DZvKLWGOM6x3LJVs',
-          discoveryDocs: [
-            'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'
-          ]
-        })
-        .then(function () {
-          return gapi.client.calendar.events.list({
-            calendarId: 'p0cqdb7ehvbd0fm7e4sq3kthc8@group.calendar.google.com',
-            timeMin: new Date().toISOString(),
-            showDeleted: false,
-            singleEvents: true,
-            maxResults: 50,
-            orderBy: 'startTime'
+    async function fetchEventData() {
+      try {
+        let response = await fetch('/api/booking')
+        let responseData = await response.json()
+        if (!responseData.events) {
+          setBookingData({
+            entries: responseData,
+            error: 'Invalid Booking Data',
+            loading: false
           })
+        } else {
+          setBookingData({
+            entries: responseData.events,
+            error: null,
+            loading: false
+          })
+        }
+      } catch (err) {
+        setBookingData({
+          entries: null,
+          error: err,
+          loading: false
         })
-        .then(
-          function (response) {
-            setCalendarData({
-              entries: parseGoogleCalendarResponse(response),
-              error: null,
-              loading: false
-            })
-          },
-          function (reason) {
-            setCalendarData({
-              entries: null,
-              error: reason.result.error.message,
-              loading: false
-            })
-          }
-        )
+      }
     }
+    if (bookingData.loading) fetchEventData()
   })
 
   return (
     <div className="w-full md:w-3/5 2xl:w-2/5 mx-auto my-5 px-4">
-      {calendarData.loading && <span>Loading</span>}
-      {!calendarData.loading && calendarData.error && (
-        <span>Error: {calendarData.error}</span>
+      {bookingData.loading && <span>Loading</span>}
+      {!bookingData.loading && bookingData.error && (
+        <span>Error: {bookingData.error}</span>
       )}
-      {!calendarData.loading && calendarData.entries && (
-        <TourDates dates={calendarData.entries} />
+      {!bookingData.loading && bookingData.entries && (
+        <TourDates dates={bookingData.entries} />
       )}
     </div>
   )
 }
 
-function parseGoogleCalendarResponse(response) {
-  return response.result.items.map((calendarItem) => ({
+function parseGoogleCalendarResponse(calendarItem) {
+  return {
     id: calendarItem.id,
-    label: calendarItem.summary,
-    start: calendarItem.start.dateTime
-  }))
+    summary: calendarItem.summary,
+    description: calendarItem.description,
+    start: calendarItem.start.dateTime,
+    end: calendarItem.end.dateTime,
+    creatorEmail: calendarItem.creator.email,
+    etag: calendarItem.etag
+  }
 }

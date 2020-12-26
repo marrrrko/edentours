@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "NODE_OPTIONS='--inspect' next dev",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start"
+    "start": "NODE_ENV=production node server.js"
   },
   "keywords": [],
   "author": "",
@@ -15,11 +15,14 @@
     "axios": "^0.21.0",
     "date-fns": "^2.16.1",
     "flickr-sdk": "^3.10.0",
+    "googleapis": "^66.0.0",
     "htmlparser2": "^6.0.0",
     "next": "^10.0.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-grid-gallery": "^0.5.5"
+    "react-grid-gallery": "^0.5.5",
+    "sqlite3": "^5.0.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "autoprefixer": "^10.0.4",

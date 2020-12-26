@@ -12,8 +12,6 @@ const Page = ({ tourId }) => {
 
 export async function getServerSideProps(context) {
   const { tourId } = context.query
-  console.log(`Context: ${JSON.stringify(context.query)}`)
-
   return { props: { tourId } }
 }
 

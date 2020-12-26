@@ -19,7 +19,7 @@ export default function TourDates({ dates }) {
         >
           Book
         </a>
-        <div className="text-lg font-bold">{date.label}</div>
+        <div className="text-lg font-bold">{date.name}</div>
         <div className="text-base">
           {format(parseISO(date.start), 'EEEE MMMM do yyyy - h:mm a OOOO')}
         </div>

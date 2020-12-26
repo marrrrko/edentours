@@ -18,12 +18,11 @@ export async function getServerSideProps(context) {
   if (page === 'robots.txt' || page === 'favicon.ico') return { props: {} }
 
   const post = await fetchPostBySlug(page)
-  const pagePostData = await buildPageContent(post)
-
-  if (!pagePostData || !pagePostData.slug) {
-    console.log(`Could not retrieve post "${page}"`)
+  if (!post || !post.slug) {
     return { props: {} }
   }
+
+  const pagePostData = await buildPageContent(post)
 
   return { props: { ...pagePostData } }
 }
@@ -33,13 +32,3 @@ export default Page
 Router.onRouteChangeComplete = () => {
   document.querySelector('.page-content').scrollTo(0, 0)
 }
-
-/*
-Plan is simple:
-  * All posts served as pages
-  * Post images are big and contain post title unless it starts with underscore
-  * Galleries are nice
-  * If gallery item caption is markdown link: render text in image and image is link
-  * Fix all links to use new url (and cached)
-  * Scheduling module embedded as iframe our using some special tag
-*/
