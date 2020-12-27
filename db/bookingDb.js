@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3'
 import { v4 as uuid } from 'uuid'
 
-export async function getUpcomingEvents() {
+export async function getUpcomingTours() {
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
     db.all(
@@ -16,7 +16,28 @@ export async function getUpcomingEvents() {
 
   return rows.map((r) => {
     let event = JSON.parse(r.doc)
-    event.start = new Date(event.start)
+    //event.start = new Date(event.start)
+    return event
+  })
+}
+
+export async function getBookings(tourId) {
+  let db = await getDb()
+  let rows = await new Promise((resolve, reject) => {
+    db.all(
+      'SELECT * FROM Booking WHERE tourId = $tourId',
+      { $tourId: tourId },
+      (error, rows) => {
+        if (error) reject(error)
+        else resolve(rows)
+      }
+    )
+  })
+  await closeDb(db)
+
+  return rows.map((r) => {
+    let event = JSON.parse(r.doc)
+    //event.start = new Date(event.start)
     return event
   })
 }

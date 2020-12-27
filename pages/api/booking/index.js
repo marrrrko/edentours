@@ -1,8 +1,5 @@
-import { getUpcomingEvents as getUpcomingEventsFromGoogle } from '../../../utils/google-calendar'
-import {
-  getUpcomingEvents as getUpcomingEventsFromLocalDatabase,
-  createNewTours
-} from '../../../db/bookingDb'
+import { getUpcomingEvents } from '../../../utils/google-calendar'
+import { getUpcomingTours, createNewTours } from '../../../db/bookingDb'
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -25,23 +22,24 @@ export default async function handler(req, res) {
 }
 
 async function getUpdatedListOfEvents() {
-  const knownEvents = await getUpcomingEventsFromLocalDatabase()
-  const knownEventsByGoogleId = knownEvents.reduce((acc, next) => {
+  const scheduledTours = await getUpcomingTours()
+  const scheduledToursByGoogleId = scheduledTours.reduce((acc, next) => {
     acc[next.externalEventId] = next
     return acc
   }, {})
-  const allEvents = await getUpcomingEventsFromGoogle()
+  const allEvents = await getUpcomingEvents()
   const newEvents = allEvents.filter(
-    (eventFromGoogle) => knownEventsByGoogleId[eventFromGoogle.id] == undefined
+    (eventFromGoogle) =>
+      scheduledToursByGoogleId[eventFromGoogle.id] == undefined
   )
 
   if (!newEvents.length) {
     console.log('No new events found')
-    return knownEvents
+    return scheduledTours
   } else {
     console.log(`${newEvents.length} new event(s) found. Creating`)
     await createNewTours(newEvents)
-    const updatedKnownEvents = await getUpcomingEventsFromLocalDatabase()
+    const updatedKnownEvents = await getUpcomingTours()
     return updatedKnownEvents
   }
 }
