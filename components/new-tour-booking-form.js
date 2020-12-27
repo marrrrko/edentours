@@ -205,11 +205,8 @@ export default function NewTourBookingForm({
           </p>
           <p className="p-0 m-0 mt-2 text-xs text-gray-800">
             <span className="font-bold">24 hours prior to your tour date</span>,
-            a second email containing{' '}
-            <a href="/zoom" target="_blank">
-              Zoom connection details
-            </a>{' '}
-            will be sent to you.
+            a second email containing Zoom connection details will be sent to
+            you.
           </p>
         </form>
       </div>

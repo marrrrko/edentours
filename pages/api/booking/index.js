@@ -1,7 +1,7 @@
 import { getUpcomingEvents as getUpcomingEventsFromGoogle } from '../../../utils/google-calendar'
 import {
   getUpcomingEvents as getUpcomingEventsFromLocalDatabase,
-  createNewEvents
+  createNewTours
 } from '../../../db/bookingDb'
 
 export default async function handler(req, res) {
@@ -40,7 +40,7 @@ async function getUpdatedListOfEvents() {
     return knownEvents
   } else {
     console.log(`${newEvents.length} new event(s) found. Creating`)
-    await createNewEvents(newEvents)
+    await createNewTours(newEvents)
     const updatedKnownEvents = await getUpcomingEventsFromLocalDatabase()
     return updatedKnownEvents
   }

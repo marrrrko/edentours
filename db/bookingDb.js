@@ -4,10 +4,13 @@ import { v4 as uuid } from 'uuid'
 export async function getUpcomingEvents() {
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
-    db.all('SELECT * FROM Tour', (error, rows) => {
-      if (error) reject(error)
-      else resolve(rows)
-    })
+    db.all(
+      "SELECT * FROM Tour WHERE start >= datetime('now')",
+      (error, rows) => {
+        if (error) reject(error)
+        else resolve(rows)
+      }
+    )
   })
   await closeDb(db)
 
@@ -18,12 +21,12 @@ export async function getUpcomingEvents() {
   })
 }
 
-export async function getEvent(eventId) {
+export async function getEvent(tourId) {
   let db = await getDb()
   let row = await new Promise((resolve, reject) => {
     db.get(
-      'SELECT * FROM Tour WHERE TourId = $eventId',
-      { $eventId: eventId },
+      'SELECT * FROM Tour WHERE tourId = $tourId',
+      { $tourId: tourId },
       (error, rows) => {
         if (error) reject(error)
         else resolve(rows)
@@ -37,7 +40,7 @@ export async function getEvent(eventId) {
   return event
 }
 
-export async function createNewEvents(events) {
+export async function createNewTours(events) {
   events.forEach((eventData) => {
     if (!eventData || !eventData.start || !eventData.id) {
       throw new Error('Invalid event: ' + JSON.stringify(eventData))
@@ -45,7 +48,7 @@ export async function createNewEvents(events) {
   })
 
   let db = await getDb()
-  let creationTasks = events.map((e) => insertEvent(db, e))
+  let creationTasks = events.map((e) => insertTour(db, e))
   let ids = await creationTasks.reduce(async (previousPromise, next) => {
     await previousPromise
     return next
@@ -61,19 +64,20 @@ export async function createNewBooking(tourId, booking) {
   const bookingId = uuid()
   let doc = {
     ...booking,
-    id: bookingId,
+    bookingId: bookingId,
+    eventTime: new Date().toISOString(),
+    eventType: 'created',
     tourId: tourId
   }
 
   await new Promise((resolve, reject) => {
     db.run(
-      'INSERT INTO Booking VALUES (?,json(?))',
-      [doc.id, JSON.stringify(doc)],
+      'INSERT INTO Booking VALUES (?, ?, json(?))',
+      [doc.bookingId, doc.eventTime, JSON.stringify(doc)],
       (err) => {
         if (err) {
           reject(err)
         } else {
-          console.log('Created booking #' + bookingId)
           resolve()
         }
       }
@@ -84,31 +88,34 @@ export async function createNewBooking(tourId, booking) {
   return bookingId
 }
 
-async function insertEvent(db, eventData) {
-  const eventId = uuid()
+async function insertTour(db, eventData) {
+  const tourId = uuid()
+  const externalEventId = eventData.id
+  delete eventData.id
   let doc = {
     ...eventData,
-    id: eventId,
-    externalEventId: eventData.id,
+    tourId: tourId,
+    eventTime: new Date().toISOString(),
+    eventType: 'created',
+    externalEventId: externalEventId,
     start: new Date(eventData.start).toISOString()
   }
 
   await new Promise((resolve, reject) => {
     db.run(
-      'INSERT INTO Tour VALUES (?,json(?))',
-      [doc.id, JSON.stringify(doc)],
+      'INSERT INTO Tour VALUES (?, ?, json(?))',
+      [doc.tourId, doc.eventTime, JSON.stringify(doc)],
       (err) => {
         if (err) {
           reject(err)
         } else {
-          console.log('Created event #' + eventId)
           resolve()
         }
       }
     )
   })
 
-  return eventId
+  return tourId
 }
 
 async function getDb() {

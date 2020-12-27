@@ -43,14 +43,12 @@ export default function NewTourBooking({ tourId }) {
         })
         let responseMsg = await response.json()
         if (response.ok) {
-          console.log('Success! ' + JSON.stringify(eventData))
           setEventData({
             ...eventData,
             sending: false,
             done: true
           })
         } else {
-          console.log('Not Success! ' + JSON.stringify(responseMsg))
           setEventData({
             ...eventData,
             error: responseMsg.msg,
@@ -58,7 +56,6 @@ export default function NewTourBooking({ tourId }) {
           })
         }
       } catch (err) {
-        console.log('Badnesss!')
         setEventData({
           ...eventData,
           error: err.toString(),
@@ -75,7 +72,7 @@ export default function NewTourBooking({ tourId }) {
       try {
         let response = await fetch('/api/booking/' + tourId)
         let eventInfo = await response.json()
-        if (!eventInfo.id || !eventInfo.summary || !eventInfo.start) {
+        if (!eventInfo.tourId || !eventInfo.summary || !eventInfo.start) {
           setEventData({
             ...eventData,
             eventInfo: eventInfo,
@@ -158,18 +155,41 @@ export default function NewTourBooking({ tourId }) {
     )
   } else if (eventData.done) {
     return (
-      <p>
-        Your booking was recorded. You should receive an email in a few days.
-      </p>
+      <div className="flex flex-col mt-20">
+        <div className="text-center  text-3xl">✍</div>
+        <div className="text-center  text-xl mt-5 mb-4">
+          Your booking was recorded.
+        </div>
+        <div className="text-center  text-base">
+          An email will be sent to you.
+        </div>
+        <div className="text-center mt-8">
+          <a
+            href={'/'}
+            className="flex-shrink-0 bg-yellow-200 no-underline text-black text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
+          >
+            Go back to starting page
+          </a>
+        </div>
+      </div>
     )
   } else if (eventData.error != undefined) {
     return (
-      <p>
-        An error occurred: {eventData.error} <br />{' '}
-        <button className="p-3 bg-gray-500" onClick={retry}>
-          Retry
-        </button>
-      </p>
+      <div className="flex flex-col mt-20">
+        <div className="text-center  text-3xl">⚔</div>
+        <div className="text-center  text-lg">An error occurred:</div>
+        <div className="text-center  text-base font-sans">
+          {eventData.error}
+        </div>
+        <div className="text-center  text-3xl">
+          <a
+            className="flex-shrink-0 bg-yellow-200 no-underline text-black text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
+            onClick={retry}
+          >
+            Retry
+          </a>
+        </div>
+      </div>
     )
   } else {
     return (

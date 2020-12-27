@@ -14,14 +14,15 @@ export default function TourDates({ dates }) {
         }
       >
         <a
-          href={'/book/' + date.id}
-          className="flex-shrink-0 float-right bg-yellow-200 no-underline text-black text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
+          href={'/book/' + date.tourId}
+          className="flex-shrink-0 float-right bg-yellow-200 no-underline text-black text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
         >
           Book
         </a>
-        <div className="text-lg font-bold">{date.name}</div>
+        <div className="text-lg font-bold">{date.summary}</div>
         <div className="text-base">
-          {format(parseISO(date.start), 'EEEE MMMM do yyyy - h:mm a OOOO')}
+          {date.start &&
+            format(parseISO(date.start), 'EEEE MMMM do yyyy - h:mm a OOOO')}
         </div>
       </div>
     )

@@ -41,11 +41,14 @@ async function createTourTable(db, migrationIndex) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run(`
-  CREATE TABLE Tour (
-    TourId TEXT NOT NULL PRIMARY KEY,
-    doc TEXT NOT NULL,
-    ExternalEventId TEXT GENERATED ALWAYS AS (json_extract(doc, '$.externalEventId')) VIRTUAL,
-    StartDate TEXT GENERATED ALWAYS AS (json_extract(doc, '$.start')) VIRTUAL)`)
+      CREATE TABLE Tour (
+        tourId TEXT NOT NULL ,
+        eventTime TEXT NOT NULL,
+        doc TEXT NOT NULL,
+        eventType TEXT NOT NULL GENERATED ALWAYS AS (json_extract(doc, '$.eventType')) VIRTUAL,        
+        externalEventId TEXT GENERATED ALWAYS AS (json_extract(doc, '$.externalEventId')) VIRTUAL,
+        start TEXT NOT NULL GENERATED ALWAYS AS (json_extract(doc, '$.start')) VIRTUAL,
+        PRIMARY KEY (tourId, eventTime))`)
       db.run(
         `
     PRAGMA user_version = ${migrationIndex + 1}`,
@@ -61,11 +64,14 @@ async function createBookingTable(db, migrationIndex) {
   return new Promise((resolve, reject) => {
     db.serialize(() => {
       db.run(`
-  CREATE TABLE Booking (
-    BookingId TEXT NOT NULL PRIMARY KEY,
-    doc TEXT NOT NULL,
-    Email TEXT GENERATED ALWAYS AS (json_extract(doc, '$.email')) VIRTUAL,
-    TourId TEXT GENERATED ALWAYS AS (json_extract(doc, '$.tourId')) VIRTUAL)`)
+      CREATE TABLE Booking (
+        bookingId TEXT NOT NULL,
+        eventTime TEXT NOT NULL,
+        doc TEXT NOT NULL,
+        eventType TEXT NOT NULL GENERATED ALWAYS AS (json_extract(doc, '$.eventType')) VIRTUAL,        
+        email TEXT GENERATED ALWAYS AS (json_extract(doc, '$.email')) VIRTUAL,
+        tourId TEXT GENERATED ALWAYS AS (json_extract(doc, '$.tourId')) VIRTUAL,
+        PRIMARY KEY (bookingId, eventTime))`)
       db.run(
         `
     PRAGMA user_version = ${migrationIndex + 1}`,

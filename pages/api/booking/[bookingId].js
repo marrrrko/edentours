@@ -17,7 +17,6 @@ export default async function handler(req, res) {
     if (errorMsg) {
       res.statusCode = 422
       res.setHeader('Content-Type', 'application/json')
-      console.log(`${JSON.stringify(req.body)}`)
       res.end(JSON.stringify({ msg: errorMsg }))
     } else {
       res.statusCode = 200
@@ -40,11 +39,11 @@ async function processBooking(tourId, booking) {
     !booking.email.length ||
     !emailIsValid(booking.email)
   ) {
-    return 'Please specify a valid email address'
+    return 'Invalid email address'
   } else if (!booking.groupName) {
-    return 'Please specify a name for your group such as "Friends from Brazil".'
+    return 'Invalid group name'
   } else if (!booking.areYouHuman || parseInt(booking.areYouHuman) != 1914) {
-    return 'Incorrect answer to special question. Answer should be a 4 digit number.'
+    return 'Incorrect answer to special question.'
   } else if (JSON.stringify(booking).length > 10000) {
     return 'Too much data'
   }
