@@ -28,7 +28,13 @@ export async function getUpcomingEvents() {
     orderBy: 'startTime'
   })
 
-  return response.data.items.map(parseGoogleCalendarResponse)
+  return response.data.items
+    .map(parseGoogleCalendarResponse)
+    .filter((event) => event.summary.trim().toLowerCase().startsWith('tour:'))
+    .map((event) => ({
+      ...event,
+      summary: event.summary.trim().slice(5).trim()
+    }))
 }
 
 export function parseGoogleCalendarResponse(calendarItem) {

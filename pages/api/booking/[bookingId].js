@@ -1,4 +1,4 @@
-import { getEvent, createNewBooking } from '../../../db/bookingDb'
+import { getTour, createNewBooking } from '../../../db/bookingDb'
 
 export default async function handler(req, res) {
   const tourId = req.query.bookingId
@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   if (tourId && req.method === 'GET') {
     res.statusCode = 200
     res.setHeader('Content-Type', 'application/json')
-    const event = await getEvent(tourId)
+    const event = await getTour(tourId)
     res.end(
       JSON.stringify({
         ...event

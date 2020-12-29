@@ -71,7 +71,7 @@ export default function NewTourBookingForm({
         <div className="text-lg text-center mt-6">{tourInfo.summary}</div>
         <div className="text-xl text-center">
           {format(parseISO(tourInfo.start), 'EEEE MMMM do yyyy')} <br />
-          {format(parseISO(tourInfo.start), 'h:mm a OOOO')}
+          {format(parseISO(tourInfo.start), 'h:mm a zzzz')}
         </div>
         <form className="mt-6">
           <label

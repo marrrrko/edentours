@@ -1,11 +1,11 @@
 import Router from 'next/router'
 import Link from 'next/link'
-import { getUpcomingTours } from '../../db/bookingDb'
+import { getUpcomingBookings } from '../../db/bookingDb'
 import DefaultErrorPage from 'next/error'
 import { parseISO, format } from 'date-fns'
 import Cookies from 'cookies'
 
-export default function Tours({ accessGranted, upcommingTours }) {
+export default function Tours({ accessGranted, upcomingToursAndBookings }) {
   if (!accessGranted) {
     return <DefaultErrorPage statusCode={401} />
   }
@@ -18,19 +18,28 @@ export default function Tours({ accessGranted, upcommingTours }) {
           <tr>
             <th>Tour</th>
             <th>Date</th>
+            <th>Groups</th>
+            <th>Participants</th>
             <th>More</th>
           </tr>
         </thead>
         <tbody>
-          {upcommingTours.map((t) => {
+          {upcomingToursAndBookings.map((t) => {
             return (
-              <tr key={t.tourId}>
-                <td className="border px-4 py-2">{t.summary}</td>
+              <tr key={t.tour.tourId}>
+                <td className="border px-4 py-2">{t.tour.summary}</td>
                 <td className="border px-4 py-2">
-                  {format(parseISO(t.start), 'EEEE MMMM do yyyy - h:mm a OOOO')}
+                  {format(
+                    parseISO(t.tour.start),
+                    'EEEE MMMM do yyyy - h:mm a zzzz'
+                  )}
+                </td>
+                <td className="border px-4 py-2">{t.currentGroupTotal}</td>
+                <td className="border px-4 py-2">
+                  {t.currentParticipantTotal}
                 </td>
                 <td className="border px-4 py-2">
-                  <Link href={'/admin/tours/' + t.tourId}>More</Link>
+                  <Link href={'/admin/tours/' + t.tour.tourId}>More</Link>
                 </td>
               </tr>
             )
@@ -50,16 +59,16 @@ export async function getServerSideProps(context) {
     access != process.env.ADMIN_ACCESS &&
     accessCookie != process.env.ADMIN_ACCESS
   ) {
-    return { props: { accessGranted: false, upcommingTours: null } }
+    return { props: { accessGranted: false } }
   }
 
   if (access === process.env.ADMIN_ACCESS) {
     cookies.set('edenaccess', access)
   }
 
-  const upcommingTours = await getUpcomingTours()
+  const upcomingToursAndBookings = await getUpcomingBookings()
 
-  return { props: { accessGranted: true, upcommingTours } }
+  return { props: { accessGranted: true, upcomingToursAndBookings } }
 }
 
 Router.onRouteChangeComplete = () => {

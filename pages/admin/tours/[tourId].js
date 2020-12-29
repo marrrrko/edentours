@@ -30,7 +30,7 @@ export default function Bookings({ accessGranted, bookings }) {
               <tr key={t.bookingId}>
                 <td className="border px-4 py-2">{t.eventType}</td>
                 <td className="border px-4 py-2">
-                  {format(parseISO(t.eventTime), 'MM/dd/yy - h:mm a OOOO')}
+                  {format(parseISO(t.eventTime), 'MM/dd/yy - h:mm a zzzz')}
                 </td>
                 <td className="border px-4 py-2">{t.bookerName}</td>
                 <td className="border px-4 py-2">{t.email}</td>

@@ -22,7 +22,7 @@ export default function TourDates({ dates }) {
         <div className="text-lg font-bold">{date.summary}</div>
         <div className="text-base">
           {date.start &&
-            format(parseISO(date.start), 'EEEE MMMM do yyyy - h:mm a OOOO')}
+            format(parseISO(date.start), 'EEEE MMMM do yyyy - h:mm a zzzz')}
         </div>
       </div>
     )
