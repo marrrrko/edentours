@@ -4,12 +4,16 @@ import { getUpcomingTours, createNewTours } from '../../../db/bookingDb'
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     const events = await getUpdatedListOfEvents()
+    const eventsInMoreThan24Hours = events.filter((event) => {
+      const hourDifference = (new Date(event.start) - new Date()) / 3600000
+      return hourDifference > 24
+    })
 
     res.statusCode = 200
     res.setHeader('Content-Type', 'application/json')
     res.end(
       JSON.stringify({
-        events: events.map((event) => ({
+        events: eventsInMoreThan24Hours.map((event) => ({
           ...event
         }))
       })

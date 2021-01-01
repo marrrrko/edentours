@@ -49,15 +49,3 @@ export default function TourDatesSection({}) {
     </div>
   )
 }
-
-function parseGoogleCalendarResponse(calendarItem) {
-  return {
-    id: calendarItem.id,
-    summary: calendarItem.summary,
-    description: calendarItem.description,
-    start: calendarItem.start.dateTime,
-    end: calendarItem.end.dateTime,
-    creatorEmail: calendarItem.creator.email,
-    etag: calendarItem.etag
-  }
-}
