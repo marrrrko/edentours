@@ -1,4 +1,5 @@
 import { getTour, createNewBooking } from '../../../db/bookingDb'
+import * as emailSending from '../../../utils/emails'
 
 export default async function handler(req, res) {
   const tourId = req.query.bookingId
@@ -21,7 +22,6 @@ export default async function handler(req, res) {
     } else {
       res.statusCode = 200
       res.setHeader('Content-Type', 'application/json')
-      console.log(`${JSON.stringify(req.body)}`)
       res.end(JSON.stringify({ msg: 'Booked!' }))
     }
   } else {
@@ -48,7 +48,7 @@ async function processBooking(tourId, booking) {
     return 'Too much data'
   }
 
-  await createNewBooking(tourId, {
+  const bookingId = await createNewBooking(tourId, {
     bookerName: booking.bookerName,
     email: booking.email,
     groupName: booking.groupName,
@@ -56,7 +56,15 @@ async function processBooking(tourId, booking) {
     groupDetails: booking.groupDetails
   })
 
-  return null
+  const email = await emailSending.buildBookingConfirmationEmail(bookingId)
+  const transactionId = await emailSending.createEmailTransaction(
+    'booking-confirmation',
+    bookingId,
+    email
+  )
+  emailSending.sendEmail(transactionId)
+
+  return null //null for success
 }
 
 function emailIsValid(email) {

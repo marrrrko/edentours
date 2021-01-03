@@ -44,6 +44,26 @@ export async function getBookings(tourId) {
   })
 }
 
+export async function getBooking(bookingId) {
+  let db = await getDb()
+  let row = await new Promise((resolve, reject) => {
+    db.get(
+      'SELECT Booking.tourId, Booking.bookingId, Booking.doc as booking, Tour.doc as tour FROM Booking LEFT JOIN Tour on Tour.tourId = Booking.tourId WHERE Booking.bookingId = $bookingId',
+      { $bookingId: bookingId },
+      (error, rows) => {
+        if (error) reject(error)
+        else resolve(rows)
+      }
+    )
+  })
+  await closeDb(db)
+
+  return {
+    ...JSON.parse(row.booking),
+    tour: JSON.parse(row.tour)
+  }
+}
+
 export async function getUpcomingBookings() {
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
@@ -93,9 +113,6 @@ function aggregateBookingsFromTours(upcomingToursAndBookings) {
       acc[next.email].push(next)
       return acc
     }, {})
-
-    // console.log(`---------- ${tour.tour.tourId} -------------`)
-    // console.log(JSON.stringify(tour.allBookingsByEmail, null, '  '))
 
     tour.finalBookingsByEmail = Object.keys(tour.allBookingsByEmail).map(
       (email) => {
@@ -244,6 +261,83 @@ async function insertTour(db, eventData) {
   return tourId
 }
 
+export async function insertEmailTransaction(
+  transactionId,
+  transactionType,
+  associatedEventId,
+  email
+) {
+  let db = await getDb()
+
+  let doc = {
+    transactionId,
+    transactionType,
+    transactionTime: new Date().toISOString(),
+    associatedEventId,
+    email,
+    sentAt: null
+  }
+
+  await new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO EmailTransaction VALUES (?, json(?))',
+      [transactionId, JSON.stringify(doc)],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+  await closeDb(db)
+  return transactionId
+}
+
+export async function getEmailTransaction(transactionId) {
+  let db = await getDb()
+  let row = await new Promise((resolve, reject) => {
+    db.get(
+      'SELECT * FROM EmailTransaction WHERE transactionId = $transactionId',
+      { $transactionId: transactionId },
+      (error, rows) => {
+        if (error) reject(error)
+        else {
+          resolve(rows)
+        }
+      }
+    )
+  })
+  await closeDb(db)
+
+  let transaction = JSON.parse(row.doc)
+  return transaction
+}
+
+export async function markEmailTransactionAsSent(
+  transactionId,
+  messageId,
+  sentAt
+) {
+  let db = await getDb()
+
+  await new Promise((resolve, reject) => {
+    db.run(
+      "UPDATE EmailTransaction SET doc=(SELECT json_set(json_set(doc,'$.sentAt',?),'$.sentMsgId',?) FROM EmailTransaction) WHERE transactionId=?",
+      [sentAt.toISOString(), messageId, transactionId],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+  await closeDb(db)
+}
+
 async function getDb() {
   return new Promise((resolve, reject) => {
     const bookingsDb = new sqlite3.Database('data/bookings.sqlite3', (err) => {
@@ -261,31 +355,9 @@ async function closeDb(db) {
   return new Promise((resolve, reject) => {
     db.close((err) => {
       if (err) reject(err)
-      else resolve()
+      else {
+        resolve()
+      }
     })
   })
 }
-
-// getDatabase()
-//   .then((db) => {
-//     console.log('Got it!')
-//     let sample = {
-//       id: uuid(),
-//       externalEventId: 'somegooglestring',
-//       start: new Date().toISOString()
-//     }
-//     db.run(
-//       'INSERT INTO Tour VALUES (?,json(?))',
-//       [sample.id, JSON.stringify(sample)],
-//       (err) => {
-//         if (err) {
-//           console.error("Couldn't insert", err)
-//         } else {
-//           console.log('Inserted!')
-//         }
-//       }
-//     )
-//   })
-//   .catch((err) => {
-//     console.error(`Something bad happened`, err)
-//   })

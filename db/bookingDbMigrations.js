@@ -1,6 +1,11 @@
 const sqlite3 = require('sqlite3')
 
-const migrations = [createTourTable, createBookingTable]
+const migrations = [
+  createTourTable,
+  createBookingTable,
+  createActionKeyTable,
+  createEmailTransactionTable
+]
 
 async function prepareDb() {
   return new Promise((resolve, reject) => {
@@ -52,7 +57,10 @@ async function createTourTable(db, migrationIndex) {
       db.run(
         `
     PRAGMA user_version = ${migrationIndex + 1}`,
-        () => {
+        (err) => {
+          if (err) {
+            reject(err, 'Migration failed')
+          }
           resolve()
         }
       )
@@ -75,7 +83,55 @@ async function createBookingTable(db, migrationIndex) {
       db.run(
         `
     PRAGMA user_version = ${migrationIndex + 1}`,
-        () => {
+        (err) => {
+          if (err) {
+            reject(err, 'Migration failed')
+          }
+          resolve()
+        }
+      )
+    })
+  })
+}
+
+async function createActionKeyTable(db, migrationIndex) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run(`
+      CREATE TABLE ActionKey (
+        actionKey TEXT NOT NULL PRIMARY KEY,
+        doc TEXT NOT NULL)`)
+      db.run(
+        `
+    PRAGMA user_version = ${migrationIndex + 1}`,
+        (err) => {
+          if (err) {
+            reject(err, 'Migration failed')
+          }
+          resolve()
+        }
+      )
+    })
+  })
+}
+
+async function createEmailTransactionTable(db, migrationIndex) {
+  return new Promise((resolve, reject) => {
+    db.serialize(() => {
+      db.run(`
+      CREATE TABLE EmailTransaction (
+        transactionId TEXT NOT NULL PRIMARY KEY,
+        doc TEXT NOT NULL,
+        transactionType TEXT NOT NULL GENERATED ALWAYS AS (json_extract(doc, '$.transactionType')) VIRTUAL,
+        transactionTime TEXT NOT NULL GENERATED ALWAYS AS (json_extract(doc, '$.transactionTime')) VIRTUAL,        
+        associatedEventId TEXT GENERATED ALWAYS AS (json_extract(doc, '$.messageType')) VIRTUAL)`)
+      db.run(
+        `
+    PRAGMA user_version = ${migrationIndex + 1}`,
+        (err) => {
+          if (err) {
+            reject(err, 'Migration failed')
+          }
           resolve()
         }
       )
