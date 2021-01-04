@@ -105,6 +105,7 @@ export async function sendEmail(transactionId) {
       const { MessageId } = await new SES({ apiVersion: '2010-12-01' })
         .sendEmail(awsEmailDoc)
         .promise()
+      console.log('Email sent')
       await markEmailTransactionAsSent(transactionId, MessageId, new Date())
     } catch (emailSendErr) {
       console.error('Failed to send email', emailSendErr)
