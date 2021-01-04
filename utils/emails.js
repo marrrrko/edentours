@@ -179,11 +179,7 @@ async function sendEmailIfNeeded(booking, apply = false) {
 
   let sent = false
   const emailMustBeSent = sentEmailsForBooking.length === 0
-  if (
-    emailMustBeSent &&
-    apply &&
-    booking.email == 'markcarrier+172758@gmail.com'
-  ) {
+  if (emailMustBeSent && apply) {
     const email = await buildBookingConfirmationEmail(booking.bookingId)
     const transactionId = await createEmailTransaction(
       'booking-confirmation',
