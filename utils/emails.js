@@ -1,23 +1,53 @@
 import { v4 as uuid } from 'uuid'
+import bs58 from 'bs58'
 import {
   insertEmailTransaction,
   getEmailTransaction,
   markEmailTransactionAsSent,
-  getBooking
+  getBooking,
+  insertActionKey
 } from '../db/bookingDb'
+import { format, parseISO } from 'date-fns'
 import { SES, config } from 'aws-sdk'
 
 config.update({ region: 'us-east-1' })
 
 export async function buildBookingConfirmationEmail(bookingId) {
   const booking = await getBooking(bookingId)
+  if (!booking.email || booking.email.indexOf('@') === -1) {
+    throw new Error('Booking does not have a valid email')
+  }
+
+  const modifyKey = bs58.encode(Buffer.from(uuid().replace(/-/g, ''), 'hex'))
+  await insertActionKey(
+    modifyKey,
+    'modify-booking',
+    bookingId,
+    new Date(new Date().setDate(new Date(booking.tour.start).getDate() + 14))
+  )
+  const unsubscribeKey = bs58.encode(
+    Buffer.from(uuid().replace(/-/g, ''), 'hex')
+  )
+  await insertActionKey(unsubscribeKey, 'unsubscribe', bookingId, null)
+  const modifyUrl = `https://eden.tours/book/${booking.tour.tourId}?action=${modifyKey}`
+  const unsubscribeUrl = `https://eden.tours/user/unsubscribe?action=${unsubscribeKey}`
+
   const recipients = {
-    to: ['markcarrier@gmail.com'],
+    to: [booking.email],
     cc: [],
     bcc: []
   }
-  const subject = `Confirmation for ${booking.tour.summary}`
-  const body = { html: 'Hello email!', plaintext: 'Hello email!' }
+  const subject = `Eden·Tours Booking Confirmation`
+  const body = {
+    html: createConfirmationEmailHtml(
+      booking.tour.summary,
+      booking.tour.start,
+      booking.participantCount,
+      modifyUrl,
+      unsubscribeUrl
+    ),
+    plaintext: ''
+  }
 
   return {
     recipients,
@@ -78,4 +108,36 @@ export async function sendEmail(transactionId) {
       console.error('Failed to send email', emailSendErr)
     }
   }
+}
+
+function createConfirmationEmailHtml(
+  tourName,
+  tourDate,
+  numConnections,
+  modifyUrl,
+  unsubscribeUrl
+) {
+  return `
+<p><h2>Congrats! Your Tour is Booked</h2></p>
+<p>We are pleased to have you as our guest for a tour. We know you will have a great time, deepen your Bible knowledge, and make new acquaintances.</p>
+
+<p>Your details are below:</p>
+
+&nbsp;&nbsp;Tour: ${tourName} <br />
+&nbsp;&nbsp;Date: ${format(
+    parseISO(tourDate),
+    'EEEE MMMM do yyyy h:mm a zzzz'
+  )} <br />
+&nbsp;&nbsp;Number of Connections: ${numConnections} <br />
+
+<p>Zoom connection details will be sent three days before your tour date. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
+<p>To cancel or modify your reservation, please click the following link:</p>
+<p><a href="${modifyUrl}">${modifyUrl}</a></p>
+<p>See you soon.<br />https://eden.tours</p>
+
+
+
+<br /><br />
+<p>You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
+  `
 }

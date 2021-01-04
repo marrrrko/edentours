@@ -338,6 +338,41 @@ export async function markEmailTransactionAsSent(
   await closeDb(db)
 }
 
+export async function insertActionKey(
+  actionKey,
+  actionType,
+  actionTarget,
+  expiration
+) {
+  let db = await getDb()
+
+  let doc = {
+    actionKey,
+    actionType,
+    actionTarget,
+    created: new Date().toISOString(),
+    expiration:
+      expiration && expiration.getMonth === 'function'
+        ? expiration.toISOString()
+        : expiration
+  }
+
+  await new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO ActionKey VALUES (?, json(?))',
+      [actionKey, JSON.stringify(doc)],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+  await closeDb(db)
+}
+
 async function getDb() {
   return new Promise((resolve, reject) => {
     const bookingsDb = new sqlite3.Database('data/bookings.sqlite3', (err) => {
