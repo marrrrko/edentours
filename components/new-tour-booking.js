@@ -15,7 +15,8 @@ export default function NewTourBooking({ tourId }) {
       groupName: '',
       groupDetails: '',
       participantCount: 1,
-      areYouHuman: ''
+      areYouHuman: '',
+      userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
     }
   })
 

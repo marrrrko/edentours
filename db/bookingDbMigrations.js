@@ -124,7 +124,7 @@ async function createEmailTransactionTable(db, migrationIndex) {
         doc TEXT NOT NULL,
         transactionType TEXT NOT NULL GENERATED ALWAYS AS (json_extract(doc, '$.transactionType')) VIRTUAL,
         transactionTime TEXT NOT NULL GENERATED ALWAYS AS (json_extract(doc, '$.transactionTime')) VIRTUAL,        
-        associatedEventId TEXT GENERATED ALWAYS AS (json_extract(doc, '$.messageType')) VIRTUAL)`)
+        associatedEventId TEXT GENERATED ALWAYS AS (json_extract(doc, '$.associatedEventId')) VIRTUAL)`)
       db.run(
         `
     PRAGMA user_version = ${migrationIndex + 1}`,

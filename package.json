@@ -29,6 +29,8 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.0.4",
+    "date-fns-timezone": "^0.1.4",
+    "date-fns-tz": "^1.0.12",
     "postcss": "^8.1.14",
     "tailwindcss": "^2.0.1"
   }

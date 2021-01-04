@@ -178,6 +178,8 @@ export async function getTour(tourId) {
   })
   await closeDb(db)
 
+  if (!row) return null
+
   let event = JSON.parse(row.doc)
   event.start = new Date(event.start)
   return event
@@ -315,6 +317,25 @@ export async function getEmailTransaction(transactionId) {
   return transaction
 }
 
+export async function getEmailTransactionsForBooking(bookingId) {
+  let db = await getDb()
+  let rows = await new Promise((resolve, reject) => {
+    db.all(
+      'SELECT doc FROM EmailTransaction WHERE associatedEventId = $associatedEventId',
+      { $associatedEventId: bookingId },
+      (error, rows) => {
+        if (error) reject(error)
+        else {
+          resolve(rows)
+        }
+      }
+    )
+  })
+  await closeDb(db)
+
+  return rows.map((r) => JSON.parse(r.doc))
+}
+
 export async function markEmailTransactionAsSent(
   transactionId,
   messageId,
@@ -324,8 +345,8 @@ export async function markEmailTransactionAsSent(
 
   await new Promise((resolve, reject) => {
     db.run(
-      "UPDATE EmailTransaction SET doc=(SELECT json_set(json_set(doc,'$.sentAt',?),'$.sentMsgId',?) FROM EmailTransaction) WHERE transactionId=?",
-      [sentAt.toISOString(), messageId, transactionId],
+      "UPDATE EmailTransaction SET doc=(SELECT json_set(json_set(doc,'$.sentAt',?),'$.sentMsgId',?) FROM EmailTransaction WHERE transactionId=?) WHERE transactionId=?",
+      [sentAt.toISOString(), messageId, transactionId, transactionId],
       (err) => {
         if (err) {
           reject(err)

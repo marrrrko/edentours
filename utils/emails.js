@@ -3,11 +3,13 @@ import bs58 from 'bs58'
 import {
   insertEmailTransaction,
   getEmailTransaction,
+  getEmailTransactionsForBooking,
+  getUpcomingBookings,
   markEmailTransactionAsSent,
   getBooking,
   insertActionKey
 } from '../db/bookingDb'
-import { format, parseISO } from 'date-fns'
+import { format } from 'date-fns-tz'
 import { SES, config } from 'aws-sdk'
 
 config.update({ region: 'us-east-1' })
@@ -124,10 +126,13 @@ function createConfirmationEmailHtml(
 <p>Your details are below:</p>
 
 &nbsp;&nbsp;Tour: ${tourName} <br />
-&nbsp;&nbsp;Date: ${format(
-    parseISO(tourDate),
-    'EEEE MMMM do yyyy h:mm a zzzz'
-  )} <br />
+&nbsp;&nbsp;Date: ${
+    format(
+      new Date(tourDate),
+      "EEEE MMMM do yyyy h:mm a 'Istanbul Time (UTC' xxx",
+      { timeZone: 'Europe/Istanbul' }
+    ) + ')'
+  } <br />
 &nbsp;&nbsp;Number of Connections: ${numConnections} <br />
 
 <p>Zoom connection details will be sent three days before your tour date. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
@@ -140,4 +145,61 @@ function createConfirmationEmailHtml(
 <br /><br />
 <p>You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
   `
+}
+
+export async function catchUpUnsentConfirmationEmails(apply = false) {
+  const upcomingToursWithBookings = await getUpcomingBookings()
+  let upcomingBookings = []
+  upcomingToursWithBookings.forEach((tour) => {
+    upcomingBookings = upcomingBookings.concat(
+      tour.bookings.map((booking) => ({
+        ...booking,
+        tour: tour.tour
+      }))
+    )
+  })
+
+  const output = []
+  await upcomingBookings.reduce(async (prev, next) => {
+    await prev
+    return sendEmailIfNeeded(next, apply).then((r) => output.push(r))
+  }, Promise.resolve())
+
+  return output
+}
+
+async function sendEmailIfNeeded(booking, apply = false) {
+  const emailsForBooking = await getEmailTransactionsForBooking(
+    booking.bookingId
+  )
+  const sentEmailsForBooking = emailsForBooking.filter(
+    (transaction) =>
+      transaction.sentAt && new Date(transaction.sentAt).getFullYear() >= 2020
+  )
+
+  let sent = false
+  const emailMustBeSent = sentEmailsForBooking.length === 0
+  if (
+    emailMustBeSent &&
+    apply &&
+    booking.email == 'markcarrier+172758@gmail.com'
+  ) {
+    const email = await buildBookingConfirmationEmail(booking.bookingId)
+    const transactionId = await createEmailTransaction(
+      'booking-confirmation',
+      booking.bookingId,
+      email
+    )
+    await sendEmail(transactionId)
+    sent = true
+  }
+
+  return {
+    tourId: booking.tourId,
+    bookingId: booking.bookingId,
+    summary: booking.tour.summary,
+    start: booking.tour.start,
+    email: booking.email,
+    emailSent: !emailMustBeSent || sent
+  }
 }

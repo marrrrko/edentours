@@ -5,14 +5,23 @@ export default async function handler(req, res) {
   const tourId = req.query.bookingId
 
   if (tourId && req.method === 'GET') {
-    res.statusCode = 200
     res.setHeader('Content-Type', 'application/json')
     const event = await getTour(tourId)
-    res.end(
-      JSON.stringify({
-        ...event
-      })
-    )
+    if (!event) {
+      res.statusCode = 404
+      res.end(
+        JSON.stringify({
+          msg: 'Tour not found'
+        })
+      )
+    } else {
+      res.statusCode = 200
+      res.end(
+        JSON.stringify({
+          ...event
+        })
+      )
+    }
   } else if (tourId && req.method === 'POST') {
     const errorMsg = await processBooking(tourId, req.body)
     if (errorMsg) {

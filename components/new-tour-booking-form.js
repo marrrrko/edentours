@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { parseISO, format } from 'date-fns'
+import { utcToZonedTime, format } from 'date-fns-tz'
+
+const fixedTimezone = 'Europe/Istanbul'
 
 export default function NewTourBookingForm({
   tourInfo,
@@ -7,6 +9,7 @@ export default function NewTourBookingForm({
   submitHandler
 }) {
   const [values, setValues] = useState(formData)
+  let tourStart = utcToZonedTime(new Date(tourInfo.start), fixedTimezone)
 
   const handleBookButtonClick = (e) => {
     let msg = getValidationErrorMsg(values)
@@ -70,8 +73,21 @@ export default function NewTourBookingForm({
         </div>
         <div className="text-lg text-center mt-6">{tourInfo.summary}</div>
         <div className="text-xl text-center">
-          {format(parseISO(tourInfo.start), 'EEEE MMMM do yyyy')} <br />
-          {format(parseISO(tourInfo.start), 'h:mm a zzzz')}
+          {format(tourStart, 'EEEE MMMM do yyyy', {
+            timeZone: fixedTimezone
+          })}
+        </div>
+        <div className="text-lg text-center">
+          {format(tourStart, 'h:mm a', {
+            timeZone: fixedTimezone
+          })}{' '}
+          <span className="text-base">
+            {fixedTimezone} (UTC
+            {format(tourStart, 'xxx', {
+              timeZone: fixedTimezone
+            })}
+            )
+          </span>
         </div>
         <form className="mt-6">
           <label
