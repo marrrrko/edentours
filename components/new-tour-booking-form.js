@@ -92,7 +92,9 @@ export default function NewTourBookingForm({
         <div className="text-lg text-center mt-6">{tourInfo.summary}</div>
         <div className="text-xl text-center">{tourStartDay_turkey}</div>
         <div className="text-lg text-center">{tourStartTime_turkey}</div>
-        <div className="text-base mt-1 text-center">{tourStartTime_user}</div>
+        {tourStartTime_user != tourStartTime_turkey && (
+          <div className="text-base mt-1 text-center">{tourStartTime_user}</div>
+        )}
         <form className="mt-6">
           <label
             htmlFor="bookerName"
