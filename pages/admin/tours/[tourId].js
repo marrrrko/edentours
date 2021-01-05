@@ -9,7 +9,7 @@ export default function Bookings({ accessGranted, bookings }) {
     return <DefaultErrorPage statusCode={401} />
   }
 
-  const emails = `mailto:?bcc=${bookings.map((b) => b.email).join('&bcc=')}`
+  const emails = `mailto:?bcc=${bookings.map((b) => b.email).join(',')}`
 
   return (
     <div className="px-10 pt-8 flex flex-col content-center">
