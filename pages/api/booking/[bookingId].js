@@ -62,7 +62,8 @@ async function processBooking(tourId, booking) {
     email: booking.email,
     groupName: booking.groupName,
     participantCount: parseInt(booking.participantCount),
-    groupDetails: booking.groupDetails
+    groupDetails: booking.groupDetails,
+    userTimeZone: booking.userTimeZone
   })
 
   const email = await emailSending.buildBookingConfirmationEmail(bookingId)

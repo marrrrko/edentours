@@ -20,6 +20,7 @@
     "flickr-sdk": "^3.10.0",
     "googleapis": "^66.0.0",
     "htmlparser2": "^6.0.0",
+    "luxon": "^1.25.0",
     "next": "^10.0.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",

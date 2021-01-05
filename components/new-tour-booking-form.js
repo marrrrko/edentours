@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { utcToZonedTime, format } from 'date-fns-tz'
+import { DateTime } from 'luxon'
 
 const fixedTimezone = 'Europe/Istanbul'
 
@@ -9,7 +9,25 @@ export default function NewTourBookingForm({
   submitHandler
 }) {
   const [values, setValues] = useState(formData)
-  let tourStart = utcToZonedTime(new Date(tourInfo.start), fixedTimezone)
+
+  let tourStartDay_turkey = DateTime.fromISO(tourInfo.start)
+    .setZone(fixedTimezone)
+    .toFormat('DDDD')
+  let tourStartTime_turkey = DateTime.fromISO(tourInfo.start)
+    .setZone(fixedTimezone)
+    .toFormat("t z 'UTC'ZZ")
+  let tourStartDay_user = DateTime.fromISO(tourInfo.start)
+    .setZone(values.userTimeZone)
+    .toFormat('DDDD')
+
+  const userTimeformat =
+    tourStartDay_turkey === tourStartDay_user
+      ? "t z 'UTC'ZZ"
+      : "ccc LLL d, t z 'UTC'ZZ"
+  let tourStartTime_user = DateTime.fromISO(tourInfo.start)
+    .setZone(values.userTimeZone)
+    .toFormat(userTimeformat)
+    .replace('_', ' ')
 
   const handleBookButtonClick = (e) => {
     let msg = getValidationErrorMsg(values)
@@ -72,23 +90,9 @@ export default function NewTourBookingForm({
           New Tour Booking
         </div>
         <div className="text-lg text-center mt-6">{tourInfo.summary}</div>
-        <div className="text-xl text-center">
-          {format(tourStart, 'EEEE MMMM do yyyy', {
-            timeZone: fixedTimezone
-          })}
-        </div>
-        <div className="text-lg text-center">
-          {format(tourStart, 'h:mm a', {
-            timeZone: fixedTimezone
-          })}{' '}
-          <span className="text-base">
-            {fixedTimezone} (UTC
-            {format(tourStart, 'xxx', {
-              timeZone: fixedTimezone
-            })}
-            )
-          </span>
-        </div>
+        <div className="text-xl text-center">{tourStartDay_turkey}</div>
+        <div className="text-lg text-center">{tourStartTime_turkey}</div>
+        <div className="text-base mt-1 text-center">{tourStartTime_user}</div>
         <form className="mt-6">
           <label
             htmlFor="bookerName"
