@@ -4,12 +4,12 @@ import { parseISO, format } from 'date-fns'
 import DefaultErrorPage from 'next/error'
 import Cookies from 'cookies'
 
-export default function Bookings({ accessGranted, bookings }) {
+export default function Bookings({ accessGranted, bookings, separator }) {
   if (!accessGranted) {
     return <DefaultErrorPage statusCode={401} />
   }
 
-  const emails = `mailto:?bcc=${bookings.map((b) => b.email).join(',')}`
+  const emails = `mailto:?bcc=${bookings.map((b) => b.email).join(separator)}`
 
   return (
     <div className="px-10 pt-8 flex flex-col content-center">
@@ -69,7 +69,9 @@ export default function Bookings({ accessGranted, bookings }) {
 }
 
 export async function getServerSideProps(context) {
-  const { tourId, access } = context.query
+  const { tourId, access, sep } = context.query
+
+  let separator = sep || ';'
 
   const cookies = new Cookies(context.req, context.res)
   const accessCookie = cookies.get('edenaccess')
@@ -86,7 +88,7 @@ export async function getServerSideProps(context) {
 
   const bookings = await getBookings(tourId)
 
-  return { props: { accessGranted: true, bookings } }
+  return { props: { accessGranted: true, bookings, separator } }
 }
 
 Router.onRouteChangeComplete = () => {
