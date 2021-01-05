@@ -1,5 +1,4 @@
-FROM node:erbium-alpine
-
+FROM node:fermium-alpine
 RUN apk update
 RUN apk add zip
 

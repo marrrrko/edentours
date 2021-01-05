@@ -9,7 +9,7 @@ import {
   getBooking,
   insertActionKey
 } from '../db/bookingDb'
-import { format } from 'date-fns-tz'
+import { format, utcToZonedTime } from 'date-fns-tz'
 import { SES, config } from 'aws-sdk'
 
 config.update({ region: 'us-east-1' })
@@ -129,7 +129,7 @@ function createConfirmationEmailHtml(
 &nbsp;&nbsp;Tour: ${tourName} <br />
 &nbsp;&nbsp;Date: ${
     format(
-      new Date(tourDate),
+      utcToZonedTime(tourDate, 'Europe/Istanbul'),
       "EEEE MMMM do yyyy h:mm a 'Istanbul Time (UTC' xxx",
       { timeZone: 'Europe/Istanbul' }
     ) + ')'
