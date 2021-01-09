@@ -1,33 +1,14 @@
-import React, { useState } from 'react'
-import { DateTime } from 'luxon'
+import React, { useState, useEffect } from 'react'
 
-const fixedTimezone = 'Europe/Istanbul'
-
-export default function NewTourBookingForm({
+export default function BookingForm({
   tourInfo,
   formData,
-  submitHandler
+  submitHandler,
+  cancelHandler,
+  isUpdate = false,
+  tourTimes
 }) {
   const [values, setValues] = useState(formData)
-
-  let tourStartDay_turkey = DateTime.fromISO(tourInfo.start)
-    .setZone(fixedTimezone)
-    .toFormat('DDDD')
-  let tourStartTime_turkey = DateTime.fromISO(tourInfo.start)
-    .setZone(fixedTimezone)
-    .toFormat("t z 'UTC'ZZ")
-  let tourStartDay_user = DateTime.fromISO(tourInfo.start)
-    .setZone(values.userTimeZone)
-    .toFormat('DDDD')
-
-  const userTimeformat =
-    tourStartDay_turkey === tourStartDay_user
-      ? "t z 'UTC'ZZ"
-      : "ccc LLL d, t z 'UTC'ZZ"
-  let tourStartTime_user = DateTime.fromISO(tourInfo.start)
-    .setZone(values.userTimeZone)
-    .toFormat(userTimeformat)
-    .replace('_', ' ')
 
   const handleBookButtonClick = (e) => {
     let msg = getValidationErrorMsg(values)
@@ -39,6 +20,11 @@ export default function NewTourBookingForm({
     e.preventDefault()
   }
 
+  const handleCancelButtonClick = (e) => {
+    cancelHandler(values)
+    e.preventDefault()
+  }
+
   function getValidationErrorMsg(data) {
     if (!data.bookerName) {
       return 'Please specify your name.'
@@ -46,10 +32,13 @@ export default function NewTourBookingForm({
       return 'Please specify a valid email address'
     } else if (!data.groupName) {
       return 'Please specify a name for your group such as "Friends from Brazil".'
+    } else if (!data.participantCount || parseInt(data.participantCount) < 0) {
+      return 'Please specify a valid number of expected participants.'
     } else if (
-      !data.areYouHuman ||
-      parseInt(data.areYouHuman) != data.areYouHuman ||
-      simpleHash(parseInt(data.areYouHuman).toString()) != 1516107
+      !isUpdate &&
+      (!data.areYouHuman ||
+        parseInt(data.areYouHuman) != data.areYouHuman ||
+        simpleHash(parseInt(data.areYouHuman).toString()) != 1516107)
     ) {
       return 'Incorrect answer to special question. Answer should be a 4 digit number.'
     } else if (JSON.stringify(data).length > 10000) {
@@ -87,13 +76,19 @@ export default function NewTourBookingForm({
     <div className="w-full md:w-3/5 2xl:w-2/5 mx-auto pb-36 pt-20 px-4 grid min-h-screen">
       <div className="bg-white">
         <div className="text-xl font-semibold text-center mb-3">
-          New Tour Booking
+          {isUpdate ? 'Modify Your Booking' : 'New Tour Booking'}
         </div>
         <div className="text-lg text-center mt-6">{tourInfo.summary}</div>
-        <div className="text-xl text-center">{tourStartDay_turkey}</div>
-        <div className="text-lg text-center">{tourStartTime_turkey}</div>
-        {tourStartTime_user != tourStartTime_turkey && (
-          <div className="text-base mt-1 text-center">{tourStartTime_user}</div>
+        <div className="text-xl text-center mt-4">
+          {tourTimes.fixedTime.day}
+        </div>
+        <div className="text-lg text-center">{tourTimes.fixedTime.time}</div>
+        {tourTimes.userTime.time != tourTimes.fixedTime.time && (
+          <div className="text-base mt-1 text-center">
+            {tourTimes.fixedTime.day == tourTimes.userTime.day
+              ? tourTimes.userTime.time
+              : tourTimes.userTime.combined}
+          </div>
         )}
         <form className="mt-6">
           <label
@@ -125,6 +120,7 @@ export default function NewTourBookingForm({
             id="email"
             type="email"
             name="email"
+            disabled={isUpdate}
             placeholder="john.doe@company.com"
             autoComplete="email"
             maxLength="100"
@@ -188,48 +184,67 @@ export default function NewTourBookingForm({
             value={values.participantCount}
             onChange={handleInputChange}
           />
-          <label
-            htmlFor="areYouHuman"
-            className="block mt-5 text-xs font-semibold text-gray-600 uppercase"
-          >
-            Quick question
-          </label>
-          <p className="text-sm font-bold p-0 m-0">
-            In what year did God's Kingdom start ruling? <br />
-            <span className="text-xs font-normal">
-              (This question helps make sure you're not a robot.)
-            </span>
-          </p>
-          <input
-            id="areYouHuman"
-            type="text"
-            name="areYouHuman"
-            className="block w-full p-3 mt-2 text-gray-700 bg-gray-200 appearance-none focus:outline-none focus:bg-gray-300 focus:shadow-inner"
-            required
-            value={values.areYouHuman}
-            onChange={handleInputChange}
-          />
+          {!isUpdate && (
+            <>
+              <label
+                htmlFor="areYouHuman"
+                className="block mt-5 text-xs font-semibold text-gray-600 uppercase"
+              >
+                Quick question
+              </label>
+              <p className="text-sm font-bold p-0 m-0">
+                In what year did God's Kingdom start ruling? <br />
+                <span className="text-xs font-normal">
+                  (This question helps us make sure you're not a robot.)
+                </span>
+              </p>
+              <input
+                id="areYouHuman"
+                type="text"
+                name="areYouHuman"
+                className="block w-full p-3 mt-2 text-gray-700 bg-gray-200 appearance-none focus:outline-none focus:bg-gray-300 focus:shadow-inner"
+                required
+                value={values.areYouHuman}
+                onChange={handleInputChange}
+              />
+            </>
+          )}
           <button
             type="submit"
             onClick={handleBookButtonClick}
             className="w-full py-3 mt-6 font-extrabold tracking-widest text-white uppercase bg-black shadow-lg focus:outline-none hover:bg-blue-900 hover:shadow-none"
           >
-            Book
+            {!isUpdate ? 'Book' : 'Update Booking'}
           </button>
-          <p className="p-0 m-0 mt-4 mb-1 text-xs text-gray-800">
-            By clicking Book you agree to receiving tour related emails. We will
-            not share your email with other organizations.
-          </p>
-          <p className="p-0 m-0 mt-4 mb-1 text-xs text-gray-800">
-            <span className="font-bold">After clicking Book</span>, an email
-            message containing instructions for modifying or cancelling this
-            booking will be sent to you.
-          </p>
-          <p className="p-0 m-0 mt-2 text-xs text-gray-800">
-            <span className="font-bold">24 hours prior to your tour date</span>,
-            a second email containing Zoom connection details will be sent to
-            you.
-          </p>
+          {isUpdate && (
+            <button
+              type="submit"
+              onClick={handleCancelButtonClick}
+              className="w-full py-3 mt-2 font-extrabold tracking-widest text-white uppercase bg-red-900 shadow-lg focus:outline-none hover:bg-gray-400 hover:shadow-none"
+            >
+              Cancel Booking
+            </button>
+          )}
+          {!isUpdate && (
+            <>
+              <p className="p-0 m-0 mt-4 mb-1 text-xs text-gray-800">
+                By clicking Book you agree to receiving tour related emails. We
+                will not share your email with other organizations.
+              </p>
+              <p className="p-0 m-0 mt-4 mb-1 text-xs text-gray-800">
+                <span className="font-bold">After clicking Book</span>, an email
+                message containing instructions for modifying or cancelling this
+                booking will be sent to you.
+              </p>
+              <p className="p-0 m-0 mt-2 text-xs text-gray-800">
+                <span className="font-bold">
+                  24 hours prior to your tour date
+                </span>
+                , a second email containing Zoom connection details will be sent
+                to you.
+              </p>
+            </>
+          )}
         </form>
       </div>
     </div>

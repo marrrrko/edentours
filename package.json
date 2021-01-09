@@ -16,7 +16,6 @@
     "axios": "^0.21.0",
     "bs58": "^4.0.1",
     "cookies": "^0.8.0",
-    "date-fns": "^2.16.1",
     "flickr-sdk": "^3.10.0",
     "googleapis": "^66.0.0",
     "htmlparser2": "^6.0.0",
@@ -30,8 +29,6 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.0.4",
-    "date-fns-timezone": "^0.1.4",
-    "date-fns-tz": "^1.0.12",
     "postcss": "^8.1.14",
     "tailwindcss": "^2.0.1"
   }

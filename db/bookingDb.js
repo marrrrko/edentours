@@ -37,33 +37,36 @@ export async function getBookings(tourId) {
   })
   await closeDb(db)
 
-  return rows.map((r) => {
-    let event = JSON.parse(r.doc)
-    //event.start = new Date(event.start)
-    return event
-  })
+  return rows.map((r) => JSON.parse(r.doc))
 }
 
-export async function getBooking(bookingId) {
+/**
+ *
+ * @returns {Array<Object>}
+ */
+export async function getBookingRecords(bookingId) {
   let db = await getDb()
-  let row = await new Promise((resolve, reject) => {
-    db.get(
+  let rows = await new Promise((resolve, reject) => {
+    db.all(
       'SELECT Booking.tourId, Booking.bookingId, Booking.doc as booking, Tour.doc as tour FROM Booking LEFT JOIN Tour on Tour.tourId = Booking.tourId WHERE Booking.bookingId = $bookingId',
       { $bookingId: bookingId },
-      (error, rows) => {
+      (error, result) => {
         if (error) reject(error)
-        else resolve(rows)
+        else resolve(result)
       }
     )
   })
   await closeDb(db)
 
-  return {
+  return rows.map((row) => ({
     ...JSON.parse(row.booking),
     tour: JSON.parse(row.tour)
-  }
+  }))
 }
 
+/**
+ * @returns({[{ tourId: string, tourDoc: object, bookingDoc: object}]})
+ */
 export async function getUpcomingBookings() {
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
@@ -77,91 +80,7 @@ export async function getUpcomingBookings() {
   })
   await closeDb(db)
 
-  const tourIndex = rows
-    .map((r) => ({
-      tourId: r.tourId,
-      booking: JSON.parse(r.bookingDoc),
-      tour: JSON.parse(r.tourDoc)
-    }))
-    .reduce((acc, next) => {
-      if (!acc[next.tourId]) {
-        acc[next.tourId] = {
-          tour: next.tour,
-          bookings: []
-        }
-      }
-      if (next.booking) acc[next.tourId].bookings.push(next.booking)
-      return acc
-    }, {})
-
-  const tourBookingList = Object.keys(tourIndex)
-    .map((key) => tourIndex[key])
-    .slice()
-    .sort((a, b) => new Date(a.tour.start) - new Date(b.tour.start))
-
-  const tourBookingAggregate = aggregateBookingsFromTours(tourBookingList)
-
-  return tourBookingAggregate
-}
-
-function aggregateBookingsFromTours(upcomingToursAndBookings) {
-  return upcomingToursAndBookings.map((tour) => {
-    tour.allBookingsByEmail = tour.bookings.reduce((acc, next) => {
-      if (!acc[next.email]) {
-        acc[next.email] = []
-      }
-      acc[next.email].push(next)
-      return acc
-    }, {})
-
-    tour.finalBookingsByEmail = Object.keys(tour.allBookingsByEmail).map(
-      (email) => {
-        return aggregateUsersBookings(email, tour.allBookingsByEmail[email])
-      }
-    )
-
-    tour.currentParticipantTotal = tour.finalBookingsByEmail.reduce(
-      (acc, next) => {
-        return acc + next.participantCount
-      },
-      0
-    )
-
-    tour.currentGroupTotal = tour.finalBookingsByEmail.reduce((acc, next) => {
-      if (next.latestBooking.eventType != 'cancelled') {
-        return acc + 1
-      }
-      return acc
-    }, 0)
-
-    return tour
-  })
-}
-
-function aggregateUsersBookings(email, bookings) {
-  return bookings
-    .slice()
-    .sort((a, b) => new Date(a.eventTime) - new Date(b.eventTime))
-    .reduce(
-      (acc, next) => {
-        if (acc.latestBooking == null) {
-          acc.participantCount = next.participantCount
-        } else if (next.eventType == 'created' || next.eventType == 'updated') {
-          acc.participantCount = next.participantCount
-        } else if (next.eventType == 'cancelled') {
-          acc.participantCount = 0
-        } else {
-          throw new Error('Unknown event type: ' + next.eventType)
-        }
-        acc.latestBooking = next
-        return acc
-      },
-      {
-        email: email,
-        participantCount: 0,
-        latestBooking: null
-      }
-    )
+  return rows
 }
 
 export async function getTour(tourId) {
@@ -204,7 +123,7 @@ export async function createNewTours(events) {
   return ids
 }
 
-export async function createNewBooking(tourId, booking) {
+export async function insertNewBooking(tourId, booking) {
   let db = await getDb()
   const bookingId = uuid()
   let doc = {
@@ -213,6 +132,58 @@ export async function createNewBooking(tourId, booking) {
     eventTime: new Date().toISOString(),
     eventType: 'created',
     tourId: tourId
+  }
+
+  await new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO Booking VALUES (?, ?, json(?))',
+      [doc.bookingId, doc.eventTime, JSON.stringify(doc)],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+  await closeDb(db)
+
+  return bookingId
+}
+
+export async function insertBookingUpdate(bookingId, booking) {
+  let db = await getDb()
+  let doc = {
+    ...booking,
+    eventTime: new Date().toISOString(),
+    eventType: 'updated'
+  }
+
+  await new Promise((resolve, reject) => {
+    db.run(
+      'INSERT INTO Booking VALUES (?, ?, json(?))',
+      [doc.bookingId, doc.eventTime, JSON.stringify(doc)],
+      (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+    )
+  })
+  await closeDb(db)
+
+  return bookingId
+}
+
+export async function insertBookingCancellation(bookingId, booking) {
+  let db = await getDb()
+  let doc = {
+    ...booking,
+    eventTime: new Date().toISOString(),
+    eventType: 'cancelled'
   }
 
   await new Promise((resolve, reject) => {
@@ -392,6 +363,28 @@ export async function insertActionKey(
     )
   })
   await closeDb(db)
+}
+
+export async function getAction(key) {
+  let db = await getDb()
+  let row = await new Promise((resolve, reject) => {
+    db.get(
+      'SELECT doc FROM ActionKey WHERE actionKey = $key',
+      { $key: key },
+      (error, rows) => {
+        if (error) reject(error)
+        else {
+          resolve(rows)
+        }
+      }
+    )
+  })
+  await closeDb(db)
+
+  if (!row) return null
+
+  let action = JSON.parse(row.doc)
+  return action
 }
 
 async function getDb() {

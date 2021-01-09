@@ -1,24 +1,40 @@
 import React, { useState, useEffect } from 'react'
-import NewTourBookingForm from './new-tour-booking-form'
+import BookingForm from './booking-form'
+import { buildTourDateStrings } from '../utils/tour-dates'
 
-export default function NewTourBooking({ tourId }) {
+export default function ExistingTourBooking({ booking, actionKey }) {
   const [eventData, setEventData] = useState({
-    tourId: tourId,
+    tourId: booking.tourId,
     eventInfo: null,
     error: null,
-    loading: true,
     sending: false,
     done: false,
+    tourInfo: booking.tour,
     formData: {
-      bookerName: '',
-      email: '',
-      groupName: '',
-      groupDetails: '',
-      participantCount: 1,
-      areYouHuman: '',
-      userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      ...booking,
+      userTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      actionKey: actionKey
     }
   })
+
+  const [tourTimes, setTourTimes] = useState({
+    raw: booking.tour.start,
+    userTime: {
+      day: '',
+      time: '',
+      combined: ''
+    },
+    fixedTime: {
+      day: '',
+      time: ''
+    }
+  })
+
+  useEffect(() => {
+    setTourTimes(
+      buildTourDateStrings(booking.tour.start, eventData.formData.userTimeZone)
+    )
+  }, [])
 
   const handleBookingSubmission = (formData) => {
     setEventData({
@@ -28,15 +44,24 @@ export default function NewTourBooking({ tourId }) {
     })
   }
 
+  const handleBookingCancellation = (formData) => {
+    setEventData({
+      ...eventData,
+      formData: formData,
+      cancel: true,
+      sending: true
+    })
+  }
+
   const retry = () => {
     setEventData({ ...eventData, error: null, sending: false })
   }
 
   useEffect(() => {
-    async function postFormData() {
+    async function submitFormData() {
       try {
-        let response = await fetch('/api/booking/' + tourId, {
-          method: 'POST',
+        let response = await fetch('/api/booking/' + booking.tourId, {
+          method: eventData.cancel ? 'DELETE' : 'PUT',
           headers: {
             'Content-Type': 'application/json'
           },
@@ -60,46 +85,14 @@ export default function NewTourBooking({ tourId }) {
         setEventData({
           ...eventData,
           error: err.toString(),
-          loading: false,
           sending: false
         })
       }
     }
-    if (eventData.sending) postFormData()
-  })
+    if (eventData.sending) submitFormData()
+  }, [eventData.sending])
 
-  useEffect(() => {
-    async function fetchEventData() {
-      try {
-        let response = await fetch('/api/booking/' + tourId)
-        let eventInfo = await response.json()
-        if (!eventInfo.tourId || !eventInfo.summary || !eventInfo.start) {
-          setEventData({
-            ...eventData,
-            eventInfo: eventInfo,
-            error: 'Invalid Event',
-            loading: false
-          })
-        } else {
-          setEventData({
-            ...eventData,
-            eventInfo: eventInfo,
-            error: null,
-            loading: false
-          })
-        }
-      } catch (err) {
-        setEventData({
-          ...eventData,
-          error: err.toString(),
-          loading: false
-        })
-      }
-    }
-    if (eventData.loading) fetchEventData()
-  })
-
-  if (eventData.loading || eventData.sending) {
+  if (eventData.sending) {
     return (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -159,10 +152,7 @@ export default function NewTourBooking({ tourId }) {
       <div className="flex flex-col mt-20">
         <div className="text-center  text-3xl">✍</div>
         <div className="text-center  text-xl mt-5 mb-4">
-          Your booking was recorded.
-        </div>
-        <div className="text-center  text-base">
-          An email will be sent to you.
+          Your booking was {eventData.cancel ? 'cancelled' : 'updated'}.
         </div>
         <div className="text-center mt-8">
           <a
@@ -194,10 +184,13 @@ export default function NewTourBooking({ tourId }) {
     )
   } else {
     return (
-      <NewTourBookingForm
-        tourInfo={eventData.eventInfo}
+      <BookingForm
+        tourInfo={eventData.tourInfo}
         formData={eventData.formData}
         submitHandler={handleBookingSubmission}
+        cancelHandler={handleBookingCancellation}
+        isUpdate={true}
+        tourTimes={tourTimes}
       />
     )
   }

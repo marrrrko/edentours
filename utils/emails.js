@@ -6,16 +6,22 @@ import {
   getEmailTransactionsForBooking,
   getUpcomingBookings,
   markEmailTransactionAsSent,
-  getBooking,
+  getBookingRecords,
   insertActionKey
 } from '../db/bookingDb'
-import { format, utcToZonedTime } from 'date-fns-tz'
+import {
+  aggregateBookingRecords,
+  indexToursAndBookings
+} from '../aggregates/booking'
 import { SES, config } from 'aws-sdk'
+import { buildTourDateStrings } from './tour-dates'
+
+const fixedTimezone = 'Europe/Istanbul'
 
 config.update({ region: 'us-east-1' })
 
 export async function buildBookingConfirmationEmail(bookingId) {
-  const booking = await getBooking(bookingId)
+  const booking = aggregateBookingRecords(await getBookingRecords(bookingId))
   if (!booking.email || booking.email.indexOf('@') === -1) {
     throw new Error('Booking does not have a valid email')
   }
@@ -120,6 +126,8 @@ function createConfirmationEmailHtml(
   modifyUrl,
   unsubscribeUrl
 ) {
+  const tourDates = buildTourDateStrings(tourDate, 'Europe/Istanbul')
+
   return `
 <p><h2>Congrats! Your Tour is Booked</h2></p>
 <p>We are pleased to have you as our guest for a tour. We know you will have a great time, deepen your Bible knowledge, and make new acquaintances.</p>
@@ -127,13 +135,7 @@ function createConfirmationEmailHtml(
 <p>Your details are below:</p>
 
 &nbsp;&nbsp;Tour: ${tourName} <br />
-&nbsp;&nbsp;Date: ${
-    format(
-      utcToZonedTime(tourDate, 'Europe/Istanbul'),
-      "EEEE MMMM do yyyy h:mm a 'Istanbul Time (UTC' xxx",
-      { timeZone: 'Europe/Istanbul' }
-    ) + ')'
-  } <br />
+&nbsp;&nbsp;Date: ${tourDates.fixedTime.combined} <br />
 &nbsp;&nbsp;Number of Connections: ${numConnections} <br />
 
 <p>Zoom connection details will be sent three days before your tour date. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
@@ -149,7 +151,8 @@ function createConfirmationEmailHtml(
 }
 
 export async function catchUpUnsentConfirmationEmails(apply = false) {
-  const upcomingToursWithBookings = await getUpcomingBookings()
+  const toursAndBookings = await getUpcomingBookings()
+  const upcomingToursWithBookings = indexToursAndBookings(toursAndBookings)
   let upcomingBookings = []
   upcomingToursWithBookings.forEach((tour) => {
     upcomingBookings = upcomingBookings.concat(

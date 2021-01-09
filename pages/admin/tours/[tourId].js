@@ -1,8 +1,11 @@
 import Router from 'next/router'
 import { getBookings } from '../../../db/bookingDb'
-import { parseISO, format } from 'date-fns'
 import DefaultErrorPage from 'next/error'
 import Cookies from 'cookies'
+import {
+  groupBookingsByBookingId,
+  aggregateBookingRecords
+} from '../../../aggregates/booking'
 
 export default function Bookings({ accessGranted, bookings, separator }) {
   if (!accessGranted) {
@@ -31,26 +34,19 @@ export default function Bookings({ accessGranted, bookings, separator }) {
         <table className="mx-auto">
           <thead>
             <tr>
-              <th>Action</th>
-              <th>Date</th>
               <th>Name</th>
               <th>Email</th>
               <th>Group name</th>
               <th>About group</th>
               <th>Participant Count</th>
+              <th>Timezone</th>
+              <th>Latest Action</th>
             </tr>
           </thead>
           <tbody>
             {bookings.map((booking) => {
               return (
                 <tr key={booking.bookingId}>
-                  <td className="border px-4 py-2">{booking.eventType}</td>
-                  <td className="border px-4 py-2">
-                    {format(
-                      parseISO(booking.eventTime),
-                      'MM/dd/yy - h:mm a zzzz'
-                    )}
-                  </td>
                   <td className="border px-4 py-2">{booking.bookerName}</td>
                   <td className="border px-4 py-2">{booking.email}</td>
                   <td className="border px-4 py-2">{booking.groupName}</td>
@@ -58,6 +54,8 @@ export default function Bookings({ accessGranted, bookings, separator }) {
                   <td className="border px-4 py-2">
                     {booking.participantCount}
                   </td>
+                  <td className="border px-4 py-2">{booking.userTimeZone}</td>
+                  <td className="border px-4 py-2">{booking.eventType}</td>
                 </tr>
               )
             })}
@@ -86,7 +84,11 @@ export async function getServerSideProps(context) {
     cookies.set('edenaccess', access)
   }
 
-  const bookings = await getBookings(tourId)
+  const bookingRecords = await getBookings(tourId)
+  const bookingRecordsByBooking = groupBookingsByBookingId(bookingRecords)
+  const bookings = Object.keys(bookingRecordsByBooking).map((bookingId) =>
+    aggregateBookingRecords(bookingRecordsByBooking[bookingId])
+  )
 
   return { props: { accessGranted: true, bookings, separator } }
 }
