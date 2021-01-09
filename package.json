@@ -24,7 +24,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-grid-gallery": "^0.5.5",
-    "sqlite3": "^5.0.0",
+    "sqlite3": "5.0.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
