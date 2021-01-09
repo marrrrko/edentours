@@ -8,9 +8,11 @@ import {
   getBookingRecords
 } from '../../../db/bookingDb'
 import * as emailSending from '../../../utils/emails'
+import Cookies from 'cookies'
 
 export default async function handler(req, res) {
   const tourId = req.query.bookingId
+  const cookies = new Cookies(req, res)
 
   if (tourId && req.method === 'GET') {
     res.setHeader('Content-Type', 'application/json')
@@ -42,7 +44,7 @@ export default async function handler(req, res) {
       res.end(JSON.stringify({ msg: 'Booked!' }))
     }
   } else if (tourId && req.method === 'PUT') {
-    const errorMsg = await processExistingBooking(tourId, req.body)
+    const errorMsg = await processExistingBooking(tourId, req.body, cookies)
     if (errorMsg) {
       res.statusCode = 422
       res.setHeader('Content-Type', 'application/json')
@@ -53,7 +55,7 @@ export default async function handler(req, res) {
       res.end(JSON.stringify({ msg: 'Updated!' }))
     }
   } else if (tourId && req.method === 'DELETE') {
-    const errorMsg = await cancelBooking(tourId, req.body)
+    const errorMsg = await cancelBooking(tourId, req.body, cookies)
     if (errorMsg) {
       res.statusCode = 422
       res.setHeader('Content-Type', 'application/json')
@@ -94,28 +96,27 @@ async function processNewBooking(tourId, booking) {
   return null //null for success
 }
 
-async function processExistingBooking(tourId, booking) {
+async function processExistingBooking(tourId, booking, cookies) {
   const validationProblem = findBookingValidationProblem(booking, false)
   if (validationProblem) return validationProblem
-  if (!booking.actionKey) return 'Invalid action'
-
-  const action = await getAction(booking.actionKey)
   if (
-    !action ||
+    !booking.actionKey ||
     !tourId ||
     !booking.bookingId ||
     booking.tour.tourId != tourId
   ) {
     return 'Invalid request'
   }
-  const { actionType, actionTarget, expiration } = action
-  if (
-    actionType != 'modify-booking' ||
-    (expiration && new Date(expiration) < new Date()) ||
-    actionTarget != booking.bookingId
-  ) {
-    return 'Invalid action'
+
+  let accessNote = ''
+  if (booking.actionKey === 'admin' && isAdmin(cookies)) {
+    accessNote = 'admin'
+  } else if (isValidActionKey(booking.actionKey)) {
+    accessNote = 'K:' + booking.actionKey
+  } else {
+    return 'No access'
   }
+
   const originalBooking = aggregateBookingRecords(
     await getBookingRecords(booking.bookingId)
   )
@@ -129,32 +130,53 @@ async function processExistingBooking(tourId, booking) {
     groupName: booking.groupName,
     participantCount: parseInt(booking.participantCount),
     groupDetails: booking.groupDetails,
-    userTimeZone: booking.userTimeZone
+    userTimeZone: booking.userTimeZone,
+    accessNote
   })
 
   return null
 }
 
-async function cancelBooking(tourId, booking) {
-  if (!booking.actionKey) return 'Invalid action'
+function isAdmin(cookies) {
+  const accessCookie = cookies.get('edenaccess')
+  return accessCookie === process.env.ADMIN_ACCESS
+}
 
-  const action = await getAction(booking.actionKey)
-  if (
-    !action ||
-    !tourId ||
-    !booking.bookingId ||
-    booking.tour.tourId != tourId
-  ) {
-    return 'Invalid request'
-  }
+async function isValidActionKey(actionKey) {
+  const action = await getAction(actionKey)
+  if (!action) return false
+
   const { actionType, actionTarget, expiration } = action
   if (
     actionType != 'modify-booking' ||
     (expiration && new Date(expiration) < new Date()) ||
     actionTarget != booking.bookingId
   ) {
-    return 'Invalid action'
+    return false
+  } else {
+    return true
   }
+}
+
+async function cancelBooking(tourId, booking, cookies) {
+  if (
+    !booking.actionKey ||
+    !tourId ||
+    !booking.bookingId ||
+    booking.tour.tourId != tourId
+  ) {
+    return 'Invalid request'
+  }
+
+  let accessNote = ''
+  if (booking.actionKey === 'admin' && isAdmin(cookies)) {
+    accessNote = 'admin'
+  } else if (isValidActionKey(booking.actionKey)) {
+    accessNote = 'K:' + booking.actionKey
+  } else {
+    return 'No access'
+  }
+
   const originalBooking = aggregateBookingRecords(
     await getBookingRecords(booking.bookingId)
   )
@@ -166,7 +188,8 @@ async function cancelBooking(tourId, booking) {
     bookingId: originalBooking.bookingId,
     email: originalBooking.email,
     tourId: originalBooking.tourId,
-    userTimeZone: booking.userTimeZone
+    userTimeZone: booking.userTimeZone,
+    accessNote
   })
 
   return null

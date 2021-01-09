@@ -10,7 +10,7 @@ export default function TourDates({ dates }) {
 
     let tourStartTime_user = DateTime.fromISO(date.start)
       .setZone(userTimeZone)
-      .toFormat("t z 'UTC'ZZ")
+      .toFormat("t z '(UTC'ZZ')'")
       .replace('_', ' ')
 
     return (

@@ -14,21 +14,21 @@ export function buildTourDateStrings(
         .replace('_', ' '),
       time: DateTime.fromISO(tourStart)
         .setZone(userTimeZone)
-        .toFormat("t z 'UTC'ZZ")
+        .toFormat("t z '(UTC'ZZ')'")
         .replace('_', ' '),
       combined: DateTime.fromISO(tourStart)
         .setZone(userTimeZone)
-        .toFormat("ccc LLL d, t z 'UTC'ZZ")
+        .toFormat("ccc LLL d, t z '(UTC'ZZ')'")
         .replace('_', ' ')
     },
     fixedTime: {
       day: DateTime.fromISO(tourStart).setZone(fixedTimezone).toFormat('DDDD'),
       time: DateTime.fromISO(tourStart)
         .setZone(fixedTimezone)
-        .toFormat("t z 'UTC'ZZ"),
+        .toFormat("t z '(UTC'ZZ')'"),
       combined: DateTime.fromISO(tourStart)
         .setZone(fixedTimezone)
-        .toFormat("ccc LLL d, t z 'UTC'ZZ")
+        .toFormat("ccc LLL d, t z '(UTC'ZZ')'")
         .replace('_', ' ')
     }
   }
@@ -41,6 +41,6 @@ export function buildCombinedFixedTimeString(
 ) {
   return DateTime.fromISO(tourStart)
     .setZone(fixedTimezone)
-    .toFormat("ccc LLL d, t z 'UTC'ZZ")
+    .toFormat("ccc LLL d, t z '(UTC'ZZ')'")
     .replace('_', ' ')
 }

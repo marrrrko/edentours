@@ -1,13 +1,22 @@
 import Router from 'next/router'
-import { getBookings } from '../../../db/bookingDb'
+import Link from 'next/link'
+import { getBookings, getTour } from '../../../db/bookingDb'
 import DefaultErrorPage from 'next/error'
 import Cookies from 'cookies'
 import {
   groupBookingsByBookingId,
   aggregateBookingRecords
 } from '../../../aggregates/booking'
+import { buildCombinedFixedTimeString } from '../../../utils/tour-dates'
 
-export default function Bookings({ accessGranted, bookings, separator }) {
+export default function Bookings({
+  accessGranted,
+  bookings,
+  separator,
+  tourId,
+  tourLabel,
+  tourDate
+}) {
   if (!accessGranted) {
     return <DefaultErrorPage statusCode={401} />
   }
@@ -18,6 +27,8 @@ export default function Bookings({ accessGranted, bookings, separator }) {
     <div className="px-10 pt-8 flex flex-col content-center">
       <div>
         <h2>Bookings</h2>
+        <h3>{tourLabel}</h3>
+        <h3>{tourDate}</h3>
       </div>
       {bookings.length > 0 && (
         <div className="block my-8">
@@ -41,6 +52,7 @@ export default function Bookings({ accessGranted, bookings, separator }) {
               <th>Participant Count</th>
               <th>Timezone</th>
               <th>Latest Action</th>
+              <th>Modify</th>
             </tr>
           </thead>
           <tbody>
@@ -56,6 +68,13 @@ export default function Bookings({ accessGranted, bookings, separator }) {
                   </td>
                   <td className="border px-4 py-2">{booking.userTimeZone}</td>
                   <td className="border px-4 py-2">{booking.eventType}</td>
+                  <td className="border px-4 py-2">
+                    <Link
+                      href={`/book/${tourId}?admin=true&bid=${booking.bookingId}`}
+                    >
+                      Modify
+                    </Link>
+                  </td>
                 </tr>
               )
             })}
@@ -84,13 +103,26 @@ export async function getServerSideProps(context) {
     cookies.set('edenaccess', access)
   }
 
+  const tour = await getTour(tourId)
   const bookingRecords = await getBookings(tourId)
   const bookingRecordsByBooking = groupBookingsByBookingId(bookingRecords)
   const bookings = Object.keys(bookingRecordsByBooking).map((bookingId) =>
     aggregateBookingRecords(bookingRecordsByBooking[bookingId])
   )
 
-  return { props: { accessGranted: true, bookings, separator } }
+  let tourLabel = tour.summary
+  let tourDate = buildCombinedFixedTimeString(tour.start.toISOString())
+
+  return {
+    props: {
+      accessGranted: true,
+      bookings,
+      separator,
+      tourId,
+      tourLabel,
+      tourDate
+    }
+  }
 }
 
 Router.onRouteChangeComplete = () => {

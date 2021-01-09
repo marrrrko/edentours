@@ -4,6 +4,7 @@ import NewTourBooking from '../../components/booking-new'
 import ExistingTourBooking from '../../components/booking-existing'
 import { getAction, getBookingRecords } from '../../db/bookingDb'
 import { aggregateBookingRecords } from '../../aggregates/booking'
+import Cookies from 'cookies'
 
 const Page = ({ tourId, errorMsg, preexistingBooking, actionKey }) => {
   if (!tourId || errorMsg) {
@@ -20,7 +21,22 @@ const Page = ({ tourId, errorMsg, preexistingBooking, actionKey }) => {
 }
 
 export async function getServerSideProps(context) {
-  const { tourId, action } = context.query
+  const { tourId, action, admin, bid } = context.query
+
+  if (admin && bid) {
+    const cookies = new Cookies(context.req, context.res)
+    const accessCookie = cookies.get('edenaccess')
+    if (accessCookie != process.env.ADMIN_ACCESS) {
+      return { props: { errorMsg: "You're not an admin!" } }
+    }
+    let booking = aggregateBookingRecords(await getBookingRecords(bid))
+    if (booking.tourId != tourId) {
+      return { props: { errorMsg: 'Invalid action' } }
+    }
+    return {
+      props: { tourId, preexistingBooking: booking, actionKey: 'admin' }
+    }
+  }
 
   if (action) {
     let actionData = await getAction(action)
