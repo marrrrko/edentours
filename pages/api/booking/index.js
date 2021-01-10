@@ -1,5 +1,9 @@
-import { getUpcomingEvents } from '../../../utils/google-calendar'
-import { getUpcomingTours, createNewTours } from '../../../db/bookingDb'
+import { getUpcomingEventsFromGoogle } from '../../../utils/google-calendar'
+import {
+  getUpcomingTours,
+  createNewTours,
+  updateTour
+} from '../../../db/bookingDb'
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
@@ -31,18 +35,45 @@ async function getUpdatedListOfEvents() {
     acc[next.externalEventId] = next
     return acc
   }, {})
-  const allEvents = await getUpcomingEvents()
-  const newEvents = allEvents.filter(
+  const allEventsFromGoogle = await getUpcomingEventsFromGoogle(false)
+  const newEvents = allEventsFromGoogle.filter(
     (eventFromGoogle) =>
       scheduledToursByGoogleId[eventFromGoogle.id] == undefined
   )
+  const changedEvents = allEventsFromGoogle.filter((eventFromGoogle) => {
+    const localEvent = scheduledToursByGoogleId[eventFromGoogle.id]
+    if (!localEvent) return false
+    return localEvent.etag != eventFromGoogle.etag
+  })
 
-  if (!newEvents.length) {
-    console.log('No new events found')
+  if (!newEvents.length && !changedEvents.length) {
     return scheduledTours
   } else {
-    console.log(`${newEvents.length} new event(s) found. Creating`)
-    await createNewTours(newEvents)
+    if (newEvents.length) {
+      console.log(`${newEvents.length} new event(s) found. Creating`)
+      await createNewTours(newEvents)
+    }
+    if (changedEvents.length) {
+      console.log(`${changedEvents.length} modified event(s) found. Updating`)
+      await changedEvents.reduce(async (previous, googleEvent) => {
+        await previous
+        let eventToBeUpdated = scheduledToursByGoogleId[googleEvent.id]
+        if (eventToBeUpdated && googleEvent) {
+          return updateTour(eventToBeUpdated.eventTime, {
+            ...eventToBeUpdated,
+            summary: googleEvent.summary,
+            start: googleEvent.start,
+            end: googleEvent.end,
+            etag: googleEvent.etag,
+            description: googleEvent.description,
+            location: googleEvent.location
+          })
+        } else {
+          console.log('Missing event #' + eventToBeUpdated.externalEventId)
+          return Promise.resolve()
+        }
+      }, Promise.resolve())
+    }
     const updatedKnownEvents = await getUpcomingTours()
     return updatedKnownEvents
   }

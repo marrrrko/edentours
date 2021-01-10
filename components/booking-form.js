@@ -32,8 +32,12 @@ export default function BookingForm({
       return 'Please specify a valid email address'
     } else if (!data.groupName) {
       return 'Please specify a name for your group such as "Friends from Brazil".'
-    } else if (!data.participantCount || parseInt(data.participantCount) < 0) {
-      return 'Please specify a valid number of expected participants.'
+    } else if (
+      !data.participantCount ||
+      parseInt(data.participantCount) <= 0 ||
+      parseInt(data.participantCount) > 20
+    ) {
+      return 'Please specify a valid number of expected participants. Maximum 20.'
     } else if (
       !isUpdate &&
       (!data.areYouHuman ||
@@ -170,8 +174,8 @@ export default function BookingForm({
           <p className="text-xs p-0 m-0">
             The number of available connections is limited. Please estimate as
             best possible the number of people you expect to require their own
-            connection. You will be able to modify this until 24 hours prior to
-            the tour.
+            connection (max 20). You will be able to modify this until 24 hours
+            prior to the tour.
           </p>
           <input
             id="participantCount"
@@ -180,7 +184,7 @@ export default function BookingForm({
             className="block w-full p-3 mt-2 text-gray-700 bg-gray-200 appearance-none focus:outline-none focus:bg-gray-300 focus:shadow-inner"
             required
             min="1"
-            max="500"
+            max="20"
             value={values.participantCount}
             onChange={handleInputChange}
           />
