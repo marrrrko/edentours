@@ -35,7 +35,7 @@ async function getUpdatedListOfEvents() {
     acc[next.externalEventId] = next
     return acc
   }, {})
-  const allEventsFromGoogle = await getUpcomingEventsFromGoogle(false)
+  const allEventsFromGoogle = await getUpcomingEventsFromGoogle(true)
   const newEvents = allEventsFromGoogle.filter(
     (eventFromGoogle) =>
       scheduledToursByGoogleId[eventFromGoogle.id] == undefined
