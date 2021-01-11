@@ -8,6 +8,7 @@ import {
   aggregateBookingRecords
 } from '../../../aggregates/booking'
 import { buildCombinedFixedTimeString } from '../../../utils/tour-dates'
+import { uniq } from 'ramda'
 
 export default function Bookings({
   accessGranted,
@@ -21,7 +22,9 @@ export default function Bookings({
     return <DefaultErrorPage statusCode={401} />
   }
 
-  const emails = `mailto:?bcc=${bookings.map((b) => b.email).join(separator)}`
+  const emails = `mailto:?bcc=${uniq(bookings.map((b) => b.email)).join(
+    separator
+  )}`
 
   return (
     <div className="px-10 pt-8 flex flex-col content-center">
@@ -52,7 +55,7 @@ export default function Bookings({
               <th>Participant Count</th>
               <th>Timezone</th>
               <th>Latest Action</th>
-              <th>Modify</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -68,11 +71,26 @@ export default function Bookings({
                   </td>
                   <td className="border px-4 py-2">{booking.userTimeZone}</td>
                   <td className="border px-4 py-2">{booking.eventType}</td>
-                  <td className="border px-4 py-2">
+                  <td className="border px-4 py-2 text-xs">
                     <Link
                       href={`/book/${tourId}?admin=true&bid=${booking.bookingId}`}
                     >
-                      Modify
+                      <a
+                        className="mt-4 mr-3 bg-gray-200 no-underline text-black text-xs font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
+                        title="Modify booking"
+                      >
+                        ✏️
+                      </a>
+                    </Link>
+                    <br />
+                    <br />
+                    <Link href={`/admin/booking/${booking.bookingId}/emails`}>
+                      <a
+                        className="mt-4 mr-3 bg-gray-200 no-underline text-black text-xs font-semibold py-2 px-2 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
+                        title="View Emails"
+                      >
+                        ✉️
+                      </a>
                     </Link>
                   </td>
                 </tr>
