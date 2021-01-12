@@ -1,25 +1,40 @@
 import { getUpcomingEventsFromGoogle } from '../../../utils/google-calendar'
+import { indexToursAndBookings } from '../../../aggregates/booking'
 import {
   getUpcomingTours,
+  getUpcomingBookings,
   createNewTours,
   updateTour
 } from '../../../db/bookingDb'
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
-    const events = await getUpdatedListOfEvents()
-    const eventsInMoreThan24Hours = events.filter((event) => {
-      const hourDifference = (new Date(event.start) - new Date()) / 3600000
-      return hourDifference > 24
-    })
+    await synchronizeToursWithGoogle()
+
+    const toursAndBookings = await getUpcomingBookings()
+    const upcomingToursAndBookings = indexToursAndBookings(toursAndBookings)
+    const tours = upcomingToursAndBookings
+      .map((tourAgg) => {
+        const maxEnrollment =
+          tourAgg.tour.location && parseInt(tourAgg.tour.location) > 0
+            ? parseInt(tourAgg.tour.location)
+            : parseInt(process.env.DEFAULT_MAX_ENROLLMENT)
+        return {
+          ...tourAgg.tour,
+          enrollment: tourAgg.currentParticipantTotal,
+          maxEnrollment
+        }
+      })
+      .filter((tour) => {
+        const hourDifference = (new Date(tour.start) - new Date()) / 3600000
+        return hourDifference > 24
+      })
 
     res.statusCode = 200
     res.setHeader('Content-Type', 'application/json')
     res.end(
       JSON.stringify({
-        events: eventsInMoreThan24Hours.map((event) => ({
-          ...event
-        }))
+        tours: tours
       })
     )
   } else {
@@ -29,7 +44,7 @@ export default async function handler(req, res) {
   }
 }
 
-async function getUpdatedListOfEvents() {
+async function synchronizeToursWithGoogle() {
   const scheduledTours = await getUpcomingTours()
   const scheduledToursByGoogleId = scheduledTours.reduce((acc, next) => {
     acc[next.externalEventId] = next
@@ -47,7 +62,7 @@ async function getUpdatedListOfEvents() {
   })
 
   if (!newEvents.length && !changedEvents.length) {
-    return scheduledTours
+    return
   } else {
     if (newEvents.length) {
       console.log(`${newEvents.length} new event(s) found. Creating`)
@@ -74,7 +89,5 @@ async function getUpdatedListOfEvents() {
         }
       }, Promise.resolve())
     }
-    const updatedKnownEvents = await getUpcomingTours()
-    return updatedKnownEvents
   }
 }

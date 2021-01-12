@@ -37,7 +37,7 @@ export default function BookingForm({
       parseInt(data.participantCount) <= 0 ||
       parseInt(data.participantCount) > 20
     ) {
-      return 'Please specify a valid number of expected participants. Maximum 20.'
+      return 'Please specify a valid number of zoom connections. Maximum 20.'
     } else if (
       !isUpdate &&
       (!data.areYouHuman ||
@@ -169,13 +169,15 @@ export default function BookingForm({
             htmlFor="participantCount"
             className="block mt-5 text-xs font-semibold text-gray-600 uppercase"
           >
-            Maximum Number of Expected Participants
+            How many Zoom connections will you need (for groups)?
           </label>
           <p className="text-xs p-0 m-0">
             The number of available connections is limited. Please estimate as
-            best possible the number of people you expect to require their own
-            connection (max 20). You will be able to modify this until 24 hours
-            prior to the tour.
+            best possible the <span className="italic">maximum</span> number of
+            people that you expect will require their own connection. There is a
+            maximum of 20 connections per booking (assuming the tour is not
+            fully booked). You will be able to modify this until 24 hours prior
+            to the tour.
           </p>
           <input
             id="participantCount"

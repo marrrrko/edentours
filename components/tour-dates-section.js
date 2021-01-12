@@ -13,7 +13,7 @@ export default function TourDatesSection({}) {
       try {
         let response = await fetch('/api/booking')
         let responseData = await response.json()
-        if (!responseData.events) {
+        if (!responseData.tours) {
           setBookingData({
             entries: responseData,
             error: 'Invalid Booking Data',
@@ -21,7 +21,7 @@ export default function TourDatesSection({}) {
           })
         } else {
           setBookingData({
-            entries: responseData.events,
+            entries: responseData.tours,
             error: null,
             loading: false
           })
