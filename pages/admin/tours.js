@@ -11,36 +11,39 @@ export default function Tours({ accessGranted, upcomingToursAndBookings }) {
     return <DefaultErrorPage statusCode={401} />
   }
   return (
-    <div className="px-10">
-      <h2>Tours</h2>
-      <table className="tablet-auto">
-        <thead>
-          <tr>
-            <th>Tour</th>
-            <th>Date</th>
-            <th>Groups</th>
-            <th>Participants</th>
-            <th>More</th>
-          </tr>
-        </thead>
-        <tbody>
-          {upcomingToursAndBookings.map((t) => {
-            return (
-              <tr key={t.tour.tourId}>
-                <td className="border px-4 py-2">{t.tour.summary}</td>
-                <td className="border px-4 py-2">{t.startString}</td>
-                <td className="border px-4 py-2">{t.currentGroupTotal}</td>
-                <td className="border px-4 py-2">
-                  {t.currentParticipantTotal}
-                </td>
-                <td className="border px-4 py-2">
-                  <Link href={'/admin/tours/' + t.tour.tourId}>More</Link>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+    <div className="px-10 mt-5 w-full flex flex-col">
+      <h2 className="mx-auto">Upcomming Tours</h2>
+
+      <div className="w-full flex flex-row content-center mt-5">
+        <table className="table-auto mx-auto">
+          <thead>
+            <tr>
+              <th>Tour</th>
+              <th>Date</th>
+              <th>Groups</th>
+              <th>Participants</th>
+              <th>More</th>
+            </tr>
+          </thead>
+          <tbody>
+            {upcomingToursAndBookings.map((t) => {
+              return (
+                <tr key={t.tour.tourId}>
+                  <td className="border px-4 py-2">{t.tour.summary}</td>
+                  <td className="border px-4 py-2">{t.startString}</td>
+                  <td className="border px-4 py-2">{t.currentGroupTotal}</td>
+                  <td className="border px-4 py-2">
+                    {t.currentParticipantTotal}
+                  </td>
+                  <td className="border px-4 py-2">
+                    <Link href={'/admin/tours/' + t.tour.tourId}>More</Link>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

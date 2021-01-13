@@ -9,6 +9,7 @@ import {
 } from '../../../aggregates/booking'
 import { buildCombinedFixedTimeString } from '../../../utils/tour-dates'
 import { uniq } from 'ramda'
+import { useState } from 'react'
 
 export default function Bookings({
   accessGranted,
@@ -18,6 +19,8 @@ export default function Bookings({
   tourLabel,
   tourDate
 }) {
+  const [values, setValues] = useState({ hideCancelled: true })
+
   if (!accessGranted) {
     return <DefaultErrorPage statusCode={401} />
   }
@@ -27,23 +30,35 @@ export default function Bookings({
   )}`
 
   return (
-    <div className="px-10 pt-8 flex flex-col content-center">
-      <div>
+    <div className="px-10 pt-8 mb-20 flex flex-col content-center">
+      <div className="mx-auto text-center mb-5">
         <h2>Bookings</h2>
         <h3>{tourLabel}</h3>
         <h3>{tourDate}</h3>
       </div>
-      {bookings.length > 0 && (
-        <div className="block my-8">
-          <a
-            href={emails}
-            target="_blank"
-            className="bg-yellow-200 no-underline text-black text-xs font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
-          >
-            Email everyone
-          </a>
+      <div className="w-full flex flex-row my-3">
+        <a
+          href={emails}
+          target="_blank"
+          className="bg-yellow-200 no-underline text-black text-xs font-semibold py-3 mt-1 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
+        >
+          Email everyone
+        </a>
+        <div className="ml-5 mt-1 bg-yellow-200 py-3 px-4 text-xs font-semibold rounded-lg shadow-md hover:bg-yellow-400">
+          <input
+            type="checkbox"
+            id="hideCancelledCBox"
+            checked={values.hideCancelled}
+            value={values.hideCancelled}
+            onChange={(e) => {
+              setValues({ ...values, hideCancelled: !values.hideCancelled })
+            }}
+          />
+          <label htmlFor="hideCancelledCBox" className="ml-2">
+            Hide Cancelled
+          </label>
         </div>
-      )}
+      </div>
       <div>
         <table className="mx-auto">
           <thead>
@@ -60,6 +75,9 @@ export default function Bookings({
           </thead>
           <tbody>
             {bookings.map((booking) => {
+              if (values.hideCancelled && booking.eventType == 'cancelled')
+                return null
+
               return (
                 <tr key={booking.bookingId}>
                   <td className="border px-4 py-2">{booking.bookerName}</td>
