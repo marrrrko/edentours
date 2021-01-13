@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         const maxEnrollment =
           tourAgg.tour.location && parseInt(tourAgg.tour.location) > 0
             ? parseInt(tourAgg.tour.location)
-            : 55
+            : parseInt(process.env.DEFAULT_MAX_ENROLLMENT)
         return {
           ...tourAgg.tour,
           enrollment: tourAgg.currentParticipantTotal,
