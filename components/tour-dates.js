@@ -47,8 +47,8 @@ export default function TourDates({ dates: tours }) {
           </div>
         )}
         {fullyBooked && (
-          <span className="float-right mr-3 mt-5 text-base font-bold bg-gray-500 text-gray-100 py-2 shadow-md px-4 rounded-lg">
-            Fully Booked
+          <span className="float-right mr-3 mt-5 px-5 py-2 text-base font-bold bg-gray-500 text-gray-100 shadow-md rounded-lg">
+            Full
           </span>
         )}
         <div className={fullyBooked ? 'text-gray-400' : ''}>
