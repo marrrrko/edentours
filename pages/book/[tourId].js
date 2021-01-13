@@ -1,4 +1,4 @@
-import DefaultErrorPage from 'next/error'
+import Error from '../_error'
 import Router from 'next/router'
 import NewTourBooking from '../../components/booking-new'
 import ExistingTourBooking from '../../components/booking-existing'
@@ -8,7 +8,7 @@ import Cookies from 'cookies'
 
 const Page = ({ tourId, errorMsg, preexistingBooking, actionKey }) => {
   if (!tourId || errorMsg) {
-    return <DefaultErrorPage statusCode={404} />
+    return <Error statusCode={404} title="Hiç bir şey!" />
   }
 
   if (preexistingBooking) {

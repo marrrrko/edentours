@@ -1,12 +1,12 @@
 import { fetchPostBySlug } from '../utils/ghost'
 import { buildPageContent } from '../utils/page-content'
-import DefaultErrorPage from 'next/error'
+import Error from './_error'
 import Post from '../components/post-page'
 import Router from 'next/router'
 
 const Page = (props) => {
   if (!props.slug) {
-    return <DefaultErrorPage statusCode={404} />
+    return <Error statusCode={404} title="Hiç bir şey!" />
   }
 
   return <Post {...props} />

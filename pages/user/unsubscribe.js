@@ -1,10 +1,10 @@
 import Router from 'next/router'
-import DefaultErrorPage from 'next/error'
+import Error from '../_error'
 import { getAction } from '../../db/bookingDb'
 
 export default function Tours({ accessGranted, errorMsg }) {
   if (!accessGranted || errorMsg) {
-    return <DefaultErrorPage statusCode={401} />
+    return <Error statusCode={401} title="Olmaz!" />
   }
   return (
     <div className="w-full md:w-3/5 2xl:w-2/5 mx-auto my-5 px-4 mt-10">

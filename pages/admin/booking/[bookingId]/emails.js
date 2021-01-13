@@ -5,7 +5,7 @@ import {
   getTour
 } from '../../../../db/bookingDb'
 import { aggregateBookingRecords } from '../../../../aggregates/booking'
-import DefaultErrorPage from 'next/error'
+import Error from '../../../_error'
 import Cookies from 'cookies'
 import { DateTime } from 'luxon'
 import { buildCombinedFixedTimeString } from '../../../../utils/tour-dates'
@@ -17,7 +17,7 @@ export default function Bookings({
   messages
 }) {
   if (!accessGranted) {
-    return <DefaultErrorPage statusCode={401} />
+    return <Error statusCode={401} title="Olmaz!" />
   }
 
   return (

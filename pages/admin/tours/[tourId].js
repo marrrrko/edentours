@@ -1,8 +1,8 @@
 import Router from 'next/router'
 import Link from 'next/link'
 import { getBookings, getTour } from '../../../db/bookingDb'
-import DefaultErrorPage from 'next/error'
 import Cookies from 'cookies'
+import Error from '../../_error'
 import {
   groupBookingsByBookingId,
   aggregateBookingRecords
@@ -22,7 +22,7 @@ export default function Bookings({
   const [values, setValues] = useState({ hideCancelled: true })
 
   if (!accessGranted) {
-    return <DefaultErrorPage statusCode={401} />
+    return <Error statusCode={401} title="Olmaz!" />
   }
 
   const emails = `mailto:?bcc=${uniq(bookings.map((b) => b.email)).join(

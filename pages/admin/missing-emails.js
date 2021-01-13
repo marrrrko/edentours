@@ -1,10 +1,10 @@
 import { catchUpUnsentConfirmationEmails } from '../../utils/emails'
-import DefaultErrorPage from 'next/error'
+import Error from '../_error'
 import Cookies from 'cookies'
 
 export default function Tours({ accessGranted, emailList }) {
   if (!accessGranted) {
-    return <DefaultErrorPage statusCode={401} />
+    return <Error statusCode={401} title="Olmaz!" />
   }
   return (
     <div className="px-10 pt-8 flex flex-col content-center">
