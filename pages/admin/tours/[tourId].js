@@ -25,9 +25,11 @@ export default function Bookings({
     return <Error statusCode={401} title="Olmaz!" />
   }
 
-  const emails = `mailto:?bcc=${uniq(bookings.map((b) => b.email)).join(
-    separator
-  )}`
+  const emails = `mailto:?bcc=${uniq(
+    bookings
+      .filter((b) => b.eventType !== 'cancelled' && b.participantCount > 0)
+      .map((b) => b.email)
+  ).join(separator)}`
 
   return (
     <div className="px-10 pt-8 mb-20 flex flex-col content-center">
