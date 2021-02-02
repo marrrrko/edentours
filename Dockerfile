@@ -1,6 +1,4 @@
 FROM node:fermium-alpine
-RUN apk update
-RUN apk add zip
 
 # Get NPM Dependencies (done in tmp directory to improve docker caching performance)
 COPY package.json /tmp/package.json
