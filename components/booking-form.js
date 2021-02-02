@@ -175,12 +175,10 @@ export default function BookingForm({
             How many Zoom connections will you need (minimum 1, maximum 20)?
           </label>
           <p className="text-xs p-0 m-0">
-            The number of available connections is limited. Please estimate as
-            best possible the <span className="italic">maximum</span> number of
-            people that you expect will require their own connection. There is a
-            maximum of 20 connections per booking (assuming the tour is not
-            fully booked). You will be able to modify this until 24 hours prior
-            to the tour.
+            Please estimate as best possible the{' '}
+            <span className="italic">maximum</span> number of people that you
+            expect will require their own connection. You will be able to modify
+            this until 24 hours prior to the tour.
           </p>
           <input
             id="participantCount"

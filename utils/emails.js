@@ -138,7 +138,7 @@ function createConfirmationEmailHtml(
 &nbsp;&nbsp;Date: ${tourDates.fixedTime.combined} <br />
 &nbsp;&nbsp;Number of Connections: ${numConnections} <br />
 
-<p>Zoom connection details will be sent three days before your tour date. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
+<p>Zoom connection details will be sent to you 24 hours before your tour starts. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
 <p>To cancel or modify your reservation, please click the following link:</p>
 <p><a href="${modifyUrl}">${modifyUrl}</a></p>
 <p>See you soon.<br />https://eden.tours</p>
