@@ -83,7 +83,9 @@ export default function Bookings({
               return (
                 <tr key={booking.bookingId}>
                   <td className="border px-4 py-2">{booking.bookerName}</td>
-                  <td className="border px-4 py-2">{booking.email}</td>
+                  <td className="border px-4 py-2">
+                    <a href={'mailto:' + booking.email}>{booking.email}</a>
+                  </td>
                   <td className="border px-4 py-2">{booking.groupName}</td>
                   <td className="border px-4 py-2">{booking.groupDetails}</td>
                   <td className="border px-4 py-2">
