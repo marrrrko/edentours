@@ -4,19 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node server.js",
+    "dev": "node start.js",
     "build": "next build",
-    "start": "NODE_ENV=production node server.js"
+    "start": "NODE_ENV=production node start.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/register": "^7.12.10",
+    "@ladjs/graceful": "^1.0.5",
     "aws-sdk": "^2.820.0",
     "axios": "^0.21.0",
+    "bree": "^4.1.1",
     "bs58": "^4.0.1",
     "cookie": "^0.4.1",
     "cookies": "^0.8.0",
+    "core-js": "^3.8.3",
     "flickr-sdk": "^3.10.0",
     "googleapis": "^66.0.0",
     "htmlparser2": "^6.0.0",
@@ -26,6 +32,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-grid-gallery": "^0.5.5",
+    "regenerator-runtime": "^0.13.7",
     "sqlite3": "5.0.0",
     "uuid": "^8.3.2"
   },
