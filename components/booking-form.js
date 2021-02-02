@@ -30,8 +30,6 @@ export default function BookingForm({
       return 'Please specify your name.'
     } else if (!data.email || !data.email.length || !emailIsValid(data.email)) {
       return 'Please specify a valid email address'
-    } else if (!data.groupName) {
-      return 'Please specify a name for your group such as "Friends from Brazil".'
     } else if (
       !data.participantCount ||
       parseInt(data.participantCount) <= 0 ||
@@ -133,6 +131,11 @@ export default function BookingForm({
             value={values.email}
             onChange={handleInputChange}
           />
+          <div className="w-full mt-10 text-center">
+            <h3 className="text-sm mx-auto font-semibold uppercase">
+              If you're booking for multiple people
+            </h3>
+          </div>
           <label
             htmlFor="groupName"
             className="block mt-2 text-xs font-semibold text-gray-600 uppercase"
@@ -169,7 +172,7 @@ export default function BookingForm({
             htmlFor="participantCount"
             className="block mt-5 text-xs font-semibold text-gray-600 uppercase"
           >
-            How many Zoom connections will you need (for groups)?
+            How many Zoom connections will you need (minimum 1, maximum 20)?
           </label>
           <p className="text-xs p-0 m-0">
             The number of available connections is limited. Please estimate as
@@ -192,23 +195,23 @@ export default function BookingForm({
           />
           {!isUpdate && (
             <>
-              <label
-                htmlFor="areYouHuman"
-                className="block mt-5 text-xs font-semibold text-gray-600 uppercase"
-              >
-                Quick question
-              </label>
-              <p className="text-sm font-bold p-0 m-0">
-                In what year did God's Kingdom start ruling? <br />
-                <span className="text-xs font-normal">
-                  (This question helps us make sure you're not a robot.)
-                </span>
-              </p>
+              <div className="w-full mt-10 mb-4 text-center">
+                <h3 className="text-sm mx-auto font-semibold uppercase">
+                  Quick question
+                </h3>
+
+                <p className="text-sm font-bold p-0 m-0">
+                  In what year did God's Kingdom start ruling? <br />
+                  <span className="text-xs font-normal">
+                    (This helps us make sure you're not a robot.)
+                  </span>
+                </p>
+              </div>
               <input
                 id="areYouHuman"
                 type="text"
                 name="areYouHuman"
-                className="block w-full p-3 mt-2 text-gray-700 bg-gray-200 appearance-none focus:outline-none focus:bg-gray-300 focus:shadow-inner"
+                className="block w-full text-center p-3 mt-2 text-gray-700 bg-gray-200 appearance-none focus:outline-none focus:bg-gray-300 focus:shadow-inner"
                 required
                 value={values.areYouHuman}
                 onChange={handleInputChange}

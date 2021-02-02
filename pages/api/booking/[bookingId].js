@@ -204,8 +204,6 @@ function findBookingValidationProblem(booking, requiredHumanCheck = true) {
     !emailIsValid(booking.email)
   ) {
     return 'Invalid email address'
-  } else if (!booking.groupName) {
-    return 'Invalid group name'
   } else if (
     requiredHumanCheck &&
     (!booking.areYouHuman || parseInt(booking.areYouHuman) != 1914)
