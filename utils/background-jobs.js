@@ -3,11 +3,10 @@ import Bree from 'bree'
 
 export function startBackgroundJobs() {
   const bree = new Bree({
-    defaultExtension: 'mjs',
     jobs: [
       {
         name: 'tour-start-emails',
-        interval: 'every 1 minute'
+        interval: 'every 30 seconds'
       }
     ]
   })

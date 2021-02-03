@@ -1,5 +1,4 @@
 import sqlite3 from 'sqlite3'
-import { v4 as uuid } from 'uuid'
 
 export async function getUpcomingTours() {
   let db = await getDb()

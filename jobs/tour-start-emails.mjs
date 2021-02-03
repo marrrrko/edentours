@@ -1,5 +1,7 @@
 import { parentPort } from 'worker_threads'
-import { getUpcomingTours, getBookings } from '../db/bookingDb'
+import { getUpcomingTours, getBookings } from '../db/bookingDb.js'
+import 'core-js/stable'
+import 'regenerator-runtime/runtime'
 ;(async () => {
   // wait for a promise to finish
   await checkForTourEmailsToSend()
