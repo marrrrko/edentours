@@ -27,12 +27,18 @@ export async function buildBookingConfirmationEmail(bookingId) {
   }
 
   const modifyKey = bs58.encode(Buffer.from(uuid().replace(/-/g, ''), 'hex'))
+  let actionExpirationDate = new Date(booking.tour.start)
+  actionExpirationDate = new Date(
+    actionExpirationDate.setDate(actionExpirationDate.getDate() + 14)
+  )
+
   await insertActionKey(
     modifyKey,
     'modify-booking',
     bookingId,
-    new Date(new Date().setDate(new Date(booking.tour.start).getDate() + 14))
+    actionExpirationDate
   )
+
   const unsubscribeKey = bs58.encode(
     Buffer.from(uuid().replace(/-/g, ''), 'hex')
   )
