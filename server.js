@@ -12,7 +12,11 @@ const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
 
-global.log.info('Starting EdenWeb')
+global.log.info('****************************')
+global.log.info('****************************')
+global.log.info('** EdenWeb Startup *********')
+global.log.info('****************************')
+global.log.info('****************************')
 
 app
   .prepare()
@@ -27,10 +31,14 @@ app
   .then(() => {
     createServer((req, res) => {
       const parsedUrl = parse(req.url, true)
-      handle(req, res, parsedUrl)
+      try {
+        handle(req, res, parsedUrl)
+      } catch (requestError) {
+        global.log.error('Request error', requestError)
+      }
     }).listen(3000, (err) => {
       if (err) throw err
-      global.log.info('*** Eden Tours Ready on port 3000 ***')
+      global.log.info('EdenWeb Ready on port 3000')
     })
   })
   .then(() => {

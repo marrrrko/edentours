@@ -16,9 +16,9 @@ import {
 import { SES, config } from 'aws-sdk'
 import { buildTourDateStrings } from './tour-dates'
 
-const emailSafetySetting = process.env.EMAIL_SENDING_SAFETY
 const fixedTimezone = 'Europe/Istanbul'
 
+//AWS Email is sent through a different region
 config.update({ region: 'us-east-1' })
 
 export async function buildBookingConfirmationEmail(bookingId) {
@@ -83,7 +83,7 @@ export async function buildTourStartEmail(tour, booking) {
     cc: [],
     bcc: []
   }
-  const subject = `Connection Information for your Upcomming Eden·Tour`
+  const subject = `Connection Information for your Upcoming Eden·Tour`
   const body = {
     html: createTourStartEmailHtml(
       tour.summary,
@@ -138,6 +138,7 @@ export async function sendEmail(transactionId) {
         global.emailLog.warn(
           `Skipping recipientless email (transaction #${transactionId})`
         )
+        return
       }
 
       const awsEmailDoc = {
@@ -178,11 +179,13 @@ export async function sendEmail(transactionId) {
 }
 
 function emailIsAllowed(email) {
-  return (
+  const emailSafetySetting = process.env.EMAIL_SENDING_SAFETY
+  const allowed =
     emailSafetySetting != null &&
+    emailSafetySetting.trim().toUpperCase() != 'X' &&
     (emailSafetySetting.trim() == '*' ||
-      email.trim().startsWith(emailSafetySetting))
-  )
+      email.trim().indexOf(emailSafetySetting) != -1)
+  return allowed
 }
 
 function createConfirmationEmailHtml(
@@ -228,15 +231,18 @@ function createTourStartEmailHtml(
   return `
 <p>Dear Friends,</p>
 
-<p>Greetings from Asia! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.</p>
+<p>Greetings from Asia! We are looking forward to meeting you on your upcoming tour. Here are your final booking details as well as your video conferencing connection instructions.</p>
 
+<h3>Tour Details</h3>
 &nbsp;&nbsp;Tour: ${tourName} <br />
-&nbsp;&nbsp;Date: ${tourDates.fixedTime.combined} <br />
+&nbsp;&nbsp;Date: <span style="font-weight: bold;">${tourDates.fixedTime.combined}</span> <br />
 &nbsp;&nbsp;Maximum Number of Connections: ${numConnections} <br />
 
-<h3>Connection Details</h3>
-<pre>${connectionInfo}</pre>
-<p>See you soon.<br />https://eden.tours</p>
+<h3>Video Conference Connection Details</h3>
+<div style="margin-right: 10px; padding: 15px; background-color: #deffff;">
+  ${connectionInfo}
+</div>
+<br/><p>See you soon.<br />https://eden.tours</p>
 
 
 

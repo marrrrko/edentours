@@ -11,64 +11,69 @@ import * as emailSending from '../../../utils/emails'
 import Cookies from 'cookies'
 
 export default async function handler(req, res) {
-  const tourId = req.query.bookingId
-  const cookies = new Cookies(req, res)
+  try {
+    const tourId = req.query.bookingId
+    const cookies = new Cookies(req, res)
 
-  if (tourId && req.method === 'GET') {
-    res.setHeader('Content-Type', 'application/json')
-    const event = await getTour(tourId)
-    if (!event) {
-      res.statusCode = 404
-      res.end(
-        JSON.stringify({
-          msg: 'Tour not found'
-        })
-      )
+    if (tourId && req.method === 'GET') {
+      res.setHeader('Content-Type', 'application/json')
+      const event = await getTour(tourId)
+      if (!event) {
+        res.statusCode = 404
+        res.end(
+          JSON.stringify({
+            msg: 'Tour not found'
+          })
+        )
+      } else {
+        res.statusCode = 200
+        res.end(
+          JSON.stringify({
+            ...event
+          })
+        )
+      }
+    } else if (tourId && req.method === 'POST') {
+      const errorMsg = await processNewBooking(tourId, req.body)
+      if (errorMsg) {
+        res.statusCode = 422
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ msg: errorMsg }))
+      } else {
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ msg: 'Booked!' }))
+      }
+    } else if (tourId && req.method === 'PUT') {
+      const errorMsg = await processExistingBooking(tourId, req.body, cookies)
+      if (errorMsg) {
+        res.statusCode = 422
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ msg: errorMsg }))
+      } else {
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ msg: 'Updated!' }))
+      }
+    } else if (tourId && req.method === 'DELETE') {
+      const errorMsg = await cancelBooking(tourId, req.body, cookies)
+      if (errorMsg) {
+        res.statusCode = 422
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ msg: errorMsg }))
+      } else {
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ msg: 'Cancelled!' }))
+      }
     } else {
-      res.statusCode = 200
-      res.end(
-        JSON.stringify({
-          ...event
-        })
-      )
+      res.statusCode = 400
+      res.setHeader('Content-Type', 'application/json')
+      res.end({ msg: 'Invalid request' })
     }
-  } else if (tourId && req.method === 'POST') {
-    const errorMsg = await processNewBooking(tourId, req.body)
-    if (errorMsg) {
-      res.statusCode = 422
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ msg: errorMsg }))
-    } else {
-      res.statusCode = 200
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ msg: 'Booked!' }))
-    }
-  } else if (tourId && req.method === 'PUT') {
-    const errorMsg = await processExistingBooking(tourId, req.body, cookies)
-    if (errorMsg) {
-      res.statusCode = 422
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ msg: errorMsg }))
-    } else {
-      res.statusCode = 200
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ msg: 'Updated!' }))
-    }
-  } else if (tourId && req.method === 'DELETE') {
-    const errorMsg = await cancelBooking(tourId, req.body, cookies)
-    if (errorMsg) {
-      res.statusCode = 422
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ msg: errorMsg }))
-    } else {
-      res.statusCode = 200
-      res.setHeader('Content-Type', 'application/json')
-      res.end(JSON.stringify({ msg: 'Cancelled!' }))
-    }
-  } else {
-    res.statusCode = 400
-    res.setHeader('Content-Type', 'application/json')
-    res.end({ msg: 'Invalid request' })
+  } catch (reqError) {
+    global.log.error('Booking API error', reqError)
+    throw reqError
   }
 }
 
@@ -111,7 +116,7 @@ async function processExistingBooking(tourId, booking, cookies) {
   let accessNote = ''
   if (booking.actionKey === 'admin' && isAdmin(cookies)) {
     accessNote = 'admin'
-  } else if (isValidActionKey(booking.actionKey)) {
+  } else if (isValidActionKey(booking.actionKey, booking.bookingId)) {
     accessNote = 'K:' + booking.actionKey
   } else {
     return 'No access'
@@ -142,7 +147,7 @@ function isAdmin(cookies) {
   return accessCookie === process.env.ADMIN_ACCESS
 }
 
-async function isValidActionKey(actionKey) {
+async function isValidActionKey(actionKey, targetId) {
   const action = await getAction(actionKey)
   if (!action) return false
 
@@ -150,7 +155,7 @@ async function isValidActionKey(actionKey) {
   if (
     actionType != 'modify-booking' ||
     (expiration && new Date(expiration) < new Date()) ||
-    actionTarget != booking.bookingId
+    actionTarget != targetId
   ) {
     return false
   } else {
@@ -171,7 +176,7 @@ async function cancelBooking(tourId, booking, cookies) {
   let accessNote = ''
   if (booking.actionKey === 'admin' && isAdmin(cookies)) {
     accessNote = 'admin'
-  } else if (isValidActionKey(booking.actionKey)) {
+  } else if (isValidActionKey(booking.actionKey, booking.bookingId)) {
     accessNote = 'K:' + booking.actionKey
   } else {
     return 'No access'

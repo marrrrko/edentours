@@ -49,7 +49,9 @@ export function setupGlobalLogging() {
     level: level,
     format: winston.format.json(),
     defaultMeta: { service: 'eden-web' },
-    transports: defaultTransports
+    transports: defaultTransports,
+    exceptionHandlers: defaultTransports,
+    exitOnError: false
   })
 
   const emailLogger = winston.createLogger({

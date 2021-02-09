@@ -39,9 +39,7 @@ export async function ensureAllQualifyingTourStartEmailsSent() {
 
 async function sendMissingTourStartEmails(tour) {
   const bookingRecords = await getBookingRecordsForTour(tour.tourId)
-  global.emailLog.info(`${bookingRecords.length} booking records`)
   const bookingRecordsByBooking = groupBookingsByBookingId(bookingRecords)
-  global.emailLog.info(JSON.stringify(bookingRecordsByBooking, null, ' '))
   const bookings = Object.keys(bookingRecordsByBooking).map((bookingId) =>
     aggregateBookingRecords(bookingRecordsByBooking[bookingId])
   )
@@ -68,8 +66,11 @@ async function sendMissingTourStartEmails(tour) {
   global.emailLog.info(
     `${
       Object.keys(tourStartEmailRecordsByTargetId).length
-    } tour start emails already sent`
+    } tour start emails already sent for ${tour.tourId}`
   )
+
+  //Should probably also check for unsent records (right now simply checking if they exist)
+  //end re-try unsent. But let's not optimize too early. Could be handled elsewhere.
   const bookingsWithoutSentEmail = activeBookings.filter(
     (booking) => tourStartEmailRecordsByTargetId[booking.bookingId] == undefined
   )
@@ -77,7 +78,9 @@ async function sendMissingTourStartEmails(tour) {
   const sendJobs = bookingsWithoutSentEmail.map((booking) =>
     sendTourStartEmail(tour, booking)
   )
-  global.emailLog.info(`${sendJobs.length} email start emails need to be sent`)
+  global.emailLog.info(
+    `${sendJobs.length} email start emails need to be sent for ${tour.tourId}`
+  )
 
   return Promise.all(sendJobs)
 }

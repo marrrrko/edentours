@@ -36,7 +36,7 @@ export default function Tours({ accessGranted, upcomingToursAndBookings }) {
 
   return (
     <div className="px-10 mt-5 w-full flex flex-col">
-      <h2 className="mx-auto">Upcomming Tours</h2>
+      <h2 className="mx-auto">Upcoming Tours</h2>
       <div className="flex flex-row content-center">
         <select
           className="inline-block w-64  mx-auto mt-4 p-2 rounded"

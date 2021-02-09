@@ -13,18 +13,23 @@ const Page = (props) => {
 }
 
 export async function getServerSideProps(context) {
-  const { page } = context.query
+  try {
+    const { page } = context.query
 
-  if (page === 'robots.txt' || page === 'favicon.ico') return { props: {} }
+    if (page === 'robots.txt' || page === 'favicon.ico') return { props: {} }
 
-  const post = await fetchPostBySlug(page)
-  if (!post || !post.slug) {
-    return { props: {} }
+    const post = await fetchPostBySlug(page)
+    if (!post || !post.slug) {
+      return { props: {} }
+    }
+
+    const pagePostData = await buildPageContent(post)
+
+    return { props: { ...pagePostData } }
+  } catch (pageError) {
+    global.log.error('Page error: ', pageError)
+    throw pageError
   }
-
-  const pagePostData = await buildPageContent(post)
-
-  return { props: { ...pagePostData } }
 }
 
 export default Page
