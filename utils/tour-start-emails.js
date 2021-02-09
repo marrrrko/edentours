@@ -76,8 +76,19 @@ async function sendMissingTourStartEmails(tour) {
   )
 
   const sendJobs = bookingsWithoutSentEmail.map((booking) =>
-    sendTourStartEmail(tour, booking)
+    sendTourStartEmail(
+      tour,
+      booking.email,
+      booking.participantCount,
+      booking.bookingId
+    )
   )
+
+  //Let's email the guide too
+  if (!tourStartEmailRecordsByTargetId['guide']) {
+    sendJobs.push(sendTourStartEmail(tour, tour.creatorEmail, 0, 'guide'))
+  }
+
   global.emailLog.info(
     `${sendJobs.length} email start emails need to be sent for ${tour.tourId}`
   )
@@ -85,13 +96,18 @@ async function sendMissingTourStartEmails(tour) {
   return Promise.all(sendJobs)
 }
 
-async function sendTourStartEmail(tour, booking) {
-  const email = await buildTourStartEmail(tour, booking)
+async function sendTourStartEmail(tour, email, participantCount, targetId) {
+  const emailMsg = await buildTourStartEmail(
+    tour,
+    email,
+    participantCount,
+    targetId
+  )
   const transactionId = await createEmailTransaction(
     'tour-start',
     tour.tourId,
-    email,
-    booking.bookingId
+    emailMsg,
+    targetId
   )
   sendEmail(transactionId)
 }

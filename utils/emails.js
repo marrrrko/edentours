@@ -71,15 +71,20 @@ export async function buildBookingConfirmationEmail(bookingId) {
   }
 }
 
-export async function buildTourStartEmail(tour, booking) {
+export async function buildTourStartEmail(
+  tour,
+  email,
+  participantCount,
+  targetId
+) {
   const unsubscribeKey = bs58.encode(
     Buffer.from(uuid().replace(/-/g, ''), 'hex')
   )
-  await insertActionKey(unsubscribeKey, 'unsubscribe', booking.bookingId, null)
+  await insertActionKey(unsubscribeKey, 'unsubscribe', targetId, null)
   const unsubscribeUrl = `https://eden.tours/user/unsubscribe?action=${unsubscribeKey}`
 
   const recipients = {
-    to: [booking.email],
+    to: [email],
     cc: [],
     bcc: []
   }
@@ -88,14 +93,14 @@ export async function buildTourStartEmail(tour, booking) {
     html: createTourStartEmailHtml(
       tour.summary,
       tour.start,
-      booking.participantCount,
+      participantCount,
       tour.description,
       unsubscribeUrl
     ),
     plaintext: createTourStartEmailPlaintext(
       tour.summary,
       tour.start,
-      booking.participantCount,
+      participantCount,
       tour.description,
       unsubscribeUrl
     )
