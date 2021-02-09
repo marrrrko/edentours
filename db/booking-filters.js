@@ -8,9 +8,6 @@ export function calculateTotalParticipants(upcomingToursAndBookings) {
       return acc
     }, {})
 
-    console.log(`---------- ${tour.tour.tourId} -------------`)
-    console.log(JSON.stringify(tour.allBookingsByEmail, null, '  '))
-
     tour.finalBookingsByEmail = Object.keys(tour.allBookingsByEmail).map(
       (email) => {
         return aggregateUsersBookings(email, tour.allBookingsByEmail[email])

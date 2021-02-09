@@ -11,12 +11,12 @@ async function prepareDb() {
   return new Promise((resolve, reject) => {
     const bookingsDb = new sqlite3.Database('data/bookings.sqlite3', (err) => {
       if (err) {
-        console.error(`SQLite Database Startup error`, err)
+        global.log.error(`SQLite Database Startup error`, err)
         reject(err)
       } else {
         bookingsDb.get('PRAGMA user_version', async (err, row) => {
           await applyMigrations(bookingsDb, parseInt(row.user_version))
-          console.log('Database ready')
+          global.log.info('Database ready')
           bookingsDb.close((err) => {
             if (err) {
               reject(err)
@@ -31,15 +31,15 @@ async function prepareDb() {
 }
 
 async function applyMigrations(db, startAt) {
-  console.log(`${migrations.length - startAt} migration(s) must be applied`)
+  global.log.info(`${migrations.length - startAt} migration(s) must be applied`)
   const migrationsToBeApplied = migrations.slice(startAt)
   await migrationsToBeApplied.reduce(async (previousPromise, next, index) => {
     await previousPromise.then(() => {
-      console.log('Applying migration ' + next.name)
+      global.log.info('Applying migration ' + next.name)
     })
     return next.call(null, db, startAt + index)
   }, Promise.resolve())
-  console.log('All migrations applied.')
+  global.log.info('All migrations applied.')
 }
 
 async function createTourTable(db, migrationIndex) {

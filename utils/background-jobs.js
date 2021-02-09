@@ -11,12 +11,14 @@ export function startBackgroundJobs() {
         lastRunComplete = false
         await ensureAllQualifyingTourStartEmailsSent()
       } catch (bgRunErr) {
-        console.error('Failed to send tour start emails', bgRunErr)
+        global.emailLog.error('Failed to send tour start emails', bgRunErr)
       } finally {
         lastRunComplete = true
       }
     } else {
-      console.warn('Last background email job did not complete yet. Skipping.')
+      global.emailLog.warn(
+        'Last background email job did not complete yet. Skipping.'
+      )
     }
   }, runIntervalSeconds * 1000)
 }

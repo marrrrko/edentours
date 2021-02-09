@@ -30,16 +30,18 @@ export async function ensureAllQualifyingTourStartEmailsSent() {
     return false
   })
 
-  console.log(`${toursThatNeedEmail.length} tours qualify for tour start email`)
+  global.emailLog.info(
+    `${toursThatNeedEmail.length} tours qualify for tour start email`
+  )
 
   return Promise.all(toursThatNeedEmail.map(sendMissingTourStartEmails))
 }
 
 async function sendMissingTourStartEmails(tour) {
   const bookingRecords = await getBookingRecordsForTour(tour.tourId)
-  console.log(`${bookingRecords.length} booking records`)
+  global.emailLog.info(`${bookingRecords.length} booking records`)
   const bookingRecordsByBooking = groupBookingsByBookingId(bookingRecords)
-  console.log(JSON.stringify(bookingRecordsByBooking, null, ' '))
+  global.emailLog.info(JSON.stringify(bookingRecordsByBooking, null, ' '))
   const bookings = Object.keys(bookingRecordsByBooking).map((bookingId) =>
     aggregateBookingRecords(bookingRecordsByBooking[bookingId])
   )
@@ -63,7 +65,7 @@ async function sendMissingTourStartEmails(tour) {
     {}
   )
 
-  console.log(
+  global.emailLog.info(
     `${
       Object.keys(tourStartEmailRecordsByTargetId).length
     } tour start emails already sent`
@@ -75,7 +77,7 @@ async function sendMissingTourStartEmails(tour) {
   const sendJobs = bookingsWithoutSentEmail.map((booking) =>
     sendTourStartEmail(tour, booking)
   )
-  console.log(`${sendJobs.length} email start emails need to be sent`)
+  global.emailLog.info(`${sendJobs.length} email start emails need to be sent`)
 
   return Promise.all(sendJobs)
 }

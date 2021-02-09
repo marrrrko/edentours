@@ -31,3 +31,6 @@ styles.css
 
 # config
 .env.local
+
+# logs
+*.log

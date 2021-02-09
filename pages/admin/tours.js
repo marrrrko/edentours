@@ -11,7 +11,6 @@ import cookie from 'cookie'
 
 function getCookieValue(key, defaultValue) {
   const value = cookie.parse(document.cookie)
-  console.log(`C: ${JSON.stringify(value)}`)
   return value[key] ?? defaultValue
 }
 

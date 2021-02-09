@@ -16,6 +16,7 @@ import {
 import { SES, config } from 'aws-sdk'
 import { buildTourDateStrings } from './tour-dates'
 
+const emailSafetySetting = process.env.EMAIL_SENDING_SAFETY
 const fixedTimezone = 'Europe/Istanbul'
 
 config.update({ region: 'us-east-1' })
@@ -129,11 +130,21 @@ export async function sendEmail(transactionId) {
   const transaction = await getEmailTransaction(transactionId)
   if (!transaction.sentAt) {
     try {
+      const to = transaction.email.recipients.to.filter(emailIsAllowed)
+      const cc = transaction.email.recipients.cc.filter(emailIsAllowed)
+      const bcc = transaction.email.recipients.bcc.filter(emailIsAllowed)
+
+      if (!to.length && !cc.length && !bcc.length) {
+        global.emailLog.warn(
+          `Skipping recipientless email (transaction #${transactionId})`
+        )
+      }
+
       const awsEmailDoc = {
         Destination: {
-          ToAddresses: transaction.email.recipients.to,
-          CcAddresses: transaction.email.recipients.cc,
-          BccAddresses: transaction.email.recipients.bcc
+          ToAddresses: to,
+          CcAddresses: cc,
+          BccAddresses: bcc
         },
         Message: {
           Body: {
@@ -156,12 +167,22 @@ export async function sendEmail(transactionId) {
       const { MessageId } = await new SES({ apiVersion: '2010-12-01' })
         .sendEmail(awsEmailDoc)
         .promise()
-      console.log(`${transaction.transactionType} email sent`)
+      global.emailLog.info(
+        `${transaction.transactionType} email sent (#${transactionId})`
+      )
       await markEmailTransactionAsSent(transactionId, MessageId, new Date())
     } catch (emailSendErr) {
-      console.error('Failed to send email', emailSendErr)
+      global.emailLog.error('Failed to send email', emailSendErr)
     }
   }
+}
+
+function emailIsAllowed(email) {
+  return (
+    emailSafetySetting != null &&
+    (emailSafetySetting.trim() == '*' ||
+      email.trim().startsWith(emailSafetySetting))
+  )
 }
 
 function createConfirmationEmailHtml(

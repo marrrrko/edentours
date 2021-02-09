@@ -65,11 +65,13 @@ async function synchronizeToursWithGoogle() {
     return
   } else {
     if (newEvents.length) {
-      console.log(`${newEvents.length} new event(s) found. Creating`)
+      global.log.info(`${newEvents.length} new event(s) found. Creating`)
       await createNewTours(newEvents)
     }
     if (changedEvents.length) {
-      console.log(`${changedEvents.length} modified event(s) found. Updating`)
+      global.log.info(
+        `${changedEvents.length} modified event(s) found. Updating`
+      )
       await changedEvents.reduce(async (previous, googleEvent) => {
         await previous
         let eventToBeUpdated = scheduledToursByGoogleId[googleEvent.id]
@@ -84,7 +86,7 @@ async function synchronizeToursWithGoogle() {
             location: googleEvent.location
           })
         } else {
-          console.log('Missing event #' + eventToBeUpdated.externalEventId)
+          global.log.info('Missing event #' + eventToBeUpdated.externalEventId)
           return Promise.resolve()
         }
       }, Promise.resolve())

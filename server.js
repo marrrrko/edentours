@@ -1,13 +1,18 @@
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
+import { setupGlobalLogging } from './utils/server-logging'
 import { createServer } from 'http'
 import { parse } from 'url'
 import next from 'next'
 import bookingDbMigrations from './db/bookingDbMigrations'
 import { startBackgroundJobs } from './utils/background-jobs'
+
+setupGlobalLogging()
 const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
+
+global.log.info('Starting EdenWeb')
 
 app
   .prepare()
@@ -15,8 +20,8 @@ app
     return bookingDbMigrations.prepareDb()
   })
   .catch((dbErr) => {
-    console.error(dbErr)
-    console.log('Problem with database. Aborting.')
+    global.log.error(dbErr)
+    global.log.error('Problem with database. Aborting.')
     process.exit(2)
   })
   .then(() => {
@@ -25,13 +30,13 @@ app
       handle(req, res, parsedUrl)
     }).listen(3000, (err) => {
       if (err) throw err
-      console.log('> Eden Tours Ready on http://localhost:3000')
+      global.log.info('*** Eden Tours Ready on port 3000 ***')
     })
   })
   .then(() => {
     startBackgroundJobs()
   })
   .catch((runError) => {
-    console.error('Something very bad has happened', runError)
+    global.log.error('Something very bad has happened', runError)
     process.exit(2)
   })

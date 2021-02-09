@@ -435,7 +435,7 @@ async function getDb() {
   return new Promise((resolve, reject) => {
     const bookingsDb = new sqlite3.Database('data/bookings.sqlite3', (err) => {
       if (err) {
-        console.error(`SQLite Database Connection Error`, err)
+        global.log.error(`SQLite Database Connection Error`, err)
         reject(err)
       } else {
         resolve(bookingsDb)

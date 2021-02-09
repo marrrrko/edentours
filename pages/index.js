@@ -17,7 +17,7 @@ export async function getServerSideProps(context) {
   const pagePostData = await buildPageContent(post)
 
   if (!pagePostData || !pagePostData.slug) {
-    console.log(`Could not retrieve post "${page}"`)
+    global.log.warn(`Could not retrieve post "${page}"`)
     return { props: {} }
   }
 

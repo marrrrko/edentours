@@ -11,12 +11,10 @@ export async function fetchPostBySlug(slug) {
     const apiResponse = await axios.get(url)
 
     if (apiResponse.status !== 200) {
-      console.log(`Could not retrieve post with slug ${slug}`)
-      console.log(`${apiResponse.status}: ${apiResponse.statusText}`)
+      global.log.warn(`Could not retrieve post with slug ${slug}`)
     }
 
     const postData = apiResponse.data
-    //console.log(`Called ${url} and got ${JSON.stringify(postData)}`)
 
     if (!postData || !postData.posts || !postData.posts.length) return null
 
@@ -24,7 +22,9 @@ export async function fetchPostBySlug(slug) {
 
     return post
   } catch (err) {
-    console.log(`Could not retrieve post with slug ${slug}: ${err.toString()}`)
+    global.log.error(
+      `Could not retrieve post with slug ${slug}: ${err.toString()}`
+    )
     return null
   }
 }
@@ -35,7 +35,7 @@ export async function getPostListWithTags() {
     const apiResponse = await axios.get(url)
 
     if (apiResponse.status !== 200) {
-      console.log(`Could not retrieve post list with tags`)
+      global.log.warn(`Could not retrieve post list with tags`)
     }
 
     const postListData = apiResponse.data
@@ -46,7 +46,7 @@ export async function getPostListWithTags() {
 
     return postList
   } catch (err) {
-    console.log(`Could not retrieve post list: ${err.toString()}`)
+    global.log.warn(`Could not retrieve post list: ${err.toString()}`)
     return null
   }
 }
