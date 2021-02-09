@@ -3,7 +3,7 @@ import bs58 from 'bs58'
 import {
   insertEmailTransaction,
   getEmailTransaction,
-  getEmailTransactionsForBooking,
+  getEmailTransactionsForEvent,
   getUpcomingBookings,
   markEmailTransactionAsSent,
   getBookingRecords,
@@ -64,17 +64,56 @@ export async function buildBookingConfirmationEmail(bookingId) {
   }
 }
 
+export async function buildTourStartEmail(tour, booking) {
+  const unsubscribeKey = bs58.encode(
+    Buffer.from(uuid().replace(/-/g, ''), 'hex')
+  )
+  await insertActionKey(unsubscribeKey, 'unsubscribe', booking.bookingId, null)
+  const unsubscribeUrl = `https://eden.tours/user/unsubscribe?action=${unsubscribeKey}`
+
+  const recipients = {
+    to: [booking.email],
+    cc: [],
+    bcc: []
+  }
+  const subject = `Connection Information for your Upcomming Eden·Tour`
+  const body = {
+    html: createTourStartEmailHtml(
+      tour.summary,
+      tour.start,
+      booking.participantCount,
+      tour.description,
+      unsubscribeUrl
+    ),
+    plaintext: createTourStartEmailPlaintext(
+      tour.summary,
+      tour.start,
+      booking.participantCount,
+      tour.description,
+      unsubscribeUrl
+    )
+  }
+
+  return {
+    recipients,
+    subject,
+    body
+  }
+}
+
 export async function createEmailTransaction(
   messageType,
   associatedEventId,
-  email
+  email,
+  targetId = null
 ) {
   const transactionId = uuid()
   await insertEmailTransaction(
     transactionId,
     messageType,
     associatedEventId,
-    email
+    email,
+    targetId
   )
 
   return transactionId
@@ -111,7 +150,7 @@ export async function sendEmail(transactionId) {
       const { MessageId } = await new SES({ apiVersion: '2010-12-01' })
         .sendEmail(awsEmailDoc)
         .promise()
-      console.log('Email sent')
+      console.log(`${transaction.transactionType} email sent`)
       await markEmailTransactionAsSent(transactionId, MessageId, new Date())
     } catch (emailSendErr) {
       console.error('Failed to send email', emailSendErr)
@@ -126,7 +165,7 @@ function createConfirmationEmailHtml(
   modifyUrl,
   unsubscribeUrl
 ) {
-  const tourDates = buildTourDateStrings(tourDate, 'Europe/Istanbul')
+  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
 
   return `
 <p><h2>Congrats! Your Tour is Booked</h2></p>
@@ -148,6 +187,68 @@ function createConfirmationEmailHtml(
 <br /><br />
 <p>You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
   `
+}
+
+function createTourStartEmailHtml(
+  tourName,
+  tourDate,
+  numConnections,
+  connectionInfo,
+  unsubscribeUrl
+) {
+  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
+
+  return `
+<p>Dear Friends,</p>
+
+<p>Greetings from Asia! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.</p>
+
+&nbsp;&nbsp;Tour: ${tourName} <br />
+&nbsp;&nbsp;Date: ${tourDates.fixedTime.combined} <br />
+&nbsp;&nbsp;Maximum Number of Connections: ${numConnections} <br />
+
+<h3>Connection Details</h3>
+<pre>${connectionInfo}</pre>
+<p>See you soon.<br />https://eden.tours</p>
+
+
+
+<br /><br />
+<p>You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
+  `
+}
+
+function createTourStartEmailPlaintext(
+  tourName,
+  tourDate,
+  numConnections,
+  connectionInfo,
+  unsubscribeUrl
+) {
+  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
+
+  return `
+Dear Friends,
+
+Greetings from Asia! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.
+
+  Tour: ${tourName}
+  Date: ${tourDates.fixedTime.combined}
+  Maximum Number of Connections: ${numConnections}
+
+
+Connection details
+${connectionInfo}
+
+
+
+See you soon.
+https://eden.tours
+
+
+
+You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can unsubscribe with this link: ${unsubscribeUrl}.
+`
 }
 
 export async function catchUpUnsentConfirmationEmails(apply = false) {
@@ -173,9 +274,7 @@ export async function catchUpUnsentConfirmationEmails(apply = false) {
 }
 
 async function sendEmailIfNeeded(booking, apply = false) {
-  const emailsForBooking = await getEmailTransactionsForBooking(
-    booking.bookingId
-  )
+  const emailsForBooking = await getEmailTransactionsForEvent(booking.bookingId)
   const sentEmailsForBooking = emailsForBooking.filter(
     (transaction) =>
       transaction.sentAt && new Date(transaction.sentAt).getFullYear() >= 2020

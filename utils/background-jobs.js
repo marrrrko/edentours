@@ -1,18 +1,22 @@
-import Graceful from '@ladjs/graceful'
-import Bree from 'bree'
+import { ensureAllQualifyingTourStartEmailsSent } from './tour-start-emails'
+
+const runIntervalSeconds = 30
 
 export function startBackgroundJobs() {
-  const bree = new Bree({
-    jobs: [
-      {
-        name: 'tour-start-emails',
-        interval: 'every 30 seconds'
-      }
-    ]
-  })
+  let lastRunComplete = true
 
-  const graceful = new Graceful({ brees: [bree] })
-  graceful.listen()
-  bree.start()
-  console.log('Background jobs started')
+  setInterval(async () => {
+    if (lastRunComplete) {
+      try {
+        lastRunComplete = false
+        await ensureAllQualifyingTourStartEmailsSent()
+      } catch (bgRunErr) {
+        console.error('Failed to send tour start emails', bgRunErr)
+      } finally {
+        lastRunComplete = true
+      }
+    } else {
+      console.warn('Last background email job did not complete yet. Skipping.')
+    }
+  }, runIntervalSeconds * 1000)
 }

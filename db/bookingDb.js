@@ -1,4 +1,6 @@
 import sqlite3 from 'sqlite3'
+import { v4 as uuid } from 'uuid'
+import '../utils/types'
 
 export async function getUpcomingTours() {
   let db = await getDb()
@@ -22,7 +24,12 @@ export async function getUpcomingTours() {
     .sort((a, b) => new Date(a.start) - new Date(b.start))
 }
 
-export async function getBookings(tourId) {
+/**
+ * Returns all booking records (unaggregated) for a given tourId
+ * @param {string} tourId
+ * @returns {PromiseLike<BookingRecord[]>}
+ */
+export async function getBookingRecordsForTour(tourId) {
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
     db.all(
@@ -262,7 +269,8 @@ export async function insertEmailTransaction(
   transactionId,
   transactionType,
   associatedEventId,
-  email
+  email,
+  targetId = null
 ) {
   let db = await getDb()
 
@@ -274,6 +282,8 @@ export async function insertEmailTransaction(
     email,
     sentAt: null
   }
+
+  if (targetId) doc.targetId = targetId
 
   await new Promise((resolve, reject) => {
     db.run(
@@ -292,6 +302,11 @@ export async function insertEmailTransaction(
   return transactionId
 }
 
+/**
+ * Returns a specified email transaction (by Id)
+ * @param {string} transactionId
+ * @returns {EmailTransaction}
+ */
 export async function getEmailTransaction(transactionId) {
   let db = await getDb()
   let row = await new Promise((resolve, reject) => {
@@ -312,12 +327,17 @@ export async function getEmailTransaction(transactionId) {
   return transaction
 }
 
-export async function getEmailTransactionsForBooking(bookingId) {
+/**
+ * Returns all email transactions associated with any system event (booking, tour, other)
+ * @param {string} eventId
+ * @returns {EmailTransaction[]}
+ */
+export async function getEmailTransactionsForEvent(eventId) {
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
     db.all(
       'SELECT doc FROM EmailTransaction WHERE associatedEventId = $associatedEventId',
-      { $associatedEventId: bookingId },
+      { $associatedEventId: eventId },
       (error, rows) => {
         if (error) reject(error)
         else {

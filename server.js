@@ -27,5 +27,11 @@ app
       if (err) throw err
       console.log('> Eden Tours Ready on http://localhost:3000')
     })
+  })
+  .then(() => {
     startBackgroundJobs()
+  })
+  .catch((runError) => {
+    console.error('Something very bad has happened', runError)
+    process.exit(2)
   })

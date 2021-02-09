@@ -1,6 +1,6 @@
 import Router from 'next/router'
 import {
-  getEmailTransactionsForBooking,
+  getEmailTransactionsForEvent,
   getBookingRecords,
   getTour
 } from '../../../../db/bookingDb'
@@ -87,7 +87,7 @@ export async function getServerSideProps(context) {
 
   const { summary, start } = await getTour(tourId)
 
-  const emailTransactions = await getEmailTransactionsForBooking(bookingId)
+  const emailTransactions = await getEmailTransactionsForEvent(bookingId)
 
   return {
     props: {

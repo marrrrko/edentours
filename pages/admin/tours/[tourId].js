@@ -1,6 +1,6 @@
 import Router from 'next/router'
 import Link from 'next/link'
-import { getBookings, getTour } from '../../../db/bookingDb'
+import { getBookingRecordsForTour, getTour } from '../../../db/bookingDb'
 import Cookies from 'cookies'
 import Error from '../../_error'
 import {
@@ -144,7 +144,7 @@ export async function getServerSideProps(context) {
   }
 
   const tour = await getTour(tourId)
-  const bookingRecords = await getBookings(tourId)
+  const bookingRecords = await getBookingRecordsForTour(tourId)
   const bookingRecordsByBooking = groupBookingsByBookingId(bookingRecords)
   const bookings = Object.keys(bookingRecordsByBooking).map((bookingId) =>
     aggregateBookingRecords(bookingRecordsByBooking[bookingId])
