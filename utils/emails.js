@@ -61,7 +61,13 @@ export async function buildBookingConfirmationEmail(bookingId) {
       modifyUrl,
       unsubscribeUrl
     ),
-    plaintext: ''
+    plaintext: createConfirmationEmailPlaintext(
+      booking.tour.summary,
+      booking.tour.start,
+      booking.participantCount,
+      modifyUrl,
+      unsubscribeUrl
+    )
   }
 
   return {
@@ -88,7 +94,9 @@ export async function buildTourStartEmail(
     cc: [],
     bcc: []
   }
-  const subject = `Connection Information for your Upcoming Eden·Tour`
+  const tourDates = buildTourDateStrings(tour.start, fixedTimezone)
+  const tourDay = tourDates.fixedTime.shortday
+  const subject = `Zoom Connection Details For Your ${tourDay} Tour`
   const body = {
     html: createTourStartEmailHtml(
       tour.summary,
@@ -224,6 +232,38 @@ function createConfirmationEmailHtml(
   `
 }
 
+function createConfirmationEmailPlaintext(
+  tourName,
+  tourDate,
+  numConnections,
+  modifyUrl,
+  unsubscribeUrl
+) {
+  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
+
+  return `
+Congrats! Your Tour is Booked
+We are pleased to have you as our guest for a tour. We know you will have a great time, deepen your Bible knowledge, and make new acquaintances.
+
+Your details are below:
+
+  Tour: ${tourName}
+  Date: ${tourDates.fixedTime.combined}
+  Number of Connections: ${numConnections}
+
+Zoom connection details will be sent to you 24 hours before your tour starts. Please check our frequently asked questions page (https://eden.tours/faq) if you need more information.
+To cancel or modify your reservation, please use the following link: ${modifyUrl}
+
+See you soon.
+https://eden.tours
+
+
+
+
+You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can unsubscribe using this link: ${unsubscribeUrl}.
+  `
+}
+
 function createTourStartEmailHtml(
   tourName,
   tourDate,
@@ -236,7 +276,7 @@ function createTourStartEmailHtml(
   return `
 <p>Dear Friends,</p>
 
-<p>Greetings from Asia! We are looking forward to meeting you on your upcoming tour. Here are your final booking details as well as your video conferencing connection instructions.</p>
+<p>Greetings from Turkey! We are looking forward to meeting you on your upcoming tour. Here are your final booking details as well as your video conferencing connection instructions.</p>
 
 <h3>Tour Details</h3>
 &nbsp;&nbsp;Tour: ${tourName} <br />
@@ -268,7 +308,7 @@ function createTourStartEmailPlaintext(
   return `
 Dear Friends,
 
-Greetings from Asia! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.
+Greetings from Turkey! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.
 
   Tour: ${tourName}
   Date: ${tourDates.fixedTime.combined}

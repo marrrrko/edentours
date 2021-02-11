@@ -12,6 +12,9 @@ export function buildTourDateStrings(
         .setZone(userTimeZone)
         .toFormat('DDDD')
         .replace('_', ' '),
+      shortday: DateTime.fromISO(tourStart)
+        .setZone(userTimeZone)
+        .toFormat('LLL-d'),
       time: DateTime.fromISO(tourStart)
         .setZone(userTimeZone)
         .toFormat("t z '(UTC'ZZ')'")
@@ -23,6 +26,9 @@ export function buildTourDateStrings(
     },
     fixedTime: {
       day: DateTime.fromISO(tourStart).setZone(fixedTimezone).toFormat('DDDD'),
+      shortday: DateTime.fromISO(tourStart)
+        .setZone(fixedTimezone)
+        .toFormat('LLL-d'),
       time: DateTime.fromISO(tourStart)
         .setZone(fixedTimezone)
         .toFormat("t z '(UTC'ZZ')'"),
