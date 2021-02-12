@@ -245,7 +245,7 @@ export default function BookingForm({
               </p>
               <p className="p-0 m-0 mt-2 text-xs text-gray-800">
                 <span className="font-bold">
-                  24 hours prior to your tour date
+                  48 hours prior to your tour date
                 </span>
                 , a second email containing Zoom connection details will be sent
                 to you.

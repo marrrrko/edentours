@@ -13,7 +13,7 @@ import {
   sendEmail
 } from './emails'
 import './types'
-const emailSendHoursPriorToTourStart = 24
+const emailSendHoursPriorToTourStart = 48
 
 export async function ensureAllQualifyingTourStartEmailsSent() {
   const tours = await getUpcomingTours()
@@ -87,6 +87,13 @@ async function sendMissingTourStartEmails(tour) {
   //Let's email the guide too
   if (!tourStartEmailRecordsByTargetId['guide']) {
     sendJobs.push(sendTourStartEmail(tour, tour.creatorEmail, 0, 'guide'))
+  }
+
+  //Let's email ourselves too
+  if (!tourStartEmailRecordsByTargetId['internal']) {
+    sendJobs.push(
+      sendTourStartEmail(tour, 'internal@eden.tours', 0, 'internal')
+    )
   }
 
   global.emailLog.info(

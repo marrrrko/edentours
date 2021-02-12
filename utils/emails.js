@@ -220,7 +220,7 @@ function createConfirmationEmailHtml(
 &nbsp;&nbsp;Date: ${tourDates.fixedTime.combined} <br />
 &nbsp;&nbsp;Number of Connections: ${numConnections} <br />
 
-<p>Zoom connection details will be sent to you 24 hours before your tour starts. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
+<p>Zoom connection details will be sent to you 48 hours before your tour starts. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
 <p>To cancel or modify your reservation, please click the following link:</p>
 <p><a href="${modifyUrl}">${modifyUrl}</a></p>
 <p>See you soon.<br />https://eden.tours</p>
@@ -251,7 +251,7 @@ Your details are below:
   Date: ${tourDates.fixedTime.combined}
   Number of Connections: ${numConnections}
 
-Zoom connection details will be sent to you 24 hours before your tour starts. Please check our frequently asked questions page (https://eden.tours/faq) if you need more information.
+Zoom connection details will be sent to you 48 hours before your tour starts. Please check our frequently asked questions page (https://eden.tours/faq) if you need more information.
 To cancel or modify your reservation, please use the following link: ${modifyUrl}
 
 See you soon.
@@ -272,6 +272,10 @@ function createTourStartEmailHtml(
   unsubscribeUrl
 ) {
   const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
+  const formattedConnectionInfo =
+    connectionInfo.indexOf('<br') != -1
+      ? connectionInfo
+      : connectionInfo.split('\n').join('<br />')
 
   return `
 <p>Dear Friends,</p>
@@ -285,7 +289,7 @@ function createTourStartEmailHtml(
 
 <h3>Video Conference Connection Details</h3>
 <div style="margin-right: 10px; padding: 15px; background-color: #deffff;">
-  ${connectionInfo}
+  ${formattedConnectionInfo}
 </div>
 <br/><p>See you soon.<br />https://eden.tours</p>
 

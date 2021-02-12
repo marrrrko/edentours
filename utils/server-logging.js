@@ -26,6 +26,7 @@ export function setupGlobalLogging() {
   ]
 
   if (process.env.USER == 'ec2-user') {
+    console.log(`Logs will be sent to cloudwatch`)
     defaultTransports.push(
       new WinstonCloudWatch({
         name: 'eden-web-stream',
@@ -42,6 +43,8 @@ export function setupGlobalLogging() {
         awsRegion: 'ca-central-1'
       })
     )
+  } else {
+    console.log(`Logs will NOT be sent to cloudwatch`)
   }
 
   const level = process.env.NODE_ENV !== 'production' ? 'debug' : 'info'
