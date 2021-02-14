@@ -25,6 +25,10 @@ export default function Bookings({
     return <Error statusCode={401} title="Olmaz!" />
   }
 
+  if (tourId == null) {
+    return <Error statusCode={404} title="Hiç bir şey!" />
+  }
+
   const emails = `mailto:?bcc=${uniq(
     bookings
       .filter((b) => b.eventType !== 'cancelled' && b.participantCount > 0)
@@ -144,6 +148,20 @@ export async function getServerSideProps(context) {
   }
 
   const tour = await getTour(tourId)
+
+  if (tour == undefined) {
+    return {
+      props: {
+        accessGranted: true,
+        bookings: [],
+        separator,
+        tourId: null,
+        tourLabel: null,
+        tourDate: null
+      }
+    }
+  }
+
   const bookingRecords = await getBookingRecordsForTour(tourId)
   const bookingRecordsByBooking = groupBookingsByBookingId(bookingRecords)
   const bookings = Object.keys(bookingRecordsByBooking).map((bookingId) =>

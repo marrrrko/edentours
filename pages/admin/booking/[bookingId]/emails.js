@@ -16,6 +16,10 @@ export default function Bookings({
   tourStart,
   messages
 }) {
+  if (bookerName == null || tourStart == null) {
+    return <Error statusCode={404} title="Hiç bir şey!" />
+  }
+
   if (!accessGranted) {
     return <Error statusCode={401} title="Olmaz!" />
   }
@@ -40,19 +44,28 @@ export default function Bookings({
       <br />
       <hr />
       <br />
-      {messages.map((message) => {
+      {messages.map((message, idx) => {
         return (
-          <div key={message.transactionId} className="mb-5">
-            <div title={message.sentMsgId}>
-              Sent on:{' '}
-              {DateTime.fromISO(message.sentAt)
-                .toFormat("ccc LLL d, t z '(UTC'ZZ')'")
-                .replace('_', ' ')}
+          <div key={message.transactionId} className="mb-8">
+            <h3 className="mt-2 mb-4 font-bold text-3xl">Message #{idx + 1}</h3>
+            <div className="bg-yellow-100 p-3">
+              <div title={message.sentMsgId}>
+                Sent on:{' '}
+                <b>
+                  {message.sentAt == null
+                    ? '--'
+                    : DateTime.fromISO(message.sentAt)
+                        .toFormat("ccc LLL d, t z '(UTC'ZZ')'")
+                        .replace('_', ' ')}{' '}
+                </b>
+              </div>
+              <div>
+                to: <b>{message.email.recipients.to.join(' , ')}</b>
+              </div>
+              <div>
+                Subject: <b>{message.email.subject}</b>
+              </div>
             </div>
-            <div>TO: {message.email.recipients.to.join(' , ')}</div>
-            <div>CC: {message.email.recipients.cc.join(' , ')}</div>
-            <div>BCC: {message.email.recipients.bcc.join(' , ')}</div>
-            <div>Subject: {message.email.subject}</div>
             <div
               className="space-y-4 font-serif"
               dangerouslySetInnerHTML={getEmailHtml(message)}
@@ -83,11 +96,32 @@ export async function getServerSideProps(context) {
   }
 
   const bookingRecords = await getBookingRecords(bookingId)
+
+  if (bookingRecords == null) {
+    return {
+      props: {
+        accessGranted: true,
+        bookerName: null,
+        tourSummary: null,
+        tourStart: null,
+        messages: []
+      }
+    }
+  }
+
   const { bookerName, tourId } = aggregateBookingRecords(bookingRecords)
 
   const { summary, start } = await getTour(tourId)
 
-  const emailTransactions = await getEmailTransactionsForEvent(bookingId)
+  const bookingEmailTransactions = await getEmailTransactionsForEvent(bookingId)
+  const tourEmailTransactions = await getEmailTransactionsForEvent(tourId)
+  const tourEmailTransactionsForThisPerson = tourEmailTransactions.filter(
+    (t) => t.targetId && t.targetId == bookingId
+  )
+
+  const emailTransactions = bookingEmailTransactions
+    .concat(tourEmailTransactionsForThisPerson)
+    .sort((a, b) => new Date(a.sentAt) - new Date(b.sentAt))
 
   return {
     props: {
