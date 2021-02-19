@@ -7,6 +7,9 @@ import {
   updateTour
 } from '../../../db/bookingDb'
 
+const cacheSetting = process.env.ENABLE_GOOGLE
+const cacheEventsFromGoogle = cacheSetting == undefined ? true : cacheSetting
+
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
@@ -55,7 +58,9 @@ async function synchronizeToursWithGoogle() {
     acc[next.externalEventId] = next
     return acc
   }, {})
-  const allEventsFromGoogle = await getUpcomingEventsFromGoogle(true)
+  const allEventsFromGoogle = await getUpcomingEventsFromGoogle(
+    cacheEventsFromGoogle
+  )
   const newEvents = allEventsFromGoogle.filter(
     (eventFromGoogle) =>
       scheduledToursByGoogleId[eventFromGoogle.id] == undefined

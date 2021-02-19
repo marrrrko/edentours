@@ -25,7 +25,7 @@ export function setupGlobalLogging() {
     })
   ]
 
-  if (process.env.USER == 'ec2-user') {
+  if (process.env.USE_CLOUDWATCH == 'TRUE') {
     console.log(`Logs will be sent to cloudwatch`)
     defaultTransports.push(
       new WinstonCloudWatch({

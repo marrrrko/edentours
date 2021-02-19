@@ -19,9 +19,21 @@ export function buildTourDateStrings(
         .setZone(userTimeZone)
         .toFormat("t z '(UTC'ZZ')'")
         .replace('_', ' '),
+      timeWithoutUTC: DateTime.fromISO(tourStart)
+        .setZone(userTimeZone)
+        .toFormat('t z')
+        .replace('_', ' '),
+      utcOffset: DateTime.fromISO(tourStart)
+        .setZone(userTimeZone)
+        .toFormat("'UTC'ZZ")
+        .replace('_', ' '),
       combined: DateTime.fromISO(tourStart)
         .setZone(userTimeZone)
         .toFormat("ccc LLL d, t z '(UTC'ZZ')'")
+        .replace('_', ' '),
+      combinedWithoutUTC: DateTime.fromISO(tourStart)
+        .setZone(userTimeZone)
+        .toFormat('ccc LLL d, t z')
         .replace('_', ' ')
     },
     fixedTime: {
@@ -32,6 +44,12 @@ export function buildTourDateStrings(
       time: DateTime.fromISO(tourStart)
         .setZone(fixedTimezone)
         .toFormat("t z '(UTC'ZZ')'"),
+      timeWithoutUTC: DateTime.fromISO(tourStart)
+        .setZone(fixedTimezone)
+        .toFormat('t z'),
+      utcOffset: DateTime.fromISO(tourStart)
+        .setZone(fixedTimezone)
+        .toFormat("'UTC'ZZ"),
       combined: DateTime.fromISO(tourStart)
         .setZone(fixedTimezone)
         .toFormat("ccc LLL d, t z '(UTC'ZZ')'")

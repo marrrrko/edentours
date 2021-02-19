@@ -84,14 +84,29 @@ export default function BookingForm({
         <div className="text-xl text-center mt-4">
           {tourTimes.fixedTime.day}
         </div>
-        <div className="text-lg text-center">{tourTimes.fixedTime.time}</div>
         {tourTimes.userTime.time != tourTimes.fixedTime.time && (
-          <div className="text-base mt-1 text-center">
-            {tourTimes.fixedTime.day == tourTimes.userTime.day
-              ? tourTimes.userTime.time
-              : tourTimes.userTime.combined}
+          <div className="pl-12 text-xl mt-1 text-center font-bold">
+            {tourTimes.fixedTime.day == tourTimes.userTime.day ? (
+              <>
+                {tourTimes.userTime.timeWithoutUTC}
+                <span className="text-base font-normal">
+                  {' '}
+                  ({tourTimes.userTime.utcOffset})
+                </span>
+              </>
+            ) : (
+              tourTimes.userTime.combined
+            )}
           </div>
         )}
+        <div className="pl-10 text-base text-center font-bold">
+          {tourTimes.fixedTime.timeWithoutUTC}
+          <span className="text-xs font-normal">
+            {' '}
+            ({tourTimes.fixedTime.utcOffset})
+          </span>
+        </div>
+
         <form className="mt-6">
           <label
             htmlFor="bookerName"

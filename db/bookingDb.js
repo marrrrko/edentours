@@ -136,14 +136,16 @@ export async function updateTour(previousEventTime, tourDoc) {
 }
 
 export async function createNewTours(events) {
-  events.forEach((eventData) => {
+  let validEvents = events.filter((eventData) => {
     if (!eventData || !eventData.start || !eventData.id) {
-      throw new Error('Invalid event: ' + JSON.stringify(eventData))
+      global.log.warn('Invalid event. Skipping: ' + JSON.stringify(eventData))
+      return false
     }
+    return true
   })
 
   let db = await getDb()
-  let creationTasks = events.map((e) => insertNewTour(db, e))
+  let creationTasks = validEvents.map((e) => insertNewTour(db, e))
   let ids = await creationTasks.reduce(async (previousPromise, next) => {
     await previousPromise
     return next

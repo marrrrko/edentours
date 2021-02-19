@@ -68,6 +68,10 @@ export default function Tours({ accessGranted, upcomingToursAndBookings }) {
           </thead>
           <tbody>
             {upcomingToursAndBookings.map((t) => {
+              const maxEnrollment =
+                t.tour.location && parseInt(t.tour.location) > 0
+                  ? parseInt(t.tour.location)
+                  : parseInt(process.env.DEFAULT_MAX_ENROLLMENT)
               return (
                 <tr
                   key={t.tour.tourId}
@@ -79,11 +83,13 @@ export default function Tours({ accessGranted, upcomingToursAndBookings }) {
                 >
                   <td className="border px-4 py-2">{t.tour.summary}</td>
                   <td className="border px-4 py-2">{t.startString}</td>
-                  <td className="border px-4 py-2">{t.currentGroupTotal}</td>
-                  <td className="border px-4 py-2">
-                    {t.currentParticipantTotal}
+                  <td className="border px-4 py-2 text-center">
+                    {t.currentGroupTotal}
                   </td>
-                  <td className="border px-4 py-2">
+                  <td className="border px-4 py-2 text-center">
+                    {t.currentParticipantTotal} / {maxEnrollment}
+                  </td>
+                  <td className="border px-4 py-2 text-center">
                     <Link href={'/admin/tours/' + t.tour.tourId}>More</Link>
                   </td>
                 </tr>
