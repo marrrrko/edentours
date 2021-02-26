@@ -1,9 +1,9 @@
-import Error from '../_error'
+import Error from '../../_error'
 import Router from 'next/router'
-import NewTourBooking from '../../components/booking-new'
-import ExistingTourBooking from '../../components/booking-existing'
-import { getAction, getBookingRecords } from '../../db/bookingDb'
-import { aggregateBookingRecords } from '../../aggregates/booking'
+import NewTourBooking from '../../../components/booking-new'
+import ExistingTourBooking from '../../../components/booking-existing'
+import { getAction, getBookingRecords } from '../../../db/bookingDb'
+import { aggregateBookingRecords } from '../../../aggregates/booking'
 import Cookies from 'cookies'
 
 const Page = ({ tourId, errorMsg, preexistingBooking, actionKey }) => {
