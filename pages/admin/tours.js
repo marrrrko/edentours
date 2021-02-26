@@ -8,6 +8,7 @@ import { indexToursAndBookings } from '../../aggregates/booking'
 import { uniq } from 'ramda'
 import { useState, useEffect } from 'react'
 import cookie from 'cookie'
+import { synchronizeToursWithGoogle } from '../../utils/google-calendar'
 
 function getCookieValue(key, defaultValue) {
   const value = cookie.parse(document.cookie)
@@ -104,6 +105,8 @@ export default function Tours({ accessGranted, upcomingToursAndBookings }) {
 
 export async function getServerSideProps(context) {
   const { access } = context.query
+
+  await synchronizeToursWithGoogle(1)
 
   const cookies = new Cookies(context.req, context.res)
   const accessCookie = cookies.get('edenaccess')

@@ -260,7 +260,3 @@ async function sendEmailIfNeeded(booking, apply = false) {
     emailSent: !emailMustBeSent || sent
   }
 }
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  console.log('Test Mode')
-}
