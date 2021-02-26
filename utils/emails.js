@@ -15,6 +15,12 @@ import {
 } from '../aggregates/booking'
 import { SES, config } from 'aws-sdk'
 import { buildTourDateStrings } from './tour-dates'
+import {
+  createTourStartEmailPlaintext,
+  createTourStartEmailHtml,
+  createConfirmationEmailPlaintext,
+  createConfirmationEmailHtml
+} from './email-templates'
 
 const fixedTimezone = 'Europe/Istanbul'
 
@@ -47,6 +53,8 @@ export async function buildBookingConfirmationEmail(bookingId) {
   const modifyUrl = `https://eden.tours/book/${booking.tour.tourId}?action=${modifyKey}`
   const unsubscribeUrl = `https://eden.tours/user/unsubscribe?action=${unsubscribeKey}`
 
+  const tourDates = buildTourDateStrings(booking.tour.start, fixedTimezone)
+
   const recipients = {
     to: [booking.email],
     cc: [],
@@ -56,14 +64,14 @@ export async function buildBookingConfirmationEmail(bookingId) {
   const body = {
     html: createConfirmationEmailHtml(
       booking.tour.summary,
-      booking.tour.start,
+      tourDates,
       booking.participantCount,
       modifyUrl,
       unsubscribeUrl
     ),
     plaintext: createConfirmationEmailPlaintext(
       booking.tour.summary,
-      booking.tour.start,
+      tourDates,
       booking.participantCount,
       modifyUrl,
       unsubscribeUrl
@@ -100,14 +108,14 @@ export async function buildTourStartEmail(
   const body = {
     html: createTourStartEmailHtml(
       tour.summary,
-      tour.start,
+      tourDates,
       participantCount,
       tour.description,
       unsubscribeUrl
     ),
     plaintext: createTourStartEmailPlaintext(
       tour.summary,
-      tour.start,
+      tourDates,
       participantCount,
       tour.description,
       unsubscribeUrl
@@ -201,138 +209,6 @@ function emailIsAllowed(email) {
   return allowed
 }
 
-function createConfirmationEmailHtml(
-  tourName,
-  tourDate,
-  numConnections,
-  modifyUrl,
-  unsubscribeUrl
-) {
-  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
-
-  return `
-<p><h2>Congrats! Your Tour is Booked</h2></p>
-<p>We are pleased to have you as our guest for a tour. We know you will have a great time, deepen your Bible knowledge, and make new acquaintances.</p>
-
-<p>Your details are below:</p>
-
-&nbsp;&nbsp;Tour: ${tourName} <br />
-&nbsp;&nbsp;Date: ${tourDates.fixedTime.combined} <br />
-&nbsp;&nbsp;Number of Connections: ${numConnections} <br />
-
-<p>Zoom connection details will be sent to you 48 hours before your tour starts. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
-<p>To cancel or modify your reservation, please click the following link:</p>
-<p><a href="${modifyUrl}">${modifyUrl}</a></p>
-<p>See you soon.<br />https://eden.tours</p>
-
-
-
-<br /><br />
-<p>You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
-  `
-}
-
-function createConfirmationEmailPlaintext(
-  tourName,
-  tourDate,
-  numConnections,
-  modifyUrl,
-  unsubscribeUrl
-) {
-  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
-
-  return `
-Congrats! Your Tour is Booked
-We are pleased to have you as our guest for a tour. We know you will have a great time, deepen your Bible knowledge, and make new acquaintances.
-
-Your details are below:
-
-  Tour: ${tourName}
-  Date: ${tourDates.fixedTime.combined}
-  Number of Connections: ${numConnections}
-
-Zoom connection details will be sent to you 48 hours before your tour starts. Please check our frequently asked questions page (https://eden.tours/faq) if you need more information.
-To cancel or modify your reservation, please use the following link: ${modifyUrl}
-
-See you soon.
-https://eden.tours
-
-
-
-
-You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can unsubscribe using this link: ${unsubscribeUrl}.
-  `
-}
-
-function createTourStartEmailHtml(
-  tourName,
-  tourDate,
-  numConnections,
-  connectionInfo,
-  unsubscribeUrl
-) {
-  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
-  const formattedConnectionInfo =
-    connectionInfo.indexOf('<br') != -1
-      ? connectionInfo
-      : connectionInfo.split('\n').join('<br />')
-
-  return `
-<p>Dear Friends,</p>
-
-<p>Greetings from Turkey! We are looking forward to meeting you on your upcoming tour. Here are your final booking details as well as your video conferencing connection instructions.</p>
-
-<h3>Tour Details</h3>
-&nbsp;&nbsp;Tour: ${tourName} <br />
-&nbsp;&nbsp;Date: <span style="font-weight: bold;">${tourDates.fixedTime.combined}</span> <br />
-&nbsp;&nbsp;Maximum Number of Connections: ${numConnections} <br />
-
-<h3>Video Conference Connection Details</h3>
-<div style="margin-right: 10px; padding: 15px; background-color: #deffff;">
-  ${formattedConnectionInfo}
-</div>
-<br/><p>See you soon.<br />https://eden.tours</p>
-
-
-
-<br /><br />
-<p>You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can <a href="${unsubscribeUrl}">unsubscribe</a>.</p>
-  `
-}
-
-function createTourStartEmailPlaintext(
-  tourName,
-  tourDate,
-  numConnections,
-  connectionInfo,
-  unsubscribeUrl
-) {
-  const tourDates = buildTourDateStrings(tourDate, fixedTimezone)
-
-  return `
-Dear Friends,
-
-Greetings from Turkey! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.
-
-  Tour: ${tourName}
-  Date: ${tourDates.fixedTime.combined}
-  Maximum Number of Connections: ${numConnections}
-
-
-Connection details
-${connectionInfo}
-
-
-
-See you soon.
-https://eden.tours
-
-
-
-You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can unsubscribe with this link: ${unsubscribeUrl}.
-`
-}
-
 export async function catchUpUnsentConfirmationEmails(apply = false) {
   const toursAndBookings = await getUpcomingBookings()
   const upcomingToursWithBookings = indexToursAndBookings(toursAndBookings)
@@ -383,4 +259,8 @@ async function sendEmailIfNeeded(booking, apply = false) {
     email: booking.email,
     emailSent: !emailMustBeSent || sent
   }
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  console.log('Test Mode')
 }
