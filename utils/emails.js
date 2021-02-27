@@ -55,6 +55,8 @@ export async function buildBookingConfirmationEmail(bookingId) {
 
   const tourDates = buildTourDateStrings(booking.tour.start, fixedTimezone)
 
+  const timeUrl = `https://eden.tours/book/${tour.id}/time`
+
   const recipients = {
     to: [booking.email],
     cc: [],
@@ -67,14 +69,16 @@ export async function buildBookingConfirmationEmail(bookingId) {
       tourDates,
       booking.participantCount,
       modifyUrl,
-      unsubscribeUrl
+      unsubscribeUrl,
+      timeUrl
     ),
     plaintext: createConfirmationEmailPlaintext(
       booking.tour.summary,
       tourDates,
       booking.participantCount,
       modifyUrl,
-      unsubscribeUrl
+      unsubscribeUrl,
+      timeUrl
     )
   }
 
@@ -96,6 +100,7 @@ export async function buildTourStartEmail(
   )
   await insertActionKey(unsubscribeKey, 'unsubscribe', targetId, null)
   const unsubscribeUrl = `https://eden.tours/user/unsubscribe?action=${unsubscribeKey}`
+  const timeUrl = `https://eden.tours/book/${tour.id}/time`
 
   const recipients = {
     to: [email],
@@ -111,14 +116,16 @@ export async function buildTourStartEmail(
       tourDates,
       participantCount,
       tour.description,
-      unsubscribeUrl
+      unsubscribeUrl,
+      timeUrl
     ),
     plaintext: createTourStartEmailPlaintext(
       tour.summary,
       tourDates,
       participantCount,
       tour.description,
-      unsubscribeUrl
+      unsubscribeUrl,
+      timeUrl
     )
   }
 

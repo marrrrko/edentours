@@ -4,8 +4,12 @@ Dear Friends,
 Greetings from Turkey! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.
 
   Tour: Seven Cities, Seven Congregations (Guide: Clem)
+
   Date: Sun Mar 14, 7:30 PM Europe/Istanbul (UTC+03:00)
+  You can view the tour date and time for your local timezone here: http://localhost:3000/book/376197a7-8701-40d2-9a81-23bd5f47b53c/time
+
   Maximum Number of Connections: 4
+
 
 Additional Notes
 
@@ -45,4 +49,4 @@ https://eden.tours
 
 
 
-You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can unsubscribe with this link: Unsubscribe here.
+You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can unsubscribe with this link: https://eden.tours/user/unsubscribe?action=VrJteFNn8uPs6NRvcs5p2G.

@@ -3,21 +3,37 @@ export function createConfirmationEmailHtml(
   tourDates,
   numConnections,
   modifyUrl,
-  unsubscribeUrl
+  unsubscribeUrl,
+  tourTimeUrl
 ) {
   return `
 <p><h2>Congrats! Your Tour is Booked</h2></p>
 <p>We are pleased to have you as our guest for a tour. We know you will have a great time, deepen your Bible knowledge, and make new acquaintances.</p>
 
-<p>Your details are below:</p>
+<h3>Tour Details</h3>
 
-&nbsp;&nbsp;Tour: ${tourName} <br />
-&nbsp;&nbsp;Date: ${tourDates.fixedTime.combined} <br />
-&nbsp;&nbsp;Number of Connections: ${numConnections} <br />
+<table style="border: none; border-spacing: 8px;">
+<col width="130">
+<tr>
+  <td>Tour</td>
+  <td style="padding-left:10px;">${tourName}</td>
+</tr>
+<tr>
+  <td>Date & Time</td>
+  <td style="padding-left:10px;"><span style="font-weight: bold;">${tourDates.fixedTime.combined}</span><br /><a href="${tourTimeUrl}">Click here</a> to view this in your local timezone</td>
+</tr>
+<tr>
+  <td>Maximum Number of Connections</td>
+  <td style="padding-left:10px;"><span style="font-size: 1.5em;">${numConnections}</span><br />
+</td>
+</tr>
+</table>
 
-<p>Zoom connection details will be sent to you 48 hours before your tour starts. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
-<p>To cancel or modify your reservation, please click the following link:</p>
-<p><a href="${modifyUrl}">${modifyUrl}</a></p>
+<p>Zoom connection details will be sent to you <b>48 hours</b> before your tour starts. Please check our <a href="https://eden.tours/faq">frequently asked questions page</a> if you need more information.</p>
+
+<h3>To cancel or modify</h3>
+<p>To cancel or modify your reservation, please use this link:<br />
+<a href="${modifyUrl}">${modifyUrl}</a></p>
 <p>See you soon.<br />https://eden.tours</p>
 
 
@@ -32,7 +48,8 @@ export function createConfirmationEmailPlaintext(
   tourDates,
   numConnections,
   modifyUrl,
-  unsubscribeUrl
+  unsubscribeUrl,
+  tourTimeUrl
 ) {
   return `
 Congrats! Your Tour is Booked
@@ -41,11 +58,17 @@ We are pleased to have you as our guest for a tour. We know you will have a grea
 Your details are below:
 
   Tour: ${tourName}
+
   Date: ${tourDates.fixedTime.combined}
+  You can view the tour date and time for your local timezone here: ${tourTimeUrl}
+  
   Number of Connections: ${numConnections}
 
 Zoom connection details will be sent to you 48 hours before your tour starts. Please check our frequently asked questions page (https://eden.tours/faq) if you need more information.
-To cancel or modify your reservation, please use the following link: ${modifyUrl}
+
+To cancel or modify your reservation, please use the following link:
+${modifyUrl}
+
 
 See you soon.
 https://eden.tours
@@ -62,7 +85,8 @@ export function createTourStartEmailHtml(
   tourDates,
   numConnections,
   connectionInfo,
-  unsubscribeUrl
+  unsubscribeUrl,
+  tourTimeUrl
 ) {
   const formattedConnectionInfo =
     connectionInfo.indexOf('<br') != -1
@@ -75,9 +99,24 @@ export function createTourStartEmailHtml(
 <p>Greetings from Turkey! We are looking forward to meeting you on your upcoming tour. Here are some reminders as well as your video conferencing connection instructions.</p>
 
 <h3>Tour Details</h3>
-&nbsp;&nbsp;Tour: ${tourName} <br />
-&nbsp;&nbsp;Date: <span style="font-weight: bold;">${tourDates.fixedTime.combined}</span> <br />
-&nbsp;&nbsp;Maximum Number of Connections: ${numConnections} <br />
+
+<table style="border: none; border-spacing: 8px;">
+<col width="130">
+<tr>
+  <td>Tour</td>
+  <td style="padding-left:10px;">${tourName}</td>
+</tr>
+<tr>
+  <td>Date & Time</td>
+  <td style="padding-left:10px;"><span style="font-weight: bold;">${tourDates.fixedTime.combined}</span><br /><a href="${tourTimeUrl}">Click here</a> to view this in your local timezone</td>
+</tr>
+<tr>
+  <td>Maximum Number of Connections</td>
+  <td style="padding-left:10px;"><span style="font-size: 1.5em;">${numConnections}</span><br />
+</td>
+</tr>
+</table>
+
 
 <h3>Additional Notes</h3>
 <ol>
@@ -109,7 +148,8 @@ export function createTourStartEmailPlaintext(
   tourDates,
   numConnections,
   connectionInfo,
-  unsubscribeUrl
+  unsubscribeUrl,
+  tourTimeUrl
 ) {
   return `
 Dear Friends,
@@ -117,8 +157,12 @@ Dear Friends,
 Greetings from Turkey! We are looking forward to meeting you on your upcoming tour. Here are your reservation details as well as your Zoom Meeting ID and password.
 
   Tour: ${tourName}
+
   Date: ${tourDates.fixedTime.combined}
+  You can view the tour date and time for your local timezone here: ${tourTimeUrl}
+
   Maximum Number of Connections: ${numConnections}
+
 
 Additional Notes
 

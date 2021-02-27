@@ -1,0 +1,27 @@
+
+Congrats! Your Tour is Booked
+We are pleased to have you as our guest for a tour. We know you will have a great time, deepen your Bible knowledge, and make new acquaintances.
+
+Your details are below:
+
+  Tour: Seven Cities, Seven Congregations (Guide: Clem)
+
+  Date: Sun Mar 14, 7:30 PM Europe/Istanbul (UTC+03:00)
+  You can view the tour date and time for your local timezone here: http://localhost:3000/book/376197a7-8701-40d2-9a81-23bd5f47b53c/time
+  
+  Number of Connections: 4
+
+Zoom connection details will be sent to you 48 hours before your tour starts. Please check our frequently asked questions page (https://eden.tours/faq) if you need more information.
+
+To cancel or modify your reservation, please use the following link:
+https://eden.tours/book/376197a7-8701-40d2-9a81-23bd5f47b53c?action=QnChkR1DMEfCcPtX9VdbhZ
+
+
+See you soon.
+https://eden.tours
+
+
+
+
+You are receiving this message because you have submitted your email at https://eden.tours. If you believe this to be an error you can unsubscribe using this link: https://eden.tours/user/unsubscribe?action=VrJteFNn8uPs6NRvcs5p2G.
+  
