@@ -44,29 +44,27 @@ function createTimeStrings(tourStart, userTimeZone) {
   }
 }
 
+function getTourStartInterval(tourStart) {
+  return Interval.fromDateTimes(DateTime.local(), DateTime.fromISO(tourStart))
+    .toDuration(['days', 'hours', 'minutes', 'seconds'])
+    .toObject()
+}
+
 const Page = ({ tourLabel, tourStart, errorMsg }) => {
   if (!tourStart || errorMsg) {
     return <Error statusCode={404} title="Hiç bir şey!" />
   }
 
   const [timeStrings, setTimeStrings] = useState(null)
-  const [timeLeft, setTimeLeft] = useState(
-    Interval.fromDateTimes(DateTime.utc(), DateTime.fromISO(tourStart))
-      .toDuration(['days', 'hours', 'minutes', 'seconds'])
-      .toObject()
-  )
+  const [timeLeft, setTimeLeft] = useState(getTourStartInterval(tourStart))
   const timer = useRef(null) // we can save timer in useRef and pass it to child
 
   useEffect(() => {
+    //window.DateTime = DateTime
     const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
     setTimeStrings(createTimeStrings(tourStart, userTimeZone))
     timer.current = setInterval(
-      () =>
-        setTimeLeft((v) =>
-          Interval.fromDateTimes(DateTime.utc(), DateTime.fromISO(tourStart))
-            .toDuration(['days', 'hours', 'minutes', 'seconds'])
-            .toObject()
-        ),
+      () => setTimeLeft(getTourStartInterval(tourStart)),
       1000
     )
     return () => {

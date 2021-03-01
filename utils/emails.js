@@ -55,7 +55,7 @@ export async function buildBookingConfirmationEmail(bookingId) {
 
   const tourDates = buildTourDateStrings(booking.tour.start, fixedTimezone)
 
-  const timeUrl = `https://eden.tours/book/${tour.id}/time`
+  const timeUrl = `https://eden.tours/book/${booking.tour.tourId}/time`
 
   const recipients = {
     to: [booking.email],
@@ -100,7 +100,7 @@ export async function buildTourStartEmail(
   )
   await insertActionKey(unsubscribeKey, 'unsubscribe', targetId, null)
   const unsubscribeUrl = `https://eden.tours/user/unsubscribe?action=${unsubscribeKey}`
-  const timeUrl = `https://eden.tours/book/${tour.id}/time`
+  const timeUrl = `https://eden.tours/book/${tour.tourId}/time`
 
   const recipients = {
     to: [email],
