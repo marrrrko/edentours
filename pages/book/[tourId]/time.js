@@ -45,9 +45,21 @@ function createTimeStrings(tourStart, userTimeZone) {
 }
 
 function getTourStartInterval(tourStart) {
-  return Interval.fromDateTimes(DateTime.local(), DateTime.fromISO(tourStart))
+  const now = DateTime.local()
+  const tourStartDt = DateTime.fromISO(tourStart)
+  let isPast = now < tourStartDt
+
+  let start = isPast ? now : tourStartDt
+  let end = isPast ? tourStartDt : now
+
+  let intervalObject = Interval.fromDateTimes(start, end)
     .toDuration(['days', 'hours', 'minutes', 'seconds'])
     .toObject()
+
+  return {
+    ...intervalObject,
+    isPast
+  }
 }
 
 const Page = ({ tourLabel, tourStart, errorMsg }) => {
@@ -67,6 +79,7 @@ const Page = ({ tourLabel, tourStart, errorMsg }) => {
       () => setTimeLeft(getTourStartInterval(tourStart)),
       1000
     )
+    console.log(JSON.stringify(timeLeft, null, ' '))
     return () => {
       clearInterval(timer.current)
     }
@@ -113,25 +126,40 @@ const Page = ({ tourLabel, tourStart, errorMsg }) => {
         </div>
       </div> */}
       <hr />
+
       <div className="mt-20 mb-20">
-        <h2 className="text-2xl mb-4">Tour will start in exactly</h2>
+        {timeLeft.isPast == true && (
+          <h2 className="text-2xl mb-4">Tour will start in exactly</h2>
+        )}
+        {timeLeft.isPast == false && (
+          <h2 className="text-2xl mb-4">Tour already started</h2>
+        )}
 
         <div>
           <span className="text-6xl">{timeLeft.days}</span>
-          <span className="text-xl ml-2">days</span>
+          <span className="text-xl ml-2">
+            {timeLeft.days == 1 ? 'day' : 'days'}
+          </span>
         </div>
         <div>
           <span className="text-6xl">{timeLeft.hours}</span>
-          <span className="text-xl ml-2">hours</span>
+          <span className="text-xl ml-2">
+            {timeLeft.hours == 1 ? 'hour' : 'hours'}
+          </span>
         </div>
         <div>
           <span className="text-6xl">{Math.floor(timeLeft.minutes)}</span>
-          <span className="text-xl ml-2">minutes</span>
+          <span className="text-xl ml-2">
+            {timeLeft.minutes == 1 ? 'minute' : 'minutes'}
+          </span>
         </div>
         <div>
           <span className="text-6xl">{Math.floor(timeLeft.seconds)}</span>
-          <span className="text-xl ml-2">seconds</span>
+          <span className="text-xl ml-2">
+            {Math.floor(timeLeft.seconds) == 1 ? 'second' : 'seconds'}
+          </span>
         </div>
+        {timeLeft.isPast == false && <h2 className="text-2xl mt-8">ago</h2>}
       </div>
     </div>
   )
