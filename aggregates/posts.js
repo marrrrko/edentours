@@ -3,6 +3,18 @@ const collator = new Intl.Collator('en', {
   sensitivity: 'base'
 })
 
+function isFilterMatch(filterType, filterValue, tag) {
+  const firstColonPos = tag.name.indexOf(':')
+  if (firstColonPos == -1) return false
+  const fixedTag = `${tag.name.slice(0, firstColonPos).trim()}:${tag.name
+    .slice(firstColonPos + 1)
+    .trim()}`.toLowerCase()
+  const filter = `${filterType}:${filterValue}`.trim().toLowerCase()
+  const matched = fixedTag === filter
+
+  return matched
+}
+
 export function findAllPostsWithTag(
   postList,
   tag,
@@ -12,26 +24,17 @@ export function findAllPostsWithTag(
   return postList
     .filter((post) => {
       const tags = post.tags
-      const tagMatches = tags.filter(
+      const targetTagMatches = tags.filter(
         (t) => t.name.trim().toLowerCase() === tag.trim().toLowerCase()
       )
-      return tagMatches.length > 0
+      return targetTagMatches.length > 0
     })
     .filter((post) => {
       if (!filterType || !filterValue) return true
-      const tags = post.tags
-      const tagMatches = tags.filter((t) => {
-        const firstColonPos = t.name.indexOf(':')
-        if (firstColonPos == -1) return true
-        const fixedTag = `${t.name
-          .slice(0, firstColonPos)
-          .trim()}:${t.name.slice(firstColonPos + 1).trim()}`
-        return (
-          fixedTag.toLowerCase() ===
-          `${filterType}:${filterValue}`.trim().toLowerCase()
-        )
-      })
-      return tagMatches.length > 0
+      const filterTagMatches = post.tags.filter((t) =>
+        isFilterMatch(filterType, filterValue, t)
+      )
+      return filterTagMatches.length > 0
     })
     .slice()
     .sort((a, b) => collator.compare(a.title, b.title))

@@ -19,7 +19,10 @@ export default function Post({ title, pageContent, feature_image }) {
         return <TourDatesSection key={index} />
       case 'tagindex':
         return (
-          <div className="w-full md:w-3/5 2xl:w-2/5 mx-auto my-5 px-4">
+          <div
+            key={index}
+            className="w-full md:w-3/5 2xl:w-2/5 mx-auto my-5 px-4"
+          >
             {pageSection.content && (
               <h2
                 title={JSON.stringify(pageSection.otherParams, null, ' ')}
@@ -31,7 +34,6 @@ export default function Post({ title, pageContent, feature_image }) {
             <TagIndex postGroups={pageSection.postGroups} />
           </div>
         )
-        return <pre>{JSON.stringify(pageSection, null, ' ')}</pre>
       default:
         return <span></span>
     }

@@ -117,7 +117,8 @@ async function parsePostHtml(postHtml) {
         return (
           name === 'a' &&
           key === 'href' &&
-          attributes[key].toLowerCase().indexOf('eden.tours/find/') !== -1
+          attributes[key].toLowerCase().indexOf('eden.tours/find/') !== -1 &&
+          attributes[key].toLowerCase().indexOf('embed=true') !== -1
         )
       }
 
