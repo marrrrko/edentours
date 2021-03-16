@@ -1,8 +1,15 @@
 import { fetchFlickrSet } from './flickr'
+import { getPostListWithTags } from '../utils/ghost'
+import {
+  findAllPostsWithTag,
+  findAllPossibleFilters,
+  groupPostByTagPrefix
+} from '../aggregates/posts'
 import * as htmlparser2 from 'htmlparser2'
 
 export async function buildPageContent(post) {
   const sections = await parsePostHtml(post.html)
+  let allPostMetaWithTags
   post.pageContent = await Promise.all(
     sections.map(async (section) => {
       if (section.type === 'flickr') {
@@ -11,6 +18,27 @@ export async function buildPageContent(post) {
         return {
           ...section,
           gridConfig
+        }
+      } else if (section.type === 'tagindex') {
+        if (!allPostMetaWithTags) {
+          allPostMetaWithTags = await getPostListWithTags()
+        }
+        const postsWithSelectedTag = findAllPostsWithTag(
+          allPostMetaWithTags,
+          section.tag,
+          section.filterType,
+          section.filterValue
+        )
+        const filters = findAllPossibleFilters(postsWithSelectedTag)
+        const postGroups = groupPostByTagPrefix(
+          postsWithSelectedTag,
+          section.groupBy
+        )
+        return {
+          ...section,
+          postsWithSelectedTag,
+          filters,
+          postGroups
         }
       } else {
         return section
@@ -56,21 +84,21 @@ async function parsePostHtml(postHtml) {
         )
       }
 
-      const isFlickrAlbum = (name, key, attributes) => {
-        return (
-          name === 'a' &&
-          key === 'href' &&
-          attributes[key].startsWith('https://www.flickr.com/photos/') &&
-          attributes[key].indexOf('/sets/') !== -1
-        )
-      }
-
       const handleRelativeLink = (key, attributes) => {
         appendHtml(
           ` ${key}="${attributes[key].replace(
             'https://content.eden.tours',
             'https://eden.tours'
           )}"`
+        )
+      }
+
+      const isFlickrAlbum = (name, key, attributes) => {
+        return (
+          name === 'a' &&
+          key === 'href' &&
+          attributes[key].startsWith('https://www.flickr.com/photos/') &&
+          attributes[key].indexOf('/sets/') !== -1
         )
       }
 
@@ -81,6 +109,41 @@ async function parsePostHtml(postHtml) {
           .split('/')[0]
         currentSection.setId = linkUrl.split('/sets/')[1].replace('/', '')
         appendHtml = (html) => {
+          return
+        }
+      }
+
+      const isTagIndex = (name, key, attributes) => {
+        return (
+          name === 'a' &&
+          key === 'href' &&
+          attributes[key].toLowerCase().indexOf('eden.tours/find/') !== -1
+        )
+      }
+
+      const handleTagIndex = (linkUrl) => {
+        currentSection = createSpecialSection('tagindex')
+        const suffix = linkUrl.toLowerCase().split('/find/')[1]
+        const tag = suffix.split('?')[0]
+        const otherParams =
+          suffix.indexOf('?') == -1
+            ? {}
+            : suffix
+                .split('?')[1]
+                .split('&')
+                .reduce((acc, next) => {
+                  const [name, value] = next.split('=')
+                  acc[name] = decodeURIComponent(value)
+                  return acc
+                }, {})
+
+        currentSection.tag = tag
+        currentSection.groupBy = otherParams.groupby || null
+        currentSection.filterType = otherParams.filtertype || null
+        currentSection.filterValue = otherParams.filtervalue || null
+        currentSection.otherParams = otherParams
+        appendHtml = (html, htmlType) => {
+          if (htmlType == 'textcontent') currentSection.content = html
           return
         }
       }
@@ -116,28 +179,30 @@ async function parsePostHtml(postHtml) {
       const parser = new htmlparser2.Parser({
         onopentag(name, attributes) {
           currentDepth++
-          appendHtml(`<${name}`)
+          appendHtml(`<${name}`, 'tagstart')
           Object.keys(attributes).forEach((key) => {
             if (isRelativeLink(name, key, attributes)) {
               handleRelativeLink(key, attributes)
             } else if (isFlickrAlbum(name, key, attributes)) {
               handleFlickrAlbumLink(attributes[key])
+            } else if (isTagIndex(name, key, attributes)) {
+              handleTagIndex(attributes[key])
             } else if (isMapHubIframe(name, key, attributes)) {
               handleMapHubIframe(key, attributes)
             } else if (isTourDatesList(name, key, attributes)) {
               handleTourDatesList(key, attributes)
             } else {
-              appendHtml(` ${key}="${attributes[key]}"`)
+              appendHtml(` ${key}="${attributes[key]}"`, 'tagattribute')
             }
           })
           appendHtml(' />')
         },
         ontext(text) {
-          appendHtml(`${text}`)
+          appendHtml(text, 'textcontent')
         },
         onclosetag(tagname) {
           currentDepth--
-          appendHtml(`</${tagname}>`)
+          appendHtml(`</${tagname}>`, 'tagend')
           if (currentDepth == 0) {
             sections.push(currentSection)
             currentSection = createHtmlSection()

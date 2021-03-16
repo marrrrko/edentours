@@ -40,7 +40,16 @@ export async function getUpcomingEventsFromGoogle(cacheMinutes = 5) {
 
   const freshValues = response.data.items
     .map(parseGoogleCalendarResponse)
-    .filter((event) => event.summary.trim().toLowerCase().startsWith('tour:'))
+    .filter((event) => {
+      const isValid = event.id && event.summary && event.start
+      if (!isValid) {
+        console.log(`Skipping invalid calendar event: ${JSON.stringify(event)}`)
+      }
+      return isValid
+    })
+    .filter((event) => {
+      return event.summary.trim().toLowerCase().startsWith('tour:')
+    })
     .map((event) => ({
       ...event,
       summary: event.summary.trim().slice(5).trim()
