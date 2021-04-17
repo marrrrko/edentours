@@ -35,31 +35,53 @@ export function aggregateBookingsFromTours(upcomingToursAndBookings) {
       return acc
     }, {})
 
+    tour.allBookingsByBookingId = tour.bookings.reduce((acc, next) => {
+      if (!acc[next.bookingId]) {
+        acc[next.bookingId] = []
+      }
+      acc[next.bookingId].push(next)
+      return acc
+    }, {})
+
     tour.finalBookingsByEmail = Object.keys(tour.allBookingsByEmail).map(
       (email) => {
         return aggregateUsersBookings(email, tour.allBookingsByEmail[email])
       }
     )
 
-    tour.currentParticipantTotal = tour.finalBookingsByEmail.reduce(
+    tour.finalBookingsByBookingId = Object.keys(
+      tour.allBookingsByBookingId
+    ).map((bookingId) => {
+      return aggregateUsersBookings(
+        bookingId,
+        tour.allBookingsByBookingId[bookingId]
+      )
+    })
+
+    tour.currentParticipantTotal = tour.finalBookingsByBookingId.reduce(
       (acc, next) => {
+        //if (verbose) console.log(`Adding ${next.participantCount} to ${acc}`)
+
         return acc + next.participantCount
       },
       0
     )
 
-    tour.currentGroupTotal = tour.finalBookingsByEmail.reduce((acc, next) => {
-      if (next.latestBooking.eventType != 'cancelled') {
-        return acc + 1
-      }
-      return acc
-    }, 0)
+    tour.currentGroupTotal = tour.finalBookingsByBookingId.reduce(
+      (acc, next) => {
+        if (next.latestBooking.eventType != 'cancelled') {
+          return acc + 1
+        }
+        return acc
+      },
+      0
+    )
 
     return tour
   })
 }
 
-export function aggregateUsersBookings(email, bookings) {
+export function aggregateUsersBookings(key, bookings) {
   return bookings
     .slice()
     .sort((a, b) => new Date(a.eventTime) - new Date(b.eventTime))
@@ -78,7 +100,7 @@ export function aggregateUsersBookings(email, bookings) {
         return acc
       },
       {
-        email: email,
+        email: key,
         participantCount: 0,
         latestBooking: null
       }
