@@ -6,7 +6,9 @@ export function setupGlobalLogging() {
   const consoleLogFormat = winston.format.combine(
     winston.format.colorize(),
     winston.format.printf(function (info) {
-      return `${new Date().toISOString()} [${info.level}] [${info.service}] ${JSON.stringify(info.message, null, 2)}`
+      return `[${
+        info.level
+      }] [${info.service}] ${JSON.stringify(info.message, null, 2)}`
     })
   )
 
@@ -24,28 +26,6 @@ export function setupGlobalLogging() {
       format: consoleLogFormat
     })
   ]
-
-  if (process.env.USE_CLOUDWATCH == 'TRUE') {
-    console.log(`Logs will be sent to cloudwatch`)
-    defaultTransports.push(
-      new WinstonCloudWatch({
-        name: 'eden-web-stream',
-        logGroupName: 'eden',
-        logStreamName: 'eden-web',
-        awsRegion: 'ca-central-1'
-      })
-    )
-    emailTransports.push(
-      new WinstonCloudWatch({
-        name: 'eden-email-stream',
-        logGroupName: 'eden',
-        logStreamName: 'eden-email',
-        awsRegion: 'ca-central-1'
-      })
-    )
-  } else {
-    console.log(`Logs will NOT be sent to cloudwatch`)
-  }
 
   const level = process.env.NODE_ENV !== 'production' ? 'debug' : 'info'
   const defaultLogger = winston.createLogger({

@@ -1,3 +1,10 @@
+import programConfig from '../data/programs.default.json'
+
+const programsById = programConfig.programs.reduce((acc, next) => {
+  acc[next.id] = next
+  return acc
+}, {})
+
 export function indexToursAndBookings(rows) {
   const tourIndex = rows
     .map((r) => ({
@@ -5,6 +12,23 @@ export function indexToursAndBookings(rows) {
       booking: JSON.parse(r.bookingDoc),
       tour: JSON.parse(r.tourDoc)
     }))
+    .map((b) => {
+      if (b.tour.summary == 'Tour: SEVEN / ru /tYler ') {
+        console.log(JSON.stringify(b, null, ' '))
+      }
+
+      if (b.tour.programId) {
+        return {
+          ...b,
+          tour: {
+            ...b.tour,
+            summary: ''
+          }
+        }
+      } else {
+        return b
+      }
+    })
     .reduce((acc, next) => {
       if (!acc[next.tourId]) {
         acc[next.tourId] = {

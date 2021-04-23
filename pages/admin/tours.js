@@ -8,7 +8,10 @@ import { indexToursAndBookings } from '../../aggregates/booking'
 import { uniq } from 'ramda'
 import { useState, useEffect } from 'react'
 import cookie from 'cookie'
-import { synchronizeToursWithGoogle } from '../../utils/google-calendar'
+import {
+  synchronizeToursWithGoogle,
+  getInvalidEvents
+} from '../../utils/google-calendar'
 
 function getCookieValue(key, defaultValue) {
   const value = cookie.parse(document.cookie)
@@ -16,7 +19,11 @@ function getCookieValue(key, defaultValue) {
 }
 
 const filterCookieName = 'edenadminguidefilter'
-export default function Tours({ accessGranted, upcomingToursAndBookings }) {
+export default function Tours({
+  accessGranted,
+  upcomingToursAndBookings,
+  invalidEvents
+}) {
   if (!accessGranted) {
     return <Error statusCode={401} title="Olmaz!" />
   }
@@ -56,6 +63,27 @@ export default function Tours({ accessGranted, upcomingToursAndBookings }) {
           })}
         </select>
       </div>
+      {invalidEvents.length > 0 && (
+        <div className="mt-5">
+          <h3 className="text-sm text-red-700">
+            The following calendar events were not imported/updated. You must
+            correct the issues before they can be imported.
+          </h3>
+          {invalidEvents.map((invalidEvent) => {
+            return (
+              <div
+                key={invalidEvent.eventId}
+                className="w-3/4 ml-8 text-xs mt-4 bg-gray-200 p-3 rounded"
+              >
+                Date: {invalidEvent.date} <br />
+                Creator: {invalidEvent.creator} <br />
+                Summary: {invalidEvent.summary} <br />
+                Issue: {invalidEvent.issue}
+              </div>
+            )
+          })}
+        </div>
+      )}
       <div className="flex flex-row content-center mt-5">
         <table className="table-auto mx-auto">
           <thead>
@@ -106,7 +134,7 @@ export default function Tours({ accessGranted, upcomingToursAndBookings }) {
 export async function getServerSideProps(context) {
   const { access } = context.query
 
-  await synchronizeToursWithGoogle(1)
+  await synchronizeToursWithGoogle(0.25)
 
   const cookies = new Cookies(context.req, context.res)
   const accessCookie = cookies.get('edenaccess')
@@ -129,7 +157,11 @@ export async function getServerSideProps(context) {
     })
   )
 
-  return { props: { accessGranted: true, upcomingToursAndBookings } }
+  const invalidEvents = await getInvalidEvents()
+
+  return {
+    props: { accessGranted: true, upcomingToursAndBookings, invalidEvents }
+  }
 }
 
 Router.onRouteChangeComplete = () => {
