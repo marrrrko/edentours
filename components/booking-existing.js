@@ -115,8 +115,10 @@ export default function ExistingTourBooking({ booking, actionKey }) {
   } else if (eventData.error != undefined) {
     return (
       <div className="flex flex-col mt-20">
-        <div className="text-center  text-3xl">⚔</div>
-        <div className="text-center  text-lg">An error occurred:</div>
+        <div className="text-center text-3xl">⚔</div>
+        <div className="text-center text-lg font-bold my-3">
+          Sorry. Your booking could not be updated:
+        </div>
         <div className="text-center  text-base font-sans">
           {eventData.error}
         </div>

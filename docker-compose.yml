@@ -1,0 +1,101 @@
+version: '3'
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /data/nginx/conf.d:/etc/nginx/conf.d
+      - /data/nginx/vhost.d:/etc/nginx/vhost.d
+      - /data/nginx/html:/usr/share/nginx/html
+      - /data/nginx/dhparam:/etc/nginx/dhparam
+      - /data/nginx/certs:/etc/nginx/certs:ro
+      - /home/ec2-user/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    network_mode: bridge
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ca-central-1
+        awslogs-group: mark-web-2
+        awslogs-create-group: 'true'
+        tag: '{{ with split .ImageName ":" }}{{join . "_"}}{{end}}-{{.ID}}'
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nginx-proxy-le
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /data/nginx/certs:/etc/nginx/certs:rw
+      - /data/nginx/acme.sh:/etc/acme.sh \
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - DEFAULT_EMAIL=markcarrier@gmail.com
+    network_mode: bridge
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ca-central-1
+        awslogs-group: mark-web-2
+        awslogs-create-group: 'true'
+        tag: '{{ with split .ImageName ":" }}{{join . "_"}}{{end}}-{{.ID}}'
+
+  ghost-cms:
+    image: ghost
+    ports:
+      - "5005:2368"
+    volumes:
+      - /data/eden:/var/lib/ghost/content
+    environment:
+      - url=https://content.eden.tours
+      - mail__transport=SMTP
+      - mail__from=Eden Tours <info@eden.tours>
+      - mail__options__service=SMTP
+      - mail__options__host=email-smtp.us-east-1.amazonaws.com
+      - mail__options__port=587
+      - mail__options__auth__user=
+      - mail__options__auth__pass=
+      - VIRTUAL_HOST=content.eden.tours
+      - LETSENCRYPT_HOST=content.eden.tours
+    network_mode: bridge
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ca-central-1
+        awslogs-group: eden-tours
+        awslogs-create-group: 'true'
+        tag: '{{ with split .ImageName ":" }}{{join . "_"}}{{end}}-{{.ID}}'
+
+  edenweb:
+    image: docker.pkg.github.com/markcarrier/edentours/eden:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - /data/edenweb:/app/data
+    environment:
+      - FLICKR_KEY=
+      - GHOST_KEY=
+      - GHOST_LOCATION=https://content.eden.tours
+      - GOOGLE_KEY=
+      - CALENDAR_ID=
+      - ADMIN_ACCESS=
+      - EMAIL_FROM=Eden Tours <bookings@eden.tours>
+      - DEFAULT_MAX_ENROLLMENT=75
+      - VIRTUAL_HOST=eden.tours
+      - LETSENCRYPT_HOST=eden.tours
+      - EMAIL_SENDING_ENABLED=true
+      - EMAIL_SENDING_SAFETY=*
+    network_mode: bridge
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ca-central-1
+        awslogs-group: eden-tours
+        awslogs-create-group: 'true'
+        tag: '{{ with split .ImageName ":" }}{{join . "_"}}{{end}}-{{.ID}}'
+
+volumes:
+  acme:
