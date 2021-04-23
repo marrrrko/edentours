@@ -107,7 +107,7 @@ async function processNewBooking(tourId, booking) {
     ).length > 0
 
   if (alreadyBooked) {
-    return 'This email is already registered for this tour on this date.\nIf you would like to modify your booking, please use the link included in your booking confirmation email.'
+    return 'This email address is already registered for this tour on this date.\nIf you would like to modify your booking, please use the link included in your booking confirmation email.'
   }
 
   const availableSpots = await getTourRemainingSpots(tourAgg)

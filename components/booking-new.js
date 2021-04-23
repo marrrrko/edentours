@@ -150,7 +150,7 @@ export default function NewTourBooking({ tourId }) {
         <div className="text-center text-lg font-bold my-3">
           Sorry. Your booking could not be recorded:
         </div>
-        <div className="text-center  text-base max-w-lg mx-auto">
+        <div className="text-center text-base max-w-lg mx-auto">
           {eventData.error.split('\n').map((line) => {
             return <div className="mb-4">{line}</div>
           })}

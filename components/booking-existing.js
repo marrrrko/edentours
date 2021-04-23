@@ -119,7 +119,7 @@ export default function ExistingTourBooking({ booking, actionKey }) {
         <div className="text-center text-lg font-bold my-3">
           Sorry. Your booking could not be updated:
         </div>
-        <div className="text-center  text-base font-sans">
+        <div className="text-center text-base max-w-lg mx-auto">
           {eventData.error}
         </div>
         <div className="text-center  text-3xl">
