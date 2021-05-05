@@ -56,8 +56,8 @@ services:
       - mail__options__service=SMTP
       - mail__options__host=email-smtp.us-east-1.amazonaws.com
       - mail__options__port=587
-      - mail__options__auth__user=
-      - mail__options__auth__pass=
+      - mail__options__auth__user=AKIA4ZUHYSCMTSJQ6VMY
+      - mail__options__auth__pass=BF5rvfVZmruLS4ekq0BVEDkn35I7R0zS8v8dBLT47qUh
       - VIRTUAL_HOST=content.eden.tours
       - LETSENCRYPT_HOST=content.eden.tours
     network_mode: bridge
