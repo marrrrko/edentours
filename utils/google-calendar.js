@@ -1,13 +1,12 @@
 import { google } from 'googleapis'
 import * as NodeCache from 'node-cache'
 import { getUpcomingTours, createNewTours, updateTour } from '../db/bookingDb'
-import tourConfig from '../data/programs.default.json'
+import { getAllTourPrograms } from '../db/tour-programs'
+import { getAllGuides } from '../db/tour-guides'
 
 const googleEventCache = new NodeCache()
 const invalidEventsCache = new NodeCache()
 const eventsCacheKey = 'googleevents'
-const validProgramIds = tourConfig.programs.map((t) => t.id)
-const validTourGuides = tourConfig.guides.map((g) => g.id)
 const validLanguages = [
   'en',
   'fr',
@@ -74,9 +73,14 @@ function isValidTour(googleEvent) {
         return p.trim()
       })
 
-    const validProgramId = validProgramIds.indexOf(programId) != -1
-    const validGuide = validTourGuides.indexOf(guideId) != -1
+    const validProgramId = validTourPrograms.map(tp => tp._id).indexOf(programId) != -1
+    if(!validProgramId) validationErrorMessage = `Unknown tour program id (${programId}). Check the config.
+    dexOf(language) != -1`
+    const validGuide = validTourGuides.map(tg => tg._id).indexOf(guideId) != -1
+    if(!validGuide) validationErrorMessage = `Unknown guide id (${guideId}). Check the config.`
     const validLanguage = validLanguages.indexOf(language) != -1
+    if(!validLanguage) validationErrorMessage = `Unknown language (${language}). Check the config.
+    dexOf(language) != -1`
     isValid = isValid && validProgramId && validGuide && validLanguage
   }
 
@@ -111,8 +115,12 @@ function eventToTour(googleEvent) {
       return p.trim()
     })
 
+  const tourProgram = validTourPrograms.filter(tp => tp._id === programId)[0]
+  const label = tourProgram.labels.filter(l => l.language === language)[0].label
+
   return {
     ...googleEvent,
+    summary: label,
     programId,
     language,
     guideId
@@ -133,17 +141,31 @@ function parseGoogleCalendarResponse(calendarItem) {
   }
 }
 
+let validTourGuides = []
+let validTourPrograms = []
+let lastTourProgramDataRefresh = 0
+async function refreshTourProgramData(cacheMinutes = 1) {
+  const nowSeconds = Math.ceil(new Date().getTime() / 1000)
+  const refreshNeeded = (nowSeconds - lastTourProgramDataRefresh) / 60 > cacheMinutes
+
+  if(refreshNeeded) {
+  validTourPrograms = await getAllTourPrograms()
+  validTourGuides = await getAllGuides()
+  lastTourProgramDataRefresh = nowSeconds
+  }
+}
+
 export async function synchronizeToursWithGoogle(cacheMinutes) {
   const scheduledTours = await getUpcomingTours()
   const scheduledToursByGoogleId = scheduledTours.reduce((acc, next) => {
     acc[next.externalEventId] = next
     return acc
   }, {})
+  await refreshTourProgramData(cacheMinutes)
   const toursFromGoogle = (await getUpcomingEventsFromGoogle(cacheMinutes))
     .filter(isValidTour)
     .map(eventToTour)
-
-  console.log(`Tours from G: ${JSON.stringify(toursFromGoogle, null, ' ')}`)
+  
   const newTours = toursFromGoogle.filter(
     (eventFromGoogle) =>
       scheduledToursByGoogleId[eventFromGoogle.id] == undefined

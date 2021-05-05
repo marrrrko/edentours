@@ -29,6 +29,7 @@ app
     process.exit(2)
   })
   .then(() => {
+    const SERVICE_PORT = process.env.SERVICE_PORT || 3001
     createServer((req, res) => {
       const parsedUrl = parse(req.url, true)
       try {
@@ -36,9 +37,9 @@ app
       } catch (requestError) {
         global.log.error('Request error', requestError)
       }
-    }).listen(3000, (err) => {
+    }).listen(SERVICE_PORT, (err) => {
       if (err) throw err
-      global.log.info('EdenWeb Ready on port 3000')
+      global.log.info(`EdenWeb Ready on port ${SERVICE_PORT}`)
     })
   })
   .then(() => {

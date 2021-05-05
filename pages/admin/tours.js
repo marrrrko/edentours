@@ -13,12 +13,18 @@ import {
   getInvalidEvents
 } from '../../utils/google-calendar'
 
+const DEFAULT_MAX_ENROLLMENT = process.env.DEFAULT_MAX_ENROLLMENT || 82
+
 function getCookieValue(key, defaultValue) {
   const value = cookie.parse(document.cookie)
   return value[key] ?? defaultValue
 }
 
+const capitalize = (word) =>
+  word && word.length ? `${word[0].toUpperCase()}${word.slice(1)}` : ''
+
 const filterCookieName = 'edenadminguidefilter'
+
 export default function Tours({
   accessGranted,
   upcomingToursAndBookings,
@@ -89,18 +95,22 @@ export default function Tours({
           <thead>
             <tr>
               <th>Tour</th>
+              <th>Lang</th>
+              <th>Guide</th>
               <th>Date</th>
               <th>Groups</th>
               <th>Participants</th>
-              <th>More</th>
             </tr>
           </thead>
           <tbody>
             {upcomingToursAndBookings.map((t) => {
-              const maxEnrollment =
-                t.tour.location && parseInt(t.tour.location) > 0
-                  ? parseInt(t.tour.location)
-                  : parseInt(process.env.DEFAULT_MAX_ENROLLMENT)
+              const hasValidEnrollmentOverride =
+                t.tour.location &&
+                parseInt(t.tour.location) == t.tour.location &&
+                parseInt(t.tour.location) > 0
+              const maxEnrollment = hasValidEnrollmentOverride
+                ? parseInt(t.tour.location)
+                : parseInt(DEFAULT_MAX_ENROLLMENT)
               return (
                 <tr
                   key={t.tour.tourId}
@@ -109,17 +119,29 @@ export default function Tours({
                       ? ''
                       : 'hidden'
                   }
+                  title={JSON.stringify(t.tour, null, ' ')}
                 >
                   <td className="border px-4 py-2">{t.tour.summary}</td>
+                  <td className="border px-4 py-2">{t.tour.language}</td>
+                  <td className="border px-4 py-2">
+                    {capitalize(t.tour.guideId)}
+                  </td>
                   <td className="border px-4 py-2">{t.startString}</td>
                   <td className="border px-4 py-2 text-center">
                     {t.currentGroupTotal}
                   </td>
                   <td className="border px-4 py-2 text-center">
-                    {t.currentParticipantTotal} / {maxEnrollment}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    <Link href={'/admin/tours/' + t.tour.tourId}>More</Link>
+                    {t.currentParticipantTotal > 0 ? (
+                      <Link href={'/admin/tours/' + t.tour.tourId}>
+                        <a>
+                          {t.currentParticipantTotal} / {maxEnrollment}
+                        </a>
+                      </Link>
+                    ) : (
+                      <span>
+                        {t.currentParticipantTotal} / {maxEnrollment}
+                      </span>
+                    )}
                   </td>
                 </tr>
               )
@@ -151,10 +173,12 @@ export async function getServerSideProps(context) {
 
   const toursAndBookings = await getUpcomingBookings()
   const upcomingToursAndBookings = indexToursAndBookings(toursAndBookings).map(
-    (tb) => ({
-      ...tb,
-      startString: buildCombinedFixedTimeString(tb.tour.start)
-    })
+    (tb) => {
+      return {
+        ...tb,
+        startString: buildCombinedFixedTimeString(tb.tour.start)
+      }
+    }
   )
 
   const invalidEvents = await getInvalidEvents()

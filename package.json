@@ -26,6 +26,7 @@
     "googleapis": "^67.1.1",
     "htmlparser2": "^6.0.1",
     "luxon": "^1.26.0",
+    "nano": "^9.0.3",
     "next": "^10.0.8",
     "node-cache": "^5.1.2",
     "react": "^17.0.1",

@@ -13,16 +13,12 @@ export function indexToursAndBookings(rows) {
       tour: JSON.parse(r.tourDoc)
     }))
     .map((b) => {
-      if (b.tour.summary == 'Tour: SEVEN / ru /tYler ') {
-        console.log(JSON.stringify(b, null, ' '))
-      }
 
       if (b.tour.programId) {
         return {
           ...b,
           tour: {
-            ...b.tour,
-            summary: ''
+            ...b.tour
           }
         }
       } else {
