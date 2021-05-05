@@ -73,11 +73,16 @@ export async function getBookingRecords(bookingId) {
 /**
  * @returns({[{ tourId: string, tourDoc: object, bookingDoc: object}]})
  */
-export async function getUpcomingBookings() {
+export async function getUpcomingBookings(tourId = null) {
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
+    const allToursQuery =
+      "SELECT Tour.tourId, Tour.doc as tourDoc, Booking.doc as bookingDoc FROM Tour LEFT JOIN Booking ON Tour.tourId = Booking.tourId WHERE Tour.start >= datetime('now')"
+    const singleTourQuery =
+      'SELECT Tour.tourId, Tour.doc as tourDoc, Booking.doc as bookingDoc FROM Tour LEFT JOIN Booking ON Tour.tourId = Booking.tourId WHERE Tour.tourId = $tourId'
     db.all(
-      "SELECT Tour.tourId, Tour.doc as tourDoc, Booking.doc as bookingDoc FROM Tour LEFT JOIN Booking ON Tour.tourId = Booking.tourId WHERE Tour.start >= datetime('now')",
+      tourId == null ? allToursQuery : singleTourQuery,
+      tourId == null ? {} : { $tourId: tourId },
       (error, rows) => {
         if (error) reject(error)
         else resolve(rows)

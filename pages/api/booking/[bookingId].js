@@ -1,11 +1,15 @@
-import { aggregateBookingRecords } from '../../../aggregates/booking'
+import {
+  aggregateBookingRecords,
+  indexToursAndBookings
+} from '../../../aggregates/booking'
 import {
   getTour,
   insertNewBooking,
   insertBookingUpdate,
   insertBookingCancellation,
   getAction,
-  getBookingRecords
+  getBookingRecords,
+  getUpcomingBookings
 } from '../../../db/bookingDb'
 import * as emailSending from '../../../utils/emails'
 import Cookies from 'cookies'
@@ -77,9 +81,41 @@ export default async function handler(req, res) {
   }
 }
 
+async function getTourRemainingSpots(tourAgg) {
+  const maxEnrollment =
+    tourAgg.tour.location && parseInt(tourAgg.tour.location) > 0
+      ? parseInt(tourAgg.tour.location)
+      : parseInt(process.env.DEFAULT_MAX_ENROLLMENT)
+
+  console.log(`Max enrollment = ${maxEnrollment}`)
+  const enrollment = tourAgg.currentParticipantTotal
+  console.log(`Current enrollment = ${enrollment}`)
+
+  return maxEnrollment - enrollment
+}
+
 async function processNewBooking(tourId, booking) {
   const validationProblem = findBookingValidationProblem(booking)
   if (validationProblem) return validationProblem
+
+  const toursAndBookings = await getUpcomingBookings(tourId)
+  const tourAgg = indexToursAndBookings(toursAndBookings)[0]
+
+  const alreadyBooked =
+    tourAgg.finalBookingsByEmail.filter(
+      (b) => b.email.toLowerCase() === booking.email.toLowerCase()
+    ).length > 0
+
+  if (alreadyBooked) {
+    return 'This email address is already registered for this tour on this date.\nIf you would like to modify your booking, please use the link included in your booking confirmation email.'
+  }
+
+  const availableSpots = await getTourRemainingSpots(tourAgg)
+  if (parseInt(booking.participantCount) > availableSpots) {
+    if (availableSpots > 0)
+      return `Only ${availableSpots} spots remain for this tour on this date.`
+    else return `No spots remain for this tour on this date`
+  }
 
   const bookingId = await insertNewBooking(tourId, {
     bookerName: booking.bookerName,
@@ -127,6 +163,16 @@ async function processExistingBooking(tourId, booking, cookies) {
   )
   if (originalBooking.email != booking.email) {
     return 'Something is fishy'
+  }
+
+  const toursAndBookings = await getUpcomingBookings(tourId)
+  const tourAgg = indexToursAndBookings(toursAndBookings)[0]
+  const availableSpots =
+    (await getTourRemainingSpots(tourAgg)) + originalBooking.participantCount
+  if (parseInt(booking.participantCount) > availableSpots) {
+    if (availableSpots > 0)
+      return `Only ${availableSpots} spots are available for this tour on this date.`
+    else return `No spots remain for this tour on this date`
   }
 
   const bookingId = await insertBookingUpdate(tourId, {

@@ -2,9 +2,6 @@ import { synchronizeToursWithGoogle } from '../../../utils/google-calendar'
 import { indexToursAndBookings } from '../../../aggregates/booking'
 import { getUpcomingBookings } from '../../../db/bookingDb'
 
-const cacheSetting = process.env.ENABLE_GOOGLE
-const cacheEventsFromGoogle = cacheSetting == undefined ? true : cacheSetting
-
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
