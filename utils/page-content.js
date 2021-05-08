@@ -6,6 +6,7 @@ import {
   groupPostByTagPrefix
 } from '../aggregates/posts'
 import * as htmlparser2 from 'htmlparser2'
+import url from 'url-parse'
 
 export async function buildPageContent(post) {
   const sections = await parsePostHtml(post.html)
@@ -166,12 +167,20 @@ async function parsePostHtml(postHtml) {
         return (
           name === 'a' &&
           key === 'href' &&
-          attributes[key].startsWith('https://dates.eden.tours')
+          attributes[key].toLowerCase().startsWith('https://dates.eden.tours')
         )
       }
 
-      const handleTourDatesList = () => {
+      const handleTourDatesList = (link) => {
         currentSection.type = 'tourdates'
+
+        const url = parse(link, true)
+
+        currentSection.tourProgramId =
+          url.pathname.language > 2 ? url.pathname : '*'
+        currentSection.language = url.query.language || '*'
+        currentSection.tourGuideId = url.query.guide || '*'
+
         appendHtml = (html) => {
           return
         }
@@ -191,7 +200,7 @@ async function parsePostHtml(postHtml) {
             } else if (isMapHubIframe(name, key, attributes)) {
               handleMapHubIframe(key, attributes)
             } else if (isTourDatesList(name, key, attributes)) {
-              handleTourDatesList(key, attributes)
+              handleTourDatesList(attributes[key])
             } else {
               appendHtml(` ${key}="${attributes[key]}"`, 'tagattribute')
             }

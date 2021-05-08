@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       res.setHeader('Content-Type', 'application/json')
       res.end(
         JSON.stringify({
-          tours: tours
+          tours: tours.map(t => ({summary: t.summary, start: t.start, tourId: t.tourId, remainingSpots: t.maxEnrollment - t.enrollment }))
         })
       )
     } else {

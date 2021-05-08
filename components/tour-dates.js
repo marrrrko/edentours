@@ -1,7 +1,7 @@
 import React from 'react'
 import { DateTime } from 'luxon'
 
-export default function TourDates({ dates: tours }) {
+export default function TourDates({ tours }) {
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
   const bookingOptions = tours.map((tour, index) => {
     let tourStartDay_user = DateTime.fromISO(tour.start)
@@ -13,11 +13,11 @@ export default function TourDates({ dates: tours }) {
       .toFormat("t z '(UTC'ZZ')'")
       .replace('_', ' ')
 
-    const fullyBooked = tour.enrollment >= tour.maxEnrollment
+    const fullyBooked = tour.remainingSpots <= 0
     const spotsLeftWarningThreshold = 20
-    const spotsLeft = tour.maxEnrollment - tour.enrollment
+    const spotsLeft = tour.remainingSpots
     const isAlmostFullyBooked = spotsLeft < spotsLeftWarningThreshold
-
+    
     return (
       <div
         key={index}

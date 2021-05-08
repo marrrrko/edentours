@@ -44,7 +44,7 @@ export default function TourDatesSection({}) {
         <span>Error: {bookingData.error}</span>
       )}
       {!bookingData.loading && bookingData.entries && (
-        <TourDates dates={bookingData.entries} />
+        <TourDates tours={bookingData.entries} />
       )}
     </div>
   )
