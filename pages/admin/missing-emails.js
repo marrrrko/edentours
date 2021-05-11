@@ -3,10 +3,12 @@ import Error from '../_error'
 import Cookies from 'cookies'
 import { DateTime } from 'luxon'
 import { useState, useEffect } from 'react'
+import BigLoader from '../../components/big-loader'
 
 export default function Tours({ accessGranted, emailList }) {
   const [selected, setSelected] = useState([])
   const [send, setSend] = useState(false)
+  const [sending, setSending] = useState(false)
 
   useEffect(() => {
 
@@ -32,7 +34,8 @@ export default function Tours({ accessGranted, emailList }) {
       }
     }
 
-    if(send) {
+    if(send && !sending) {
+      setSending(true)
       sendSelected()
     }
 
@@ -62,6 +65,10 @@ export default function Tours({ accessGranted, emailList }) {
 
   const isChecked = (tValue) => {
     return selected.indexOf(tValue) !== -1
+  }
+
+  if(sending) {
+    return <div className="text-center"><BigLoader /> <br /> <span className="text-xl font-bold">Sending. Please be patient.</span></div>
   }
 
   return (
