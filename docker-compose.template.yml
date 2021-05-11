@@ -33,7 +33,7 @@ services:
       - /data/nginx/acme.sh:/etc/acme.sh \
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      - DEFAULT_EMAIL=markcarrier@gmail.com
+      - DEFAULT_EMAIL=
     network_mode: bridge
     logging:
       driver: awslogs
@@ -50,14 +50,14 @@ services:
     volumes:
       - /data/eden:/var/lib/ghost/content
     environment:
-      - url=https://content.eden.tours
+      - url=
       - mail__transport=SMTP
-      - mail__from=Eden Tours <info@eden.tours>
+      - mail__from=
       - mail__options__service=SMTP
-      - mail__options__host=email-smtp.us-east-1.amazonaws.com
+      - mail__options__host=
       - mail__options__port=587
-      - mail__options__auth__user=AKIA4ZUHYSCMTSJQ6VMY
-      - mail__options__auth__pass=BF5rvfVZmruLS4ekq0BVEDkn35I7R0zS8v8dBLT47qUh
+      - mail__options__auth__user=
+      - mail__options__auth__pass=
       - VIRTUAL_HOST=content.eden.tours
       - LETSENCRYPT_HOST=content.eden.tours
     network_mode: bridge
@@ -78,15 +78,15 @@ services:
     environment:
       - FLICKR_KEY=
       - GHOST_KEY=
-      - GHOST_LOCATION=https://content.eden.tours
+      - GHOST_LOCATION=
       - GOOGLE_KEY=
       - CALENDAR_ID=
       - ADMIN_ACCESS=
-      - EMAIL_FROM=Eden Tours <bookings@eden.tours>
-      - DEFAULT_MAX_ENROLLMENT=75
-      - VIRTUAL_HOST=eden.tours
-      - LETSENCRYPT_HOST=eden.tours
-      - EMAIL_SENDING_ENABLED=true
+      - EMAIL_FROM=
+      - DEFAULT_MAX_ENROLLMENT=
+      - VIRTUAL_HOST=
+      - LETSENCRYPT_HOST=
+      - EMAIL_SENDING_ENABLED=
       - EMAIL_SENDING_SAFETY=*
     network_mode: bridge
     logging:
