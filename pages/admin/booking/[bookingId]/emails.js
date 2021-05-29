@@ -21,7 +21,7 @@ export default function Bookings({
   }
 
   if (!accessGranted) {
-    return <Error statusCode={401} title="Olmaz!" />
+    return <Error statusCode={401} title="Yasak!" />
   }
 
   return (

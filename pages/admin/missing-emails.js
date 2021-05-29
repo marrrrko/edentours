@@ -42,7 +42,7 @@ export default function Tours({ accessGranted, emailList }) {
   }, [send])
 
   if (!accessGranted) {
-    return <Error statusCode={401} title="Olmaz!" />
+    return <Error statusCode={401} title="Yasak!" />
   }
 
   const everyId = emailList.map((e) => `send-${e.transactionId}`)

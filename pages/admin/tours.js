@@ -18,7 +18,7 @@ function getCookieValue(key, defaultValue) {
 const filterCookieName = 'edenadminguidefilter'
 export default function Tours({ accessGranted, upcomingToursAndBookings }) {
   if (!accessGranted) {
-    return <Error statusCode={401} title="Olmaz!" />
+    return <Error statusCode={401} title="Yasak!" />
   }
 
   const [filterData, setFilterData] = useState('none')
