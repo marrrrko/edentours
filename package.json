@@ -27,7 +27,7 @@
     "htmlparser2": "^6.0.1",
     "luxon": "^1.26.0",
     "nano": "^9.0.3",
-    "next": "^10.0.8",
+    "next": "^11.0.0",
     "node-cache": "^5.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -37,11 +37,11 @@
     "url-parse": "^1.5.1",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
-    "winston-cloudwatch": "^2.5.0"
+    "winston-cloudwatch": "^2.5.2"
   },
   "devDependencies": {
     "autoprefixer": "^10.2.5",
-    "postcss": "^8.2.8",
+    "postcss": "^8.3.5",
     "ramda": "^0.27.1",
     "tailwindcss": "^2.0.3"
   }
