@@ -1,25 +1,17 @@
-import programConfig from '../data/programs.default.json'
-
-const programsById = programConfig.programs.reduce((acc, next) => {
-  acc[next.id] = next
-  return acc
-}, {})
-
 export function indexToursAndBookings(rows) {
   const tourIndex = rows
     .map((r) => ({
       tourId: r.tourId,
       booking: JSON.parse(r.bookingDoc),
-      tour: JSON.parse(r.tourDoc)
+      tour: JSON.parse(r.tourDoc),
     }))
     .map((b) => {
-
       if (b.tour.programId) {
         return {
           ...b,
           tour: {
-            ...b.tour
-          }
+            ...b.tour,
+          },
         }
       } else {
         return b
@@ -29,7 +21,7 @@ export function indexToursAndBookings(rows) {
       if (!acc[next.tourId]) {
         acc[next.tourId] = {
           tour: next.tour,
-          bookings: []
+          bookings: [],
         }
       }
       if (next.booking) acc[next.tourId].bookings.push(next.booking)
@@ -122,7 +114,7 @@ export function aggregateUsersBookings(key, bookings) {
       {
         email: key,
         participantCount: 0,
-        latestBooking: null
+        latestBooking: null,
       }
     )
 }

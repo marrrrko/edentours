@@ -3,10 +3,11 @@ import { getPostListWithTags } from '../utils/ghost'
 import {
   findAllPostsWithTag,
   findAllPossibleFilters,
-  groupPostByTagPrefix
+  groupPostByTagPrefix,
 } from '../aggregates/posts'
 import * as htmlparser2 from 'htmlparser2'
 import url from 'url-parse'
+import parse from 'url-parse'
 
 export async function buildPageContent(post) {
   const sections = await parsePostHtml(post.html)
@@ -18,7 +19,7 @@ export async function buildPageContent(post) {
         let gridConfig = flickrData.body.photoset.photo.map(flickrToReactGrid)
         return {
           ...section,
-          gridConfig
+          gridConfig,
         }
       } else if (section.type === 'tagindex') {
         if (!allPostMetaWithTags) {
@@ -39,7 +40,7 @@ export async function buildPageContent(post) {
           ...section,
           postsWithSelectedTag,
           filters,
-          postGroups
+          postGroups,
         }
       } else {
         return section
@@ -53,7 +54,7 @@ export async function buildPageContent(post) {
 function createHtmlSection() {
   let section = {
     type: 'html',
-    html: ''
+    html: '',
   }
 
   return section
@@ -61,7 +62,7 @@ function createHtmlSection() {
 
 function createSpecialSection(type) {
   let section = {
-    type: type
+    type: type,
   }
 
   return section
@@ -224,7 +225,7 @@ async function parsePostHtml(postHtml) {
         onend() {
           sections.push(currentSection)
           resolve(sections)
-        }
+        },
       })
 
       parser.write(postHtml)
@@ -241,6 +242,6 @@ function flickrToReactGrid(flickrPhoto) {
     thumbnail: flickrPhoto.url_s,
     thumbnailWidth: flickrPhoto.width_s,
     thumbnailHeight: flickrPhoto.height_s,
-    caption: flickrPhoto.title
+    caption: flickrPhoto.title,
   }
 }

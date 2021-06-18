@@ -11,7 +11,7 @@ import cookie from 'cookie'
 import {
   synchronizeToursWithGoogle,
   getInvalidEvents,
-  getOrphanEvents
+  getOrphanEvents,
 } from '../../utils/google-calendar'
 
 const DEFAULT_MAX_ENROLLMENT = process.env.DEFAULT_MAX_ENROLLMENT || 82
@@ -30,7 +30,7 @@ export default function Tours({
   accessGranted,
   upcomingToursAndBookings,
   invalidEvents,
-  orphanEvents
+  orphanEvents,
 }) {
   if (!accessGranted) {
     return <Error statusCode={401} title="Olmaz!" />
@@ -51,7 +51,7 @@ export default function Tours({
   }
 
   return (
-    <div className="px-10 mt-5 w-full flex flex-col">
+    <div className="px-10 mt-5 mb-20 w-full flex flex-col">
       <h2 className="mx-auto">Upcoming Tours</h2>
       <div className="flex flex-row content-center">
         <select
@@ -72,16 +72,24 @@ export default function Tours({
         </select>
       </div>
       {invalidEvents.length > 0 && (
-        <div className="mt-5">
-          <h3 className="text-sm text-red-700">
-            The following calendar events were not imported/updated. You must
-            correct the issues before they can be imported.
-          </h3>
+        <div className="flex-col mt-5">
+          <div>
+            <h3 className="text-sm text-red-700 text-center">
+              The following calendar events were not imported/updated. You must
+              correct the issues before they can be imported.
+            </h3>
+            <div className="text-center">
+              Formatting Example:{' '}
+              <span className="font-mono p-1 bg-yellow-200 rounded-sm">
+                Tour: seven / it / stefania
+              </span>
+            </div>
+          </div>
           {invalidEvents.map((invalidEvent) => {
             return (
               <div
                 key={invalidEvent.eventId}
-                className="w-3/4 ml-8 text-xs mt-4 bg-gray-200 p-3 rounded"
+                className="w-3/4 mx-auto text-xs mt-4 bg-gray-200 p-3 rounded"
               >
                 Date: {invalidEvent.date} <br />
                 Creator: {invalidEvent.creator} <br />
@@ -95,7 +103,7 @@ export default function Tours({
       {orphanEvents.length > 0 && (
         <div className="mt-5">
           <h3 className="text-sm text-red-700">
-            The following tours are missing from Google. 
+            The following tours are missing from Google.
           </h3>
           {orphanEvents.map((orphanEvent) => {
             return (
@@ -194,11 +202,12 @@ export async function getServerSideProps(context) {
   }
 
   const toursAndBookings = await getUpcomingBookings()
+  console.log(JSON.stringify(toursAndBookings, null, ' '))
   const upcomingToursAndBookings = indexToursAndBookings(toursAndBookings).map(
     (tb) => {
       return {
         ...tb,
-        startString: buildCombinedFixedTimeString(tb.tour.start)
+        startString: buildCombinedFixedTimeString(tb.tour.start),
       }
     }
   )
@@ -207,7 +216,12 @@ export async function getServerSideProps(context) {
   const orphanEvents = await getOrphanEvents()
 
   return {
-    props: { accessGranted: true, upcomingToursAndBookings, invalidEvents, orphanEvents }
+    props: {
+      accessGranted: true,
+      upcomingToursAndBookings,
+      invalidEvents,
+      orphanEvents,
+    },
   }
 }
 
