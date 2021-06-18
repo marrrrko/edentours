@@ -6,6 +6,7 @@ import { getAllGuides } from '../db/tour-guides'
 
 const googleEventCache = new NodeCache()
 const invalidEventsCache = new NodeCache()
+const orphanEventsCache = new NodeCache()
 const eventsCacheKey = 'googleevents'
 const validLanguages = [
   'en',
@@ -99,8 +100,9 @@ function isValidTour(googleEvent) {
     console.log(`Skipping invalid event from google: ${validationErrorMessage}`)
   } else if (invalidEvents[googleEvent.id]) {
     delete invalidEvents[googleEvent.id]
-    invalidEventsCache.set('invalid-events', invalidEvents)
+    invalidEventsCache.set('invalid-events', invalidEvents)    
   }
+  console.log(`Found ${invalidEvents.length} invalid events`)
 
   return isValid
 }
@@ -176,6 +178,17 @@ export async function synchronizeToursWithGoogle(cacheMinutes) {
     return existingTour.etag != tourFromGoogle.etag
   })
 
+  const toursFromGoogleByGoogleId = toursFromGoogle.reduce((acc,next) => {
+    console.log(`Checking ${JSON.stringify(next,null, ' ')}`)
+    acc[next.id] = next
+    return acc
+  },{})
+  const orphanTours = scheduledTours.filter(existingTour => {    
+    return toursFromGoogleByGoogleId[existingTour.externalEventId] == null
+  })
+  orphanEventsCache.set('orphan-events', orphanTours)
+  console.log(`Found ${orphanTours.length} orphan events`)
+
   if (!newTours.length && !toursToUpdate.length) {
     return
   } else {
@@ -212,4 +225,9 @@ export async function synchronizeToursWithGoogle(cacheMinutes) {
 export async function getInvalidEvents() {
   const badEvents = invalidEventsCache.get('invalid-events') || {}
   return Object.values(badEvents)
+}
+
+export async function getOrphanEvents() {
+  const orphans = orphanEventsCache.get('orphan-events') || []
+  return orphans
 }

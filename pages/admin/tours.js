@@ -10,7 +10,8 @@ import { useState, useEffect } from 'react'
 import cookie from 'cookie'
 import {
   synchronizeToursWithGoogle,
-  getInvalidEvents
+  getInvalidEvents,
+  getOrphanEvents
 } from '../../utils/google-calendar'
 
 const DEFAULT_MAX_ENROLLMENT = process.env.DEFAULT_MAX_ENROLLMENT || 82
@@ -28,7 +29,8 @@ const filterCookieName = 'edenadminguidefilter'
 export default function Tours({
   accessGranted,
   upcomingToursAndBookings,
-  invalidEvents
+  invalidEvents,
+  orphanEvents
 }) {
   if (!accessGranted) {
     return <Error statusCode={401} title="Olmaz!" />
@@ -85,6 +87,26 @@ export default function Tours({
                 Creator: {invalidEvent.creator} <br />
                 Summary: {invalidEvent.summary} <br />
                 Issue: {invalidEvent.issue}
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {orphanEvents.length > 0 && (
+        <div className="mt-5">
+          <h3 className="text-sm text-red-700">
+            The following tours are missing from Google. 
+          </h3>
+          {orphanEvents.map((orphanEvent) => {
+            return (
+              <div
+                key={orphanEvent.eventId}
+                className="w-3/4 ml-8 text-xs mt-4 bg-gray-200 p-3 rounded"
+              >
+                Date: {orphanEvent.date} <br />
+                Creator: {orphanEvent.creator} <br />
+                Summary: {orphanEvent.summary} <br />
+                Issue: {orphanEvent.issue}
               </div>
             )
           })}
@@ -182,9 +204,10 @@ export async function getServerSideProps(context) {
   )
 
   const invalidEvents = await getInvalidEvents()
+  const orphanEvents = await getOrphanEvents()
 
   return {
-    props: { accessGranted: true, upcomingToursAndBookings, invalidEvents }
+    props: { accessGranted: true, upcomingToursAndBookings, invalidEvents, orphanEvents }
   }
 }
 
