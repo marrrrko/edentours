@@ -1,9 +1,16 @@
 import React from 'react'
 import { DateTime } from 'luxon'
 
-export default function TourDates({ tours }) {
+export default function TourDates({ tours, programId, guideId, language }) {
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const bookingOptions = tours.map((tour, index) => {
+  const filteredTours = tours.filter((t) => {
+    return (
+      (programId === '*' || t.programId === programId) &&
+      (guideId === '*' || t.guide.id === guideId) &&
+      (language === '*' || t.language === language)
+    )
+  })
+  const bookingOptions = filteredTours.map((tour, index) => {
     let tourStartDay_user = DateTime.fromISO(tour.start)
       .setZone(userTimeZone)
       .toFormat('DDDD')
@@ -17,22 +24,14 @@ export default function TourDates({ tours }) {
     const spotsLeftWarningThreshold = 20
     const spotsLeft = tour.remainingSpots
     const isAlmostFullyBooked = spotsLeft < spotsLeftWarningThreshold
-    
+
     return (
-      <div
-        key={index}
-        className={
-          'py-6 px-2 ' +
-          (index % 2 === 0 ? 'bg-indigo-100' : 'bg-blue-50') +
-          (index === 0 ? ' rounded-t-lg' : '') +
-          (index === tours.length - 1 ? ' rounded-b-lg' : '')
-        }
-      >
+      <div key={index} className="py-6 px-2 pl-4 shadow-xl bg-yellow-100 mb-7">
         {!fullyBooked && (
-          <div className="float-right text-center mt-4 mr-3">
+          <div className="float-right text-center mt-10 mr-3">
             <a
               href={'/book/' + tour.tourId}
-              className="bg-yellow-200 no-underline text-black text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:ring-offset-2 focus:ring-offset-blue-200"
+              className="bg-blue-900 no-underline text-white text-base font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-900 focus:ring-offset-2 focus:ring-offset-blue-200"
             >
               Book
             </a>
@@ -58,10 +57,34 @@ export default function TourDates({ tours }) {
             <br />
             <span className="text-sm">{tourStartTime_user}</span>
           </div>
+          <div className="text-sm mt-3 flex flex-row">
+            <div className="flex-grow">
+              <span className="font-bold">Guide: </span>
+              <span>{tour.guide.name}</span>
+            </div>
+            <div className="flex-grow">
+              <span className="font-bold">Language: </span>
+              <span>
+                {tour.language?.nativeName}{' '}
+                {tour.language?.nativeName !== tour.language?.name && (
+                  <span>({tour.language?.name})</span>
+                )}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     )
   })
 
-  return <div className="rounded">{bookingOptions}</div>
+  return (
+    <div
+      data-program-id={programId}
+      data-guide-id={guideId}
+      data-language={language}
+      className=""
+    >
+      {bookingOptions}
+    </div>
+  )
 }

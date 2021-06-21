@@ -16,7 +16,7 @@ export default function Post({ title, pageContent, feature_image }) {
       case 'maphub':
         return <MapHubSection key={index} pageSection={pageSection} />
       case 'tourdates':
-        return <TourDatesSection key={index} />
+        return <TourDatesSection key={index} pageSection={pageSection} />
       case 'tagindex':
         return (
           <div

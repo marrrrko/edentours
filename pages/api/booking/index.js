@@ -1,11 +1,38 @@
 import { synchronizeToursWithGoogle } from '../../../utils/google-calendar'
 import { indexToursAndBookings } from '../../../aggregates/booking'
 import { getUpcomingBookings } from '../../../db/bookingDb'
+import languageData from '../../../languages.json'
+import { getAllGuides } from '../../../db/tour-guides'
+
+const languageDict = languageData.languages.reduce((acc, next) => {
+  acc[next.code] = next
+  return acc
+}, {})
+
+let tourGuides = null
+let lastTourProgramDataRefresh = 0
+async function refreshTourProgramData(cacheSeconds = 30) {
+  const nowSeconds = Math.ceil(new Date().getTime() / 1000)
+  const refreshNeeded = nowSeconds - lastTourProgramDataRefresh > cacheSeconds
+
+  if (refreshNeeded) {
+    //validTourPrograms = await getAllTourPrograms()
+    tourGuides = (await getAllGuides()).reduce((acc, next) => {
+      acc[next._id] = next
+      return acc
+    }, {})
+    console.log(tourGuides)
+    lastTourProgramDataRefresh = nowSeconds
+  }
+}
 
 export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
-      await synchronizeToursWithGoogle(10)
+      await Promise.all([
+        refreshTourProgramData(),
+        synchronizeToursWithGoogle(10),
+      ])
 
       const toursAndBookings = await getUpcomingBookings()
       const upcomingToursAndBookings = indexToursAndBookings(toursAndBookings)
@@ -18,7 +45,7 @@ export default async function handler(req, res) {
           return {
             ...tourAgg.tour,
             enrollment: tourAgg.currentParticipantTotal,
-            maxEnrollment
+            maxEnrollment,
           }
         })
         .filter((tour) => {
@@ -30,7 +57,18 @@ export default async function handler(req, res) {
       res.setHeader('Content-Type', 'application/json')
       res.end(
         JSON.stringify({
-          tours: tours.map(t => ({summary: t.summary, start: t.start, tourId: t.tourId, remainingSpots: t.maxEnrollment - t.enrollment }))
+          tours: tours.map((t) => ({
+            summary: t.summary,
+            start: t.start,
+            tourId: t.tourId,
+            remainingSpots: t.maxEnrollment - t.enrollment,
+            programId: t.programId,
+            language: languageDict[t.language],
+            guide: {
+              id: t.guideId,
+              name: tourGuides[t.guideId]?.displayLabel,
+            },
+          })),
         })
       )
     } else {

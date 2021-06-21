@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import TourDates from './tour-dates'
 
-export default function TourDatesSection({}) {
+export default function TourDatesSection({ pageSection }) {
   const [bookingData, setBookingData] = useState({
     entries: null,
     error: null,
-    loading: true
+    loading: true,
   })
 
   useEffect(() => {
@@ -17,20 +17,20 @@ export default function TourDatesSection({}) {
           setBookingData({
             entries: responseData,
             error: 'Invalid Booking Data',
-            loading: false
+            loading: false,
           })
         } else {
           setBookingData({
             entries: responseData.tours,
             error: null,
-            loading: false
+            loading: false,
           })
         }
       } catch (err) {
         setBookingData({
           entries: null,
           error: err,
-          loading: false
+          loading: false,
         })
       }
     }
@@ -44,7 +44,12 @@ export default function TourDatesSection({}) {
         <span>Error: {bookingData.error}</span>
       )}
       {!bookingData.loading && bookingData.entries && (
-        <TourDates tours={bookingData.entries} />
+        <TourDates
+          tours={bookingData.entries}
+          programId={pageSection.tourProgramId}
+          language={pageSection.language}
+          guideId={pageSection.tourGuideId}
+        />
       )}
     </div>
   )

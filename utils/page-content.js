@@ -177,8 +177,7 @@ async function parsePostHtml(postHtml) {
 
         const url = parse(link, true)
 
-        currentSection.tourProgramId =
-          url.pathname.language > 2 ? url.pathname : '*'
+        currentSection.tourProgramId = url.query.program || '*'
         currentSection.language = url.query.language || '*'
         currentSection.tourGuideId = url.query.guide || '*'
 

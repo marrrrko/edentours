@@ -3,27 +3,12 @@ import * as NodeCache from 'node-cache'
 import { getUpcomingTours, createNewTours, updateTour } from '../db/bookingDb'
 import { getAllTourPrograms } from '../db/tour-programs'
 import { getAllGuides } from '../db/tour-guides'
-
+import languageData from '../languages.json'
 const googleEventCache = new NodeCache()
 const invalidEventsCache = new NodeCache()
 const eventsCacheKey = 'googleevents'
-const validLanguages = [
-  'en',
-  'fr',
-  'es',
-  'ar',
-  'zh',
-  'ru',
-  'de',
-  'it',
-  'ja',
-  'el',
-  'hi',
-  'vi',
-  'th',
-  'ko',
-  'fa',
-]
+const validLanguages = languageData.languages.map((l) => l.code)
+
 const calendar = google.calendar({
   version: 'v3',
   auth: process.env.GOOGLE_KEY,
