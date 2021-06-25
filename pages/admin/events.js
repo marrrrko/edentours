@@ -27,7 +27,7 @@ const capitalize = (word) =>
 
 const filterCookieName = 'edenadminguidefilter'
 
-export default function Tours({
+export default function Events({
   accessGranted,
   upcomingToursAndBookings,
   invalidEvents,

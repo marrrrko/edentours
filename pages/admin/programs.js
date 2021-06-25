@@ -6,9 +6,8 @@ import Error from '../_error'
 import Cookies from 'cookies'
 import { useState, useEffect } from 'react'
 import cookie from 'cookie'
-import languageData from '../../languages.json'
 import AdminMenu from '../../components/admin-menu'
-export default function Tours({ accessGranted, programs, guides, languages }) {
+export default function Programs({ accessGranted, programs, guides }) {
   if (!accessGranted) {
     return <Error statusCode={401} title="Olmaz!" />
   }
@@ -23,7 +22,7 @@ export default function Tours({ accessGranted, programs, guides, languages }) {
       <div className="flex flex-col content-center mt-5">
         {programs.map((program) => {
           return (
-            <div key={program._id} className="mb-10">
+            <div key={program._id} className="mb-6">
               <h2 className="font-mono text-base">{program._id}</h2>
               <hr />
               <div>
@@ -41,6 +40,12 @@ export default function Tours({ accessGranted, programs, guides, languages }) {
         })}
       </div>
 
+      <div className="mb-10">
+        <Link href="/admin/languages">
+          <a>View All Possible Language Codes</a>
+        </Link>
+      </div>
+
       <h2 className="mx-auto mt-10">Guides</h2>
       <div className="flex flex-col content-center mt-5">
         {guides.map((guide) => {
@@ -48,31 +53,11 @@ export default function Tours({ accessGranted, programs, guides, languages }) {
             <div
               key={guide._id}
               title={JSON.stringify(guide, null, ' ')}
-              className="mb-10"
+              className="flex text-base "
             >
-              <h2 className="font-mono text-base">{guide._id}</h2>
-              <hr />
-              <div>{guide.displayLabel}</div>
-              <div>{guide.email}</div>
-            </div>
-          )
-        })}
-      </div>
-
-      <h2 className="mx-auto mt-10">Languages</h2>
-      <div className="flex flex-col content-center mt-5">
-        {languages.map((language) => {
-          return (
-            <div
-              key={language.code}
-              title={JSON.stringify(language, null, ' ')}
-              className="text-base"
-            >
-              <span className="font-mono font-bold inline-block w-30">
-                {language.code}
-              </span>
-              <span className="ml-4">{language.nativeName}</span>
-              <span className="ml-2">({language.name})</span>
+              <div className="font-mono w-32">{guide._id}</div>
+              <div className="w-48">{guide.displayLabel}</div>
+              <div className="w-48">{guide.email}</div>
             </div>
           )
         })}
@@ -104,7 +89,6 @@ export async function getServerSideProps(context) {
       accessGranted: true,
       programs,
       guides,
-      languages: languageData.languages,
     },
   }
 }
