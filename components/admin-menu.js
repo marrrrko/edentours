@@ -6,7 +6,7 @@ export default function AdminMenu({ activeLink }) {
       <li className="mr-1 md:mr-3">
         <Link href="/admin/events">
           <a className="hover:bg-gray-200 p-2 pb-3 md:px-3 rounded no-underline">
-            Events
+            Upcoming Events
           </a>
         </Link>
       </li>
