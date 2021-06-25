@@ -13,6 +13,7 @@ import {
   getInvalidEvents,
   getOrphanEvents,
 } from '../../utils/google-calendar'
+import AdminMenu from '../../components/admin-menu'
 
 const DEFAULT_MAX_ENROLLMENT = process.env.DEFAULT_MAX_ENROLLMENT || 82
 
@@ -52,7 +53,10 @@ export default function Tours({
 
   return (
     <div className="px-10 mt-5 mb-20 w-full flex flex-col">
-      <h2 className="mx-auto">Upcoming Tours</h2>
+      <div className="flex flex-row-reverse">
+        <AdminMenu />
+      </div>
+      <h2 className="mx-auto">Upcoming Events</h2>
       <div className="flex flex-row content-center">
         <select
           className="inline-block w-64  mx-auto mt-4 p-2 rounded"
@@ -78,12 +82,6 @@ export default function Tours({
               The following calendar events were not imported/updated. You must
               correct the issues before they can be imported.
             </h3>
-            <div className="text-center">
-              Formatting Example:{' '}
-              <span className="font-mono p-1 bg-yellow-200 rounded-sm">
-                Tour: seven / it / stefania
-              </span>
-            </div>
           </div>
           {invalidEvents.map((invalidEvent) => {
             return (
@@ -98,6 +96,23 @@ export default function Tours({
               </div>
             )
           })}
+          <div className="mt-8 mb-12">
+            <div className="text-center">
+              Required Calendar Format:
+              <br />
+              <span className="font-mono p-1 bg-yellow-200 rounded-sm">
+                Tour: &lt;program id&gt; / &lt;language code&gt; / &lt;guide
+                id&gt;
+              </span>
+            </div>
+            <div className="text-center mt-2">
+              Example:
+              <br />
+              <span className="font-mono p-1 bg-yellow-200 rounded-sm">
+                Tour: seven / it / stefania
+              </span>
+            </div>
+          </div>
         </div>
       )}
       {orphanEvents.length > 0 && (
@@ -202,7 +217,6 @@ export async function getServerSideProps(context) {
   }
 
   const toursAndBookings = await getUpcomingBookings()
-  console.log(JSON.stringify(toursAndBookings, null, ' '))
   const upcomingToursAndBookings = indexToursAndBookings(toursAndBookings).map(
     (tb) => {
       return {
