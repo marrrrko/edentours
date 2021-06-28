@@ -5,11 +5,12 @@ import Cookies from 'cookies'
 import Error from '../../_error'
 import {
   groupBookingsByBookingId,
-  aggregateBookingRecords
+  aggregateBookingRecords,
 } from '../../../aggregates/booking'
 import { buildCombinedFixedTimeString } from '../../../utils/tour-dates'
 import { uniq } from 'ramda'
 import { useState } from 'react'
+import AdminMenu from '../../../components/admin-menu'
 
 export default function Bookings({
   accessGranted,
@@ -17,7 +18,7 @@ export default function Bookings({
   separator,
   tourId,
   tourLabel,
-  tourDate
+  tourDate,
 }) {
   const [values, setValues] = useState({ hideCancelled: true })
 
@@ -36,7 +37,10 @@ export default function Bookings({
   ).join(separator)}`
 
   return (
-    <div className="px-10 pt-8 mb-20 flex flex-col content-center">
+    <div className="px-10 pt-5 mb-20 flex flex-col content-center">
+      <div className="flex flex-row-reverse mb-4">
+        <AdminMenu />
+      </div>
       <div className="mx-auto text-center mb-5">
         <h2>Bookings</h2>
         <h3>{tourLabel}</h3>
@@ -64,6 +68,13 @@ export default function Bookings({
             Hide Cancelled
           </label>
         </div>
+        <a
+          href={`/book/${tourId}`}
+          target="_blank"
+          className="bg-yellow-200 no-underline text-black text-xs font-semibold py-3 mt-1 ml-5 px-4 rounded-lg shadow-md hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-red-200"
+        >
+          Create Booking
+        </a>
       </div>
       <div>
         <table className="mx-auto">
@@ -157,8 +168,8 @@ export async function getServerSideProps(context) {
         separator,
         tourId: null,
         tourLabel: null,
-        tourDate: null
-      }
+        tourDate: null,
+      },
     }
   }
 
@@ -178,8 +189,8 @@ export async function getServerSideProps(context) {
       separator,
       tourId,
       tourLabel,
-      tourDate
-    }
+      tourDate,
+    },
   }
 }
 

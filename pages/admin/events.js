@@ -79,8 +79,9 @@ export default function Events({
         <div className="flex-col mt-5">
           <div>
             <h3 className="text-sm text-red-700 text-center">
-              The following calendar events were not imported/updated. You must
-              correct the issues before they can be imported.
+              The following calendar events were not imported/updated because
+              they are not correctly formatted. Please correct them in the
+              Google calendar.
             </h3>
           </div>
           {invalidEvents.map((invalidEvent) => {
@@ -143,8 +144,7 @@ export default function Events({
               <th>Lang</th>
               <th>Guide</th>
               <th>Date</th>
-              <th>Groups</th>
-              <th>Participants</th>
+              <th>Bookings</th>
             </tr>
           </thead>
           <tbody>
@@ -172,21 +172,16 @@ export default function Events({
                     {capitalize(t.tour.guideId)}
                   </td>
                   <td className="border px-4 py-2">{t.startString}</td>
-                  <td className="border px-4 py-2 text-center">
-                    {t.currentGroupTotal}
-                  </td>
-                  <td className="border px-4 py-2 text-center">
-                    {t.currentParticipantTotal > 0 ? (
-                      <Link href={'/admin/tours/' + t.tour.tourId}>
-                        <a>
-                          {t.currentParticipantTotal} / {maxEnrollment}
-                        </a>
-                      </Link>
-                    ) : (
-                      <span>
+                  <td className="border px-4 py-2 text-center w-40 text-lg">
+                    <Link href={'/admin/tours/' + t.tour.tourId}>
+                      <a>
                         {t.currentParticipantTotal} / {maxEnrollment}
-                      </span>
-                    )}
+                        <br />
+                        <span className="text-xs">
+                          ({t.currentGroupTotal} groups)
+                        </span>
+                      </a>
+                    </Link>
                   </td>
                 </tr>
               )
