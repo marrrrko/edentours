@@ -1,6 +1,6 @@
 import {
   aggregateBookingRecords,
-  indexToursAndBookings
+  indexToursAndBookings,
 } from '../../../aggregates/booking'
 import {
   getTour,
@@ -9,7 +9,7 @@ import {
   insertBookingCancellation,
   getAction,
   getBookingRecords,
-  getUpcomingBookings
+  getUpcomingBookings,
 } from '../../../db/bookingDb'
 import * as emailSending from '../../../utils/emails'
 import Cookies from 'cookies'
@@ -26,14 +26,14 @@ export default async function handler(req, res) {
         res.statusCode = 404
         res.end(
           JSON.stringify({
-            msg: 'Tour not found'
+            msg: 'Tour not found',
           })
         )
       } else {
         res.statusCode = 200
         res.end(
           JSON.stringify({
-            ...event
+            ...event,
           })
         )
       }
@@ -87,9 +87,9 @@ async function getTourRemainingSpots(tourAgg) {
       ? parseInt(tourAgg.tour.location)
       : parseInt(process.env.DEFAULT_MAX_ENROLLMENT)
 
-  console.log(`Max enrollment = ${maxEnrollment}`)
+  //console.log(`Max enrollment = ${maxEnrollment}`)
   const enrollment = tourAgg.currentParticipantTotal
-  console.log(`Current enrollment = ${enrollment}`)
+  //console.log(`Current enrollment = ${enrollment}`)
 
   return maxEnrollment - enrollment
 }
@@ -123,7 +123,7 @@ async function processNewBooking(tourId, booking) {
     groupName: booking.groupName,
     participantCount: parseInt(booking.participantCount),
     groupDetails: booking.groupDetails,
-    userTimeZone: booking.userTimeZone
+    userTimeZone: booking.userTimeZone,
   })
 
   const email = await emailSending.buildBookingConfirmationEmail(bookingId)
@@ -182,7 +182,7 @@ async function processExistingBooking(tourId, booking, cookies) {
     participantCount: parseInt(booking.participantCount),
     groupDetails: booking.groupDetails,
     userTimeZone: booking.userTimeZone,
-    accessNote
+    accessNote,
   })
 
   return null
@@ -240,7 +240,7 @@ async function cancelBooking(tourId, booking, cookies) {
     email: originalBooking.email,
     tourId: originalBooking.tourId,
     userTimeZone: booking.userTimeZone,
-    accessNote
+    accessNote,
   })
 
   return null

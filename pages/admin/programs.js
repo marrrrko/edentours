@@ -33,7 +33,7 @@ export default function Programs({ accessGranted, programs, guides }) {
                 {program.labels.map((label) => {
                   return (
                     <div key={label.language} className="flex">
-                      <div className="font-bold w-10 mb-2 mr-2">
+                      <div className="font-bold mb-2 mr-2 w-16 ">
                         <a
                           onClick={() => {
                             setProgram(program._id)
@@ -69,7 +69,7 @@ export default function Programs({ accessGranted, programs, guides }) {
               title={JSON.stringify(guide, null, ' ')}
               className="flex text-base"
             >
-              <div className="font-mono text-sm font-bold w-32 mb-4">
+              <div className="font-mono text-xs font-bold w-48 mb-4">
                 <a
                   onClick={() => setSetGuide(guide._id)}
                   className="bg-gray-200 hover:bg-yellow-200 p-2 md:px-3 cursor-pointer rounded no-underline"

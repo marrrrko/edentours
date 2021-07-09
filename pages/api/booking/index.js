@@ -21,7 +21,6 @@ async function refreshTourProgramData(cacheSeconds = 30) {
       acc[next._id] = next
       return acc
     }, {})
-    console.log(tourGuides)
     lastTourProgramDataRefresh = nowSeconds
   }
 }

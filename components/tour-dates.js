@@ -7,7 +7,7 @@ export default function TourDates({ tours, programId, guideId, language }) {
     return (
       (programId === '*' || t.programId === programId) &&
       (guideId === '*' || t.guide.id === guideId) &&
-      (language === '*' || t.language === language)
+      (language === '*' || t.language?.code === language)
     )
   })
   const bookingOptions = filteredTours.map((tour, index) => {

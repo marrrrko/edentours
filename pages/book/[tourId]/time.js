@@ -40,7 +40,7 @@ function createTimeStrings(tourStart, userTimeZone) {
     yourTimeZoneStartTime: DateTime.fromISO(tourStart)
       .setZone(userTimeZone)
       .toFormat(`t`)
-      .replace('_', ' ')
+      .replace('_', ' '),
   }
 }
 
@@ -58,7 +58,7 @@ function getTourStartInterval(tourStart) {
 
   return {
     ...intervalObject,
-    isPast
+    isPast,
   }
 }
 
@@ -79,7 +79,7 @@ const Page = ({ tourLabel, tourStart, errorMsg }) => {
       () => setTimeLeft(getTourStartInterval(tourStart)),
       1000
     )
-    console.log(JSON.stringify(timeLeft, null, ' '))
+    //console.log(JSON.stringify(timeLeft, null, ' '))
     return () => {
       clearInterval(timer.current)
     }
