@@ -34,7 +34,7 @@ export default function Events({
   orphanEvents,
 }) {
   if (!accessGranted) {
-    return <Error statusCode={401} title="Olmaz!" />
+    return <Error statusCode={401} title="Yasak!" />
   }
 
   const [filterData, setFilterData] = useState('none')

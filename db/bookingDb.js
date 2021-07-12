@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import sqlite3 from 'sqlite3'
 import { v4 as uuid } from 'uuid'
 import '../utils/types'
@@ -332,6 +333,29 @@ export async function getEmailTransaction(transactionId) {
 
   let transaction = JSON.parse(row.doc)
   return transaction
+}
+
+export async function getUnsentEmailsInRange(startSeconds, endSeconds) {
+  //SELECT doc FROM EmailTransaction WHERE transactionTime > '2021-05-11' AND transactionTime < '2021-05-11T14:00:00.000Z' AND json_extract(doc,'$.sentMsgId') IS NULL
+  let db = await getDb()
+  let rows = await new Promise((resolve, reject) => {
+    db.all(
+      "SELECT doc FROM EmailTransaction WHERE transactionTime > $start AND transactionTime < $end AND json_extract(doc,'$.sentMsgId') IS NULL",
+      {
+        $start: DateTime.fromSeconds(startSeconds).setZone('utc').toISO(),
+        $end: DateTime.fromSeconds(endSeconds).setZone('utc').toISO()
+      },
+      (error, rows) => {
+        if (error) reject(error)
+        else {
+          resolve(rows)
+        }
+      }
+    )
+  })
+  await closeDb(db)
+
+  return rows.map((r) => JSON.parse(r.doc))
 }
 
 /**
