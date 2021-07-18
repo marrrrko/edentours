@@ -84,7 +84,15 @@ export default function TourDates({ tours, programId, guideId, language }) {
       data-language={language}
       className=""
     >
-      {bookingOptions}
+      {bookingOptions.length > 0 && bookingOptions}
+      {bookingOptions.length === 0 && (
+        <div>
+          <h3>No tours are currently scheduled.</h3>
+          <span className="text-base">
+            We are always adding new tour dates. Please check back regularly.
+          </span>
+        </div>
+      )}
     </div>
   )
 }
