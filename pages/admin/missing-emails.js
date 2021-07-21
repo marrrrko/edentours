@@ -48,7 +48,7 @@ export async function getServerSideProps(context) {
   }
 
   if (access === process.env.ADMIN_ACCESS) {
-    cookies.set('edenaccess', access)
+    cookies.set('edenaccess', access, { maxAge: 90 * 24 * 60 * 60 * 60 })
   }
 
   const apply = sendAll || false
@@ -57,7 +57,7 @@ export async function getServerSideProps(context) {
   return {
     props: {
       accessGranted: true,
-      emailList: emails
-    }
+      emailList: emails,
+    },
   }
 }

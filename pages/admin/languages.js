@@ -52,7 +52,7 @@ export async function getServerSideProps(context) {
   }
 
   if (access === process.env.ADMIN_ACCESS) {
-    cookies.set('edenaccess', access)
+    cookies.set('edenaccess', access, { maxAge: 90 * 24 * 60 * 60 * 60 })
   }
 
   return {
