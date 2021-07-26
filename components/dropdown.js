@@ -17,7 +17,7 @@ function NextLink(props) {
   )
 }
 
-export default function Dropdown({ name, items }) {
+export default function Dropdown({ name, items, centerAlign = false }) {
   return (
     <Menu as="div" className="relative inline-block text-left z-20 -mt-2">
       {({ open }) => (
@@ -45,7 +45,7 @@ export default function Dropdown({ name, items }) {
           >
             <Menu.Items
               static
-              className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none"
+              className={`${centerAlign ? "fixed inset-x-1/2 -ml-28" : "origin-top-right absolute right-0"} mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none`}
             >
               <div className="py-1">
                 {items.map((i) => {
