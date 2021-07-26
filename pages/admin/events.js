@@ -11,7 +11,7 @@ import cookie from 'cookie'
 import {
   synchronizeToursWithGoogle,
   getInvalidEvents,
-  getOrphanEvents,
+  getOrphanEvents
 } from '../../utils/google-calendar'
 import AdminMenu from '../../components/admin-menu'
 
@@ -31,10 +31,10 @@ export default function Events({
   accessGranted,
   upcomingToursAndBookings,
   invalidEvents,
-  orphanEvents,
+  orphanEvents
 }) {
   if (!accessGranted) {
-    return <Error statusCode={401} title="Olmaz!" />
+    return <Error statusCode={401} title="Yasak!" />
   }
 
   const [filterData, setFilterData] = useState('none')
@@ -124,7 +124,7 @@ export default function Events({
           {orphanEvents.map((orphanEvent) => {
             return (
               <div
-                key={orphanEvent.eventId}
+                key={orphanEvent.externalEventId}
                 className="w-3/4 ml-8 text-xs mt-4 bg-gray-200 p-3 rounded"
               >
                 Date: {orphanEvent.date} <br />
@@ -163,8 +163,7 @@ export default function Events({
                     filterData == 'all' || t.tour.creatorEmail == filterData
                       ? ''
                       : 'hidden'
-                  }
-                  title={JSON.stringify(t.tour, null, ' ')}
+                  }                  
                 >
                   <td className="border px-4 py-2">{t.tour.summary}</td>
                   <td className="border px-4 py-2">{t.tour.language}</td>
@@ -216,7 +215,7 @@ export async function getServerSideProps(context) {
     (tb) => {
       return {
         ...tb,
-        startString: buildCombinedFixedTimeString(tb.tour.start),
+        startString: buildCombinedFixedTimeString(tb.tour.start)
       }
     }
   )
@@ -229,8 +228,8 @@ export async function getServerSideProps(context) {
       accessGranted: true,
       upcomingToursAndBookings,
       invalidEvents,
-      orphanEvents,
-    },
+      orphanEvents
+    }
   }
 }
 

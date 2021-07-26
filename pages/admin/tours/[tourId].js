@@ -23,7 +23,7 @@ export default function Bookings({
   const [values, setValues] = useState({ hideCancelled: true })
 
   if (!accessGranted) {
-    return <Error statusCode={401} title="Olmaz!" />
+    return <Error statusCode={401} title="Yasak!" />
   }
 
   if (tourId == null) {
