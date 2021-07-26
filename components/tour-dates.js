@@ -9,9 +9,7 @@ export default function TourDates({ tours, programId, guideId, language }) {
       (guideId === '*' || t.guide.id === guideId) &&
       (language === '*' || t.language?.code === language)
     )
-  })
-
-  const allToursFull = !filteredTours.find((tour) => tour.remainingSpots > 0)
+  })  
 
   const bookingOptions = filteredTours.map((tour, index) => {
     let tourStartDay_user = DateTime.fromISO(tour.start)

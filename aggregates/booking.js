@@ -31,7 +31,7 @@ export function indexToursAndBookings(rows) {
   const tourBookingList = Object.keys(tourIndex)
     .map((key) => tourIndex[key])
     .slice()
-    .sort((a, b) => new Date(b.tour.start) - new Date(a.tour.start))
+    .sort((a, b) => new Date(a.tour.start) - new Date(b.tour.start))
 
   const tourBookingAggregate = aggregateBookingsFromTours(tourBookingList)
   return tourBookingAggregate

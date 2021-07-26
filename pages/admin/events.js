@@ -28,7 +28,6 @@ const capitalize = (word) =>
 
 const filterCookieName = 'edenadminguidefilter'
 
-
 export default function Events({
   accessGranted,
   upcomingToursAndBookings,
@@ -44,17 +43,20 @@ export default function Events({
   const [filterData, setFilterData] = useState('none')
 
   useEffect(() => {
-
     async function cancelTour(tourId) {
       setTourToCancel(null)
-      if(confirm(`Cancel tour? The tour will be hidden from the site (but not deleted)`)) {
+      if (
+        confirm(
+          `Cancel tour? The tour will be hidden from the site (but not deleted)`
+        )
+      ) {
         let response = await fetch('/api/events/' + tourId, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
-          }        
-        })        
-        if (response.ok) {          
+          }
+        })
+        if (response.ok) {
           location.reload()
         } else {
           alert('Failed to cancel')
@@ -62,22 +64,22 @@ export default function Events({
       }
     }
 
-    if(tourToCancel) cancelTour(tourToCancel)
-
+    if (tourToCancel) cancelTour(tourToCancel)
   }, [tourToCancel])
 
   useEffect(() => {
-
     async function restoreTour(tourId) {
       setTourToRestore(null)
-      if(confirm(`Restore tour? The tour will become visible on the site again.`)) {
+      if (
+        confirm(`Restore tour? The tour will become visible on the site again.`)
+      ) {
         let response = await fetch(`/api/events/${tourId}?restore=true`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
-          }        
-        })        
-        if (response.ok) {          
+          }
+        })
+        if (response.ok) {
           location.reload()
         } else {
           alert('Failed to restore')
@@ -85,8 +87,7 @@ export default function Events({
       }
     }
 
-    if(tourToRestore) restoreTour(tourToRestore)
-
+    if (tourToRestore) restoreTour(tourToRestore)
   }, [tourToRestore])
 
   useEffect(() => {
@@ -188,7 +189,8 @@ export default function Events({
                 : parseInt(DEFAULT_MAX_ENROLLMENT)
 
               const isCancelled = !!t.tour.cancelled
-              const isOrphaned = orphanEventIds.find(oe => oe === t.tour.tourId) != null
+              const isOrphaned =
+                orphanEventIds.find((oe) => oe === t.tour.tourId) != null
 
               return (
                 <tr
@@ -197,18 +199,44 @@ export default function Events({
                     filterData == 'all' || t.tour.creatorEmail == filterData
                       ? ''
                       : 'hidden'
-                  } ${!isCancelled && isOrphaned ? 'text-red-400' : ''}`}                  
+                  } ${!isCancelled && isOrphaned ? 'text-red-400' : ''}`}
                 >
                   <td className={`border px-4 py-2`}>
                     {t.tour.summary}
-                    {!isCancelled && isOrphaned && (<div className="text-xs">Not found in calendar. <a className="cursor-pointer" onClick={() => setTourToCancel(t.tour.tourId)}>Cancel tour</a></div>)}
-                    {isCancelled && (<div className="text-xs font-bold">(cancelled) {!isOrphaned && <a className="cursor-pointer" onClick={() => setTourToRestore(t.tour.tourId)}>Restore tour</a>}</div>)}
-                    </td>
+                    {!isCancelled && isOrphaned && (
+                      <div className="text-xs">
+                        Not found in calendar.{' '}
+                        <a
+                          className="cursor-pointer"
+                          onClick={() => setTourToCancel(t.tour.tourId)}
+                        >
+                          Cancel tour
+                        </a>
+                      </div>
+                    )}
+                    {isCancelled && (
+                      <div className="text-xs font-bold">
+                        (cancelled){' '}
+                        <a
+                          className="cursor-pointer"
+                          onClick={() => setTourToRestore(t.tour.tourId)}
+                        >
+                          Restore tour
+                        </a>
+                      </div>
+                    )}
+                  </td>
                   <td className="border px-4 py-2">{t.tour.language}</td>
                   <td className="border px-4 py-2">
                     {capitalize(t.tour.guideId)}
                   </td>
-                  <td className={`border px-4 py-2 ${isCancelled ? 'line-through' : ''}`}>{t.startString}</td>
+                  <td
+                    className={`border px-4 py-2 ${
+                      isCancelled ? 'line-through' : ''
+                    }`}
+                  >
+                    {t.startString}
+                  </td>
                   <td className="border px-4 py-2 text-center w-40 text-lg">
                     <Link href={'/admin/tours/' + t.tour.tourId}>
                       <a>
@@ -225,6 +253,11 @@ export default function Events({
             })}
           </tbody>
         </table>
+      </div>
+      <div className="mt-10">
+        <a href="/admin/events?sinceDays=180">
+          Include past tour events (last 180 days)
+        </a>
       </div>
     </div>
   )
@@ -249,8 +282,10 @@ export async function getServerSideProps(context) {
   }
 
   let sinceDate = null
-  if(sinceDays && sinceDays == parseInt(sinceDays) && sinceDays > 0) {
-    sinceDate = DateTime.now().minus({ days: parseInt(sinceDays)}).toJSDate()
+  if (sinceDays && sinceDays == parseInt(sinceDays) && sinceDays > 0) {
+    sinceDate = DateTime.now()
+      .minus({ days: parseInt(sinceDays) })
+      .toJSDate()
   }
   const toursAndBookings = await getUpcomingBookings(null, sinceDate)
   const upcomingToursAndBookings = indexToursAndBookings(toursAndBookings).map(
@@ -263,7 +298,7 @@ export async function getServerSideProps(context) {
   )
 
   const invalidEvents = await getInvalidEvents()
-  const orphanEventIds = (await getOrphanEvents()).map(oe => oe.tourId)
+  const orphanEventIds = (await getOrphanEvents()).map((oe) => oe.tourId)
 
   return {
     props: {
