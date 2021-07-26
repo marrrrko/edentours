@@ -40,6 +40,7 @@ export default function Events({
   }
 
   const [tourToCancel, setTourToCancel] = useState(null)
+  const [tourToRestore, setTourToRestore] = useState(null)
   const [filterData, setFilterData] = useState('none')
 
   useEffect(() => {
@@ -52,10 +53,8 @@ export default function Events({
           headers: {
             'Content-Type': 'application/json'
           }        
-        })
-        let responseData = await response.json()
-        if (response.ok) {
-          //console.log(responseData)
+        })        
+        if (response.ok) {          
           location.reload()
         } else {
           alert('Failed to cancel')
@@ -66,6 +65,29 @@ export default function Events({
     if(tourToCancel) cancelTour(tourToCancel)
 
   }, [tourToCancel])
+
+  useEffect(() => {
+
+    async function restoreTour(tourId) {
+      setTourToRestore(null)
+      if(confirm(`Restore tour? The tour will become visible on the site again.`)) {
+        let response = await fetch(`/api/events/${tourId}?restore=true`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }        
+        })        
+        if (response.ok) {          
+          location.reload()
+        } else {
+          alert('Failed to restore')
+        }
+      }
+    }
+
+    if(tourToRestore) restoreTour(tourToRestore)
+
+  }, [tourToRestore])
 
   useEffect(() => {
     let existingValueFromCookie = getCookieValue(filterCookieName, 'all')
@@ -179,8 +201,8 @@ export default function Events({
                 >
                   <td className={`border px-4 py-2`}>
                     {t.tour.summary}
-                    {!isCancelled && isOrphaned && (<div className="text-xs">Not found in calendar. <a className="cursor-pointer" onClick={() => setTourToCancel(t.tour.tourId)}>Cancel this tour</a></div>)}
-                    {isCancelled && (<div className="text-xs font-bold">(cancelled) {!isOrphaned && <a className="cursor-pointer" onClick={() => setTourToCancel(t.tour.tourId)}>Reactivate this tour</a>}</div>)}
+                    {!isCancelled && isOrphaned && (<div className="text-xs">Not found in calendar. <a className="cursor-pointer" onClick={() => setTourToCancel(t.tour.tourId)}>Cancel tour</a></div>)}
+                    {isCancelled && (<div className="text-xs font-bold">(cancelled) {!isOrphaned && <a className="cursor-pointer" onClick={() => setTourToRestore(t.tour.tourId)}>Restore tour</a>}</div>)}
                     </td>
                   <td className="border px-4 py-2">{t.tour.language}</td>
                   <td className="border px-4 py-2">

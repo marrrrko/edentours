@@ -10,6 +10,9 @@ export default function TourDates({ tours, programId, guideId, language }) {
       (language === '*' || t.language?.code === language)
     )
   })
+
+  const allToursFull = !filteredTours.find((tour) => tour.remainingSpots > 0)
+
   const bookingOptions = filteredTours.map((tour, index) => {
     let tourStartDay_user = DateTime.fromISO(tour.start)
       .setZone(userTimeZone)
@@ -88,9 +91,11 @@ export default function TourDates({ tours, programId, guideId, language }) {
       {bookingOptions.length === 0 && (
         <div>
           <h3>No tours are currently scheduled.</h3>
-          <span className="text-base">
-            We are always adding new tour dates. Please check back regularly.
-          </span>
+        </div>
+      )}
+      {(allToursFull || bookingOptions.length === 0) && (
+        <div className="text-base mt-6">
+          We are always adding new tour dates. Please check back regularly.
         </div>
       )}
     </div>

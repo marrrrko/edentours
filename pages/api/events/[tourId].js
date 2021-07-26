@@ -4,7 +4,7 @@ import { getTour, updateTour } from '../../../db/bookingDb'
 export default async function handler(req, res) {
   const cookies = new Cookies(req, res)
   const accessCookie = cookies.get('edenaccess')
-  
+
   if (accessCookie != process.env.ADMIN_ACCESS) {
     res.statusCode = 401
     res.setHeader('Content-Type', 'application/json')
@@ -13,16 +13,15 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'DELETE') {
-    const { tourId, reverse } = req.query
+    const { tourId, restore } = req.query
     const tour = await getTour(tourId)
 
     const updatedTour = {
       ...tour,
-      cancelled: !reverse
+      cancelled: !restore
     }
 
     await updateTour(tour.eventTime, updatedTour)
-    
 
     res.statusCode = 200
     res.setHeader('Content-Type', 'application/json')
