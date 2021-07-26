@@ -20,13 +20,22 @@ export default function TopBar({ programs }) {
           <li className="">
             <Dropdown name="Tours" items={toursButtonItems} />
           </li>
-          <li className="mr-1 md:mr-2">
+          <li className="">
             <Dropdown
               name="Explore"
               items={[
                 { label: 'Turkey', url: '/turkey-today' },
                 { label: 'Bible Research', url: '/research' },
-                { label: 'FAQ', url: '/faq' },
+              ]}
+            />
+          </li>
+          <li className="mr-2">
+            <Dropdown
+              name="Info"
+              items={[
+                { label: 'Frequently Asked', url: '/faq' },
+                { label: 'About Us', url: '/about-us' },
+                { label: 'Contact Us', url: '/contact' },
               ]}
             />
           </li>

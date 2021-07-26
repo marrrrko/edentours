@@ -23,10 +23,10 @@ export default function Dropdown({ name, items }) {
       {({ open }) => (
         <>
           <div>
-            <Menu.Button className="inline-flex justify-center rounded w-full px-4 pt-1 pb-2 bg-white hover:bg-gray-200 text-sm font-medium text-gray-700 focus:outline-none">
+            <Menu.Button className="inline-flex justify-center rounded w-full px-2 mr-1 pt-1 pb-2 bg-white hover:bg-gray-200 text-sm font-medium text-gray-700 focus:outline-none">
               {name}
               <ChevronDownIcon
-                className="-mr-1 ml-1 h-5 w-5"
+                className="-mr-1 h-5 w-5"
                 style={{ marginTop: '5px' }}
                 aria-hidden="true"
               />
