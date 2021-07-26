@@ -7,6 +7,7 @@ import Cookies from 'cookies'
 import { indexToursAndBookings } from '../../aggregates/booking'
 import { uniq } from 'ramda'
 import { useState, useEffect } from 'react'
+import { DateTime } from 'luxon'
 import cookie from 'cookie'
 import {
   synchronizeToursWithGoogle,
@@ -125,7 +126,7 @@ export default function Events({
             return (
               <div
                 key={orphanEvent.externalEventId}
-                className="w-3/4 ml-8 text-xs mt-4 bg-gray-200 p-3 rounded"
+                className="w-3/4 mx-auto text-xs mt-4 bg-gray-200 p-3 rounded"
               >
                 Date: {orphanEvent.date} <br />
                 Creator: {orphanEvent.creator} <br />
@@ -193,7 +194,7 @@ export default function Events({
 }
 
 export async function getServerSideProps(context) {
-  const { access } = context.query
+  const { access, sinceDays } = context.query
 
   await synchronizeToursWithGoogle(0.25)
 
@@ -210,7 +211,11 @@ export async function getServerSideProps(context) {
     cookies.set('edenaccess', access, { maxAge: 90 * 24 * 60 * 60 * 60 })
   }
 
-  const toursAndBookings = await getUpcomingBookings()
+  let sinceDate = null
+  if(sinceDays && sinceDays == parseInt(sinceDays) && sinceDays > 0) {
+    sinceDate = DateTime.now().minus({ days: parseInt(sinceDays)}).toJSDate()
+  }
+  const toursAndBookings = await getUpcomingBookings(null, sinceDate)
   const upcomingToursAndBookings = indexToursAndBookings(toursAndBookings).map(
     (tb) => {
       return {

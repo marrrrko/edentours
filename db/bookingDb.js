@@ -74,16 +74,18 @@ export async function getBookingRecords(bookingId) {
 /**
  * @returns({[{ tourId: string, tourDoc: object, bookingDoc: object}]})
  */
-export async function getUpcomingBookings(tourId = null) {
+export async function getUpcomingBookings(tourId = null, sinceDate) {
+  const since = sinceDate && typeof sinceDate.getMonth === 'function' ? sinceDate.toISOString().substring(0,19) : "now"
   let db = await getDb()
   let rows = await new Promise((resolve, reject) => {
     const allToursQuery =
-      "SELECT Tour.tourId, Tour.doc as tourDoc, Booking.doc as bookingDoc FROM Tour LEFT JOIN Booking ON Tour.tourId = Booking.tourId WHERE Tour.start >= datetime('now')"
+      "SELECT Tour.tourId, Tour.doc as tourDoc, Booking.doc as bookingDoc FROM Tour LEFT JOIN Booking ON Tour.tourId = Booking.tourId WHERE Tour.start >= datetime($since)"
     const singleTourQuery =
       'SELECT Tour.tourId, Tour.doc as tourDoc, Booking.doc as bookingDoc FROM Tour LEFT JOIN Booking ON Tour.tourId = Booking.tourId WHERE Tour.tourId = $tourId'
+    
     db.all(
       tourId == null ? allToursQuery : singleTourQuery,
-      tourId == null ? {} : { $tourId: tourId },
+      tourId == null ? { $since: since} : { $tourId: tourId },
       (error, rows) => {
         if (error) reject(error)
         else resolve(rows)

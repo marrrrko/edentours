@@ -205,13 +205,7 @@ export async function synchronizeToursWithGoogle(cacheMinutes) {
     .filter((e) => invalidTourIds.indexOf(e.externalEventId) === -1)
 
   invalidEventsCache.set('orphan-events', orphanTours)
-  console.log(
-    `Found ${orphanTours.length} orphan events: \n${JSON.stringify(
-      orphanTours,
-      null,
-      ' '
-    )}`
-  )
+  console.log(`Found ${orphanTours.length} orphan events`)
 
   if (!newTours.length && !toursToUpdate.length) {
     return
