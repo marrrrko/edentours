@@ -17,18 +17,20 @@ const emailSendHoursPriorToTourStart = 48
 
 export async function ensureAllQualifyingTourStartEmailsSent() {
   const tours = await getUpcomingTours()
-  const toursThatNeedEmail = tours.filter((t) => {
-    const start = new Date(t.start)
-    const now = new Date()
-    const diffInMs = start - now
-    const diffInHours = diffInMs / (1000 * 60 * 60)
+  const toursThatNeedEmail = tours
+    .filter((t) => !t.cancelled)
+    .filter((t) => {
+      const start = new Date(t.start)
+      const now = new Date()
+      const diffInMs = start - now
+      const diffInHours = diffInMs / (1000 * 60 * 60)
 
-    if (diffInHours > 0 && diffInHours < emailSendHoursPriorToTourStart) {
-      return true
-    }
+      if (diffInHours > 0 && diffInHours < emailSendHoursPriorToTourStart) {
+        return true
+      }
 
-    return false
-  })
+      return false
+    })
 
   global.emailLog.info(
     `${toursThatNeedEmail.length} tours qualify for tour start email`

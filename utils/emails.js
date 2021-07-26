@@ -3,16 +3,13 @@ import bs58 from 'bs58'
 import {
   insertEmailTransaction,
   getEmailTransaction,
-  getEmailTransactionsForEvent,
-  getUpcomingBookings,
   getUnsentEmailsInRange,
   markEmailTransactionAsSent,
   getBookingRecords,
   insertActionKey
 } from '../db/bookingDb'
 import {
-  aggregateBookingRecords,
-  indexToursAndBookings
+  aggregateBookingRecords  
 } from '../aggregates/booking'
 import { SES, config } from 'aws-sdk'
 import { buildTourDateStrings } from './tour-dates'
@@ -224,55 +221,3 @@ export async function getUnsentMessages(numDays = 14) {
   const unsentMessages = await getUnsentEmailsInRange(startSeconds, endSeconds)
   return unsentMessages
 }
-
-// export async function catchUpUnsentConfirmationEmails(apply = false) {
-//   const toursAndBookings = await getUpcomingBookings()
-//   const upcomingToursWithBookings = indexToursAndBookings(toursAndBookings)
-//   let upcomingBookings = []
-//   upcomingToursWithBookings.forEach((tour) => {
-//     upcomingBookings = upcomingBookings.concat(
-//       tour.bookings.map((booking) => ({
-//         ...booking,
-//         tour: tour.tour
-//       }))
-//     )
-//   })
-
-//   const output = []
-//   await upcomingBookings.reduce(async (prev, next) => {
-//     await prev
-//     return sendEmailIfNeeded(next, apply).then((r) => output.push(r))
-//   }, Promise.resolve())
-
-//   return output.filter(i => i.emailSent == false)
-// }
-
-// async function sendEmailIfNeeded(booking, apply = false) {
-//   const emailsForBooking = await getEmailTransactionsForEvent(booking.bookingId)
-//   const sentEmailsForBooking = emailsForBooking.filter(
-//     (transaction) =>
-//       transaction.sentAt && new Date(transaction.sentAt).getFullYear() >= 2020
-//   )
-
-//   let sent = false
-//   const emailMustBeSent = sentEmailsForBooking.length === 0
-//   if (emailMustBeSent && apply) {
-//     const email = await buildBookingConfirmationEmail(booking.bookingId)
-//     const transactionId = await createEmailTransaction(
-//       'booking-confirmation',
-//       booking.bookingId,
-//       email
-//     )
-//     await sendEmail(transactionId)
-//     sent = true
-//   }
-
-//   return {
-//     tourId: booking.tourId,
-//     bookingId: booking.bookingId,
-//     summary: booking.tour.summary,
-//     start: booking.tour.start,
-//     email: booking.email,
-//     emailSent: !emailMustBeSent || sent
-//   }
-// }

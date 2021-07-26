@@ -28,17 +28,44 @@ const capitalize = (word) =>
 
 const filterCookieName = 'edenadminguidefilter'
 
+
 export default function Events({
   accessGranted,
   upcomingToursAndBookings,
   invalidEvents,
-  orphanEvents
+  orphanEventIds
 }) {
   if (!accessGranted) {
     return <Error statusCode={401} title="Yasak!" />
   }
 
+  const [tourToCancel, setTourToCancel] = useState(null)
   const [filterData, setFilterData] = useState('none')
+
+  useEffect(() => {
+
+    async function cancelTour(tourId) {
+      setTourToCancel(null)
+      if(confirm(`Cancel tour? The tour will be hidden from the site (but not deleted)`)) {
+        let response = await fetch('/api/events/' + tourId, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }        
+        })
+        let responseData = await response.json()
+        if (response.ok) {
+          //console.log(responseData)
+          location.reload()
+        } else {
+          alert('Failed to cancel')
+        }
+      }
+    }
+
+    if(tourToCancel) cancelTour(tourToCancel)
+
+  }, [tourToCancel])
 
   useEffect(() => {
     let existingValueFromCookie = getCookieValue(filterCookieName, 'all')
@@ -117,26 +144,6 @@ export default function Events({
           </div>
         </div>
       )}
-      {orphanEvents.length > 0 && (
-        <div className="mt-5">
-          <h3 className="text-sm text-red-700">
-            The following tours are missing from Google.
-          </h3>
-          {orphanEvents.map((orphanEvent) => {
-            return (
-              <div
-                key={orphanEvent.externalEventId}
-                className="w-3/4 mx-auto text-xs mt-4 bg-gray-200 p-3 rounded"
-              >
-                Date: {orphanEvent.date} <br />
-                Creator: {orphanEvent.creator} <br />
-                Summary: {orphanEvent.summary} <br />
-                Issue: {orphanEvent.issue}
-              </div>
-            )
-          })}
-        </div>
-      )}
       <div className="flex flex-row content-center mt-5">
         <table className="table-auto mx-auto">
           <thead>
@@ -157,21 +164,29 @@ export default function Events({
               const maxEnrollment = hasValidEnrollmentOverride
                 ? parseInt(t.tour.location)
                 : parseInt(DEFAULT_MAX_ENROLLMENT)
+
+              const isCancelled = !!t.tour.cancelled
+              const isOrphaned = orphanEventIds.find(oe => oe === t.tour.tourId) != null
+
               return (
                 <tr
                   key={t.tour.tourId}
-                  className={
+                  className={`${
                     filterData == 'all' || t.tour.creatorEmail == filterData
                       ? ''
                       : 'hidden'
-                  }                  
+                  } ${!isCancelled && isOrphaned ? 'text-red-400' : ''}`}                  
                 >
-                  <td className="border px-4 py-2">{t.tour.summary}</td>
+                  <td className={`border px-4 py-2`}>
+                    {t.tour.summary}
+                    {!isCancelled && isOrphaned && (<div className="text-xs">Not found in calendar. <a className="cursor-pointer" onClick={() => setTourToCancel(t.tour.tourId)}>Cancel this tour</a></div>)}
+                    {isCancelled && (<div className="text-xs font-bold">(cancelled) {!isOrphaned && <a className="cursor-pointer" onClick={() => setTourToCancel(t.tour.tourId)}>Reactivate this tour</a>}</div>)}
+                    </td>
                   <td className="border px-4 py-2">{t.tour.language}</td>
                   <td className="border px-4 py-2">
                     {capitalize(t.tour.guideId)}
                   </td>
-                  <td className="border px-4 py-2">{t.startString}</td>
+                  <td className={`border px-4 py-2 ${isCancelled ? 'line-through' : ''}`}>{t.startString}</td>
                   <td className="border px-4 py-2 text-center w-40 text-lg">
                     <Link href={'/admin/tours/' + t.tour.tourId}>
                       <a>
@@ -226,14 +241,14 @@ export async function getServerSideProps(context) {
   )
 
   const invalidEvents = await getInvalidEvents()
-  const orphanEvents = await getOrphanEvents()
+  const orphanEventIds = (await getOrphanEvents()).map(oe => oe.tourId)
 
   return {
     props: {
       accessGranted: true,
       upcomingToursAndBookings,
       invalidEvents,
-      orphanEvents
+      orphanEventIds
     }
   }
 }

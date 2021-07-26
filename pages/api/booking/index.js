@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       await Promise.all([
         refreshTourProgramData(),
-        synchronizeToursWithGoogle(10),
+        synchronizeToursWithGoogle(10)
       ])
 
       const toursAndBookings = await getUpcomingBookings()
@@ -44,13 +44,14 @@ export default async function handler(req, res) {
           return {
             ...tourAgg.tour,
             enrollment: tourAgg.currentParticipantTotal,
-            maxEnrollment,
+            maxEnrollment
           }
         })
         .filter((tour) => {
           const hourDifference = (new Date(tour.start) - new Date()) / 3600000
           return hourDifference > 24
         })
+        .filter((tour) => !tour.cancelled)
 
       res.statusCode = 200
       res.setHeader('Content-Type', 'application/json')
@@ -65,9 +66,9 @@ export default async function handler(req, res) {
             language: languageDict[t.language],
             guide: {
               id: t.guideId,
-              name: tourGuides[t.guideId]?.displayLabel,
-            },
-          })),
+              name: tourGuides[t.guideId]?.displayLabel
+            }
+          }))
         })
       )
     } else {
