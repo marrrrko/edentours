@@ -93,11 +93,6 @@ export default function TourDates({ tours, programId, guideId, language }) {
           <h3>No tours are currently scheduled.</h3>
         </div>
       )}
-      {(allToursFull || bookingOptions.length === 0) && (
-        <div className="text-base mt-6">
-          We are always adding new tour dates. Please check back regularly.
-        </div>
-      )}
     </div>
   )
 }
