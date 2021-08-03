@@ -109,6 +109,7 @@ export default function Programs({ accessGranted, programs, guides }) {
 export async function getServerSideProps(context) {
   const { access } = context.query
 
+  context.req.connection.encrypted = true
   const cookies = new Cookies(context.req, context.res)
   const accessCookie = cookies.get('edenaccess')
   if (
@@ -119,7 +120,7 @@ export async function getServerSideProps(context) {
   }
 
   if (access === process.env.ADMIN_ACCESS) {
-    cookies.set('edenaccess', access, { maxAge: 90 * 24 * 60 * 60 * 60 })
+    cookies.set('edenaccess', access, { maxAge: 90 * 24 * 60 * 60 * 60, secure: true, sameSite: 'strict' })
   }
 
   const programs = await getAllTourPrograms()

@@ -145,6 +145,7 @@ export async function getServerSideProps(context) {
 
   let separator = sep || ';'
 
+  context.req.connection.encrypted = true
   const cookies = new Cookies(context.req, context.res)
   const accessCookie = cookies.get('edenaccess')
   if (
@@ -155,7 +156,7 @@ export async function getServerSideProps(context) {
   }
 
   if (access === process.env.ADMIN_ACCESS) {
-    cookies.set('edenaccess', access, { maxAge: 90 * 24 * 60 * 60 * 60 })
+    cookies.set('edenaccess', access, { maxAge: 90 * 24 * 60 * 60 * 60, secure: true, sameSite: 'strict' })
   }
 
   const tour = await getTour(tourId)
