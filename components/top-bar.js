@@ -4,7 +4,7 @@ import Dropdown from './dropdown'
 export default function TopBar({ programs }) {
   const toursButtonItems = [
     ...programs.map((p) => ({ label: p.label, url: '/' + p.id })),
-    { label: 'View All Tours', url: '/tours' }
+    { label: 'View All Tour Dates', url: '/tours' }
   ]
   return (
     <div className="topbar w-full max-w-7xl mx-auto border-b flex flex-col sm:flex-row flex-nowrap items-center p-1 font-serif">
@@ -59,7 +59,7 @@ export default function TopBar({ programs }) {
             items={[
               { label: 'Frequently Asked', url: '/faq' },
               { label: 'About Us', url: '/about-us' },
-              { label: 'Contact Us', url: '/contact' }
+              { label: 'Contact Us', url: '/contact-us' }
             ]}
             centerAlign={true} 
           />
