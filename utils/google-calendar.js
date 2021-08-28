@@ -90,6 +90,7 @@ function isValidTour(googleEvent) {
       labelForLanguageExists
   }
 
+  const fifteenMinutes = 15 * 60
   let invalidEvents = invalidEventsCache.get('invalid-events') || {}
   if (!isValid) {
     invalidEventsCache.set('invalid-events', {
@@ -101,7 +102,7 @@ function isValidTour(googleEvent) {
         creator: googleEvent.creatorEmail,
         issue: validationErrorMessage.join(' '),
       },
-    })
+    },fifteenMinutes)
     console.log(
       `Skipping invalid event "${
         googleEvent.summary

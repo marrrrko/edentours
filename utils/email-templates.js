@@ -122,7 +122,7 @@ export function createTourStartEmailHtml(
 <ol>
 <li>The Zoom conference will open 15 minutes before the scheduled time. Please connect at least 5 minutes before the scheduled time to make sure everything is working.</li>
 <li>If you booked more than 1 connection, please forward this invitation to those in your group. </li>
-<li>The tour will last about 2 ½ hours. We will take a short break in the middle and some time for Q&A at the end. The tour’s length may vary, so please allow for some extra time.</li>
+<li>The tour will last about 2 hours. We will take a short break in the middle and some time for Q&A at the end. The tour’s length may vary, so please allow for some extra time.</li>
 <li>Have a look at our study map to prepare for the tour <a href="https://eden.tours/research">https://eden.tours/research</a>.</li>
 <li>You may take personal notes. Video, audio recording, or live streaming are not permitted. No posting on social media.</li>
 <li>The tour is absolutely FREE.</li>
@@ -168,7 +168,7 @@ Additional Notes
 
   - The Zoom conference will open 15 minutes before the scheduled time. Please connect at least 5 minutes before the scheduled time to make sure everything is working.
   - If you booked more than 1 connection, please forward this invitation to those in your group. 
-  - The tour will last about 2 ½ hours. We will take a short break in the middle and some time for Q&A at the end. The tour’s length may vary, so please allow for some extra time.
+  - The tour will last about 2 hours. We will take a short break in the middle and some time for Q&A at the end. The tour’s length may vary, so please allow for some extra time.
   - Have a look at our study map to prepare for the tour <a href="https://eden.tours/research">https://eden.tours/research</a>.
   - You may take personal notes. Video, audio recording, or live streaming are not permitted. No posting on social media.
   - The tour is absolutely FREE
