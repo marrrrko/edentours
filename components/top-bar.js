@@ -84,6 +84,11 @@ export default function TopBar({ programs }) {
               { label: "Frequently Asked", url: "/faq" },
               { label: "About Us", url: "/about-us" },
               { label: "Contact Us", url: "/contact-us" },
+              {
+                label: "Follow Us",
+                url: "https://www.instagram.com/eden.tours.turkey/",
+                icon: InstagramLogo(),
+              },
             ]}
             centerAlign={true}
           />
