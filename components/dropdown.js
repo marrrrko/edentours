@@ -1,7 +1,7 @@
-import { Fragment } from 'react'
-import { Menu, Transition } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/solid'
-import Link from 'next/link'
+import { Fragment } from "react"
+import { Menu, Transition } from "@headlessui/react"
+import { ChevronDownIcon } from "@heroicons/react/solid"
+import Link from "next/link"
 
 function NextLink(props) {
   const { href, children, ...rest } = props
@@ -27,7 +27,7 @@ export default function Dropdown({ name, items, centerAlign = false }) {
               {name}
               <ChevronDownIcon
                 className="-mr-1 h-5 w-5"
-                style={{ marginTop: '5px' }}
+                style={{ marginTop: "5px" }}
                 aria-hidden="true"
               />
             </Menu.Button>
@@ -45,13 +45,20 @@ export default function Dropdown({ name, items, centerAlign = false }) {
           >
             <Menu.Items
               static
-              className={`${centerAlign ? "fixed inset-x-1/2 -ml-28" : "origin-top-right absolute right-0"} mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none`}
+              className={`${
+                centerAlign
+                  ? "fixed inset-x-1/2 -ml-28"
+                  : "origin-top-right absolute right-0"
+              } mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none`}
             >
               <div className="py-1">
                 {items.map((i) => {
                   return (
                     <Menu.Item key={i.url} href={i.url} as={NextLink}>
-                      {i.label}
+                      <div className="flex flex-row items-center">
+                        {i.icon && <div className="mr-3">{i.icon}</div>}
+                        <div>{i.label}</div>
+                      </div>
                     </Menu.Item>
                   )
                 })}
