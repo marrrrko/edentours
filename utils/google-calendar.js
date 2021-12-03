@@ -1,16 +1,16 @@
-import { google } from 'googleapis'
-import * as NodeCache from 'node-cache'
-import { getUpcomingTours, createNewTours, updateTour } from '../db/bookingDb'
-import { getAllTourPrograms } from '../db/tour-programs'
-import { getAllGuides } from '../db/tour-guides'
-import languageData from '../languages.json'
+import { google } from "googleapis"
+import * as NodeCache from "node-cache"
+import { getUpcomingTours, createNewTours, updateTour } from "../db/bookingDb"
+import { getAllTourPrograms } from "../db/tour-programs"
+import { getAllGuides } from "../db/tour-guides"
+import languageData from "../languages.json"
 const googleEventCache = new NodeCache()
 const invalidEventsCache = new NodeCache()
-const eventsCacheKey = 'googleevents'
+const eventsCacheKey = "googleevents"
 const validLanguages = languageData.languages.map((l) => l.code)
 
 const calendar = google.calendar({
-  version: 'v3',
+  version: "v3",
   auth: process.env.GOOGLE_KEY,
 })
 
@@ -25,8 +25,8 @@ async function getUpcomingEventsFromGoogle(cacheMinutes = 5) {
     timeMin: new Date().toISOString(),
     showDeleted: false,
     singleEvents: true,
-    maxResults: 25,
-    orderBy: 'startTime',
+    maxResults: 100,
+    orderBy: "startTime",
   })
 
   const freshValues = response.data.items.map(parseGoogleCalendarResponse)
@@ -38,7 +38,7 @@ async function getUpcomingEventsFromGoogle(cacheMinutes = 5) {
 
 function isValidTour(googleEvent) {
   let validationErrorMessage = [
-    'Calendar event must have summary and start time',
+    "Calendar event must have summary and start time",
   ]
   let isValid = googleEvent.id && googleEvent.summary && googleEvent.start
 
@@ -50,16 +50,16 @@ function isValidTour(googleEvent) {
   const cleanedSummary = googleEvent.summary.trim().toLowerCase()
   isValid =
     isValid &&
-    cleanedSummary.startsWith('tour:') &&
-    cleanedSummary.replace('tour:', '').split('/').length == 3
+    cleanedSummary.startsWith("tour:") &&
+    cleanedSummary.replace("tour:", "").split("/").length == 3
 
   if (isValid) {
     validationErrorMessage = [
       `Invalid event description or missing configuration:`,
     ]
     const [programId, language, guideId] = cleanedSummary
-      .replace('tour:', '')
-      .split('/')
+      .replace("tour:", "")
+      .split("/")
       .map((p) => {
         return p.trim()
       })
@@ -91,26 +91,30 @@ function isValidTour(googleEvent) {
   }
 
   const fifteenMinutes = 15 * 60
-  let invalidEvents = invalidEventsCache.get('invalid-events') || {}
+  let invalidEvents = invalidEventsCache.get("invalid-events") || {}
   if (!isValid) {
-    invalidEventsCache.set('invalid-events', {
-      ...invalidEvents,
-      [googleEvent.id]: {
-        eventId: googleEvent.id,
-        summary: googleEvent.summary || null,
-        date: googleEvent.date || null,
-        creator: googleEvent.creatorEmail,
-        issue: validationErrorMessage.join(' '),
+    invalidEventsCache.set(
+      "invalid-events",
+      {
+        ...invalidEvents,
+        [googleEvent.id]: {
+          eventId: googleEvent.id,
+          summary: googleEvent.summary || null,
+          date: googleEvent.date || null,
+          creator: googleEvent.creatorEmail,
+          issue: validationErrorMessage.join(" "),
+        },
       },
-    },fifteenMinutes)
+      fifteenMinutes
+    )
     console.log(
       `Skipping invalid event "${
         googleEvent.summary
-      }" from google: ${validationErrorMessage.join(' ')}`
+      }" from google: ${validationErrorMessage.join(" ")}`
     )
   } else if (invalidEvents[googleEvent.id]) {
     delete invalidEvents[googleEvent.id]
-    invalidEventsCache.set('invalid-events', invalidEvents)
+    invalidEventsCache.set("invalid-events", invalidEvents)
   }
   console.log(`Found ${Object.keys(invalidEvents).length} invalid events`)
 
@@ -121,8 +125,8 @@ function eventToTour(googleEvent) {
   const [programId, language, guideId] = googleEvent.summary
     .trim()
     .toLowerCase()
-    .replace('tour:', '')
-    .split('/')
+    .replace("tour:", "")
+    .split("/")
     .map((p) => {
       return p.trim()
     })
@@ -197,7 +201,7 @@ export async function synchronizeToursWithGoogle(cacheMinutes) {
     return acc
   }, {})
   const invalidTourIds = Object.keys(
-    invalidEventsCache.get('invalid-events') || {}
+    invalidEventsCache.get("invalid-events") || {}
   )
   const orphanTours = scheduledTours
     .filter((existingTour) => {
@@ -205,7 +209,7 @@ export async function synchronizeToursWithGoogle(cacheMinutes) {
     })
     .filter((e) => invalidTourIds.indexOf(e.externalEventId) === -1)
 
-  invalidEventsCache.set('orphan-events', orphanTours)
+  invalidEventsCache.set("orphan-events", orphanTours)
   console.log(`Found ${orphanTours.length} orphan events`)
 
   if (!newTours.length && !toursToUpdate.length) {
@@ -236,7 +240,7 @@ export async function synchronizeToursWithGoogle(cacheMinutes) {
             location: tourFromGoogle.location,
           })
         } else {
-          global.log.info('Missing tour #' + tourToBeUpdated.externalEventId)
+          global.log.info("Missing tour #" + tourToBeUpdated.externalEventId)
           return Promise.resolve()
         }
       }, Promise.resolve())
@@ -245,11 +249,11 @@ export async function synchronizeToursWithGoogle(cacheMinutes) {
 }
 
 export async function getInvalidEvents() {
-  const badEvents = invalidEventsCache.get('invalid-events') || {}
+  const badEvents = invalidEventsCache.get("invalid-events") || {}
   return Object.values(badEvents)
 }
 
 export async function getOrphanEvents() {
-  const orphans = invalidEventsCache.get('orphan-events') || []
+  const orphans = invalidEventsCache.get("orphan-events") || []
   return orphans
 }
